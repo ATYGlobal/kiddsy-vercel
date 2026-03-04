@@ -71,7 +71,7 @@ function StarField() {
 
 // ─── Kiddsy Logo SVG component ─────────────────────────────────────────────
 // Replace src with your actual logo file: import logoUrl from "./assets/logo.png"
-import logoUrl from "../assets/Kiddsy_Loop_Logo.png";
+import KiddsyLogo from './components/KiddsyLogo';
 function KiddsyLogo({ size = "md" }) {
   const sizes = { sm: "text-lg", md: "text-2xl", lg: "text-4xl" };
   return (
