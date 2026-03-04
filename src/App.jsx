@@ -528,8 +528,6 @@ function Header({ lang, onLangChange, view, onHome }) {
 }
 
 // ─── Main App ──────────────────────────────────────────────────────────────
-type View = "library" | "generator" | "reader";
-
 export default function App() {
   const [view, setView] = useState("library");
   const [lang, setLang] = useState("es");
