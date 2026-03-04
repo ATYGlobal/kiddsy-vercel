@@ -72,13 +72,6 @@ function StarField() {
 // ─── Kiddsy Logo SVG component ─────────────────────────────────────────────
 // Replace src with your actual logo file: import logoUrl from "./assets/logo.png"
 import KiddsyLogo from './components/KiddsyLogo';
-  return (
-    <div className={`font-display ${sizes[size]} leading-none select-none`}>
-      <span style={{ color: C.blue }}>Kiddsy</span>
-      <span style={{ color: C.red }}>Loop</span>
-    </div>
-  );
-}
 
 // ─── Animated loading logo for loaders ────────────────────────────────────
 export function KiddsyLoader({ message = "Loading magic…" }) {
