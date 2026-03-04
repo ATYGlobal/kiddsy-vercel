@@ -3,7 +3,7 @@
  * "Buy us a hot chocolate" — PayPal donation integration
  * Warm, cozy aesthetic matching the logo's yellow/red palette
  */
-
+import KiddsyLogo from './components/KiddsyLogo';
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Coffee, Star, Sparkles, Users, BookOpen, Globe, Zap } from "lucide-react";
