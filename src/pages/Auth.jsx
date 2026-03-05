@@ -246,6 +246,7 @@ export default function Auth({ onSuccess }) {
             <AnimatePresence mode="wait">
               {mode === MODES.social && (
                 <motion.div key="social" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
+                  {/*
                   <SocialButton
                     onClick={handleGoogle}
                     loading={loading === "google"}
@@ -261,13 +262,14 @@ export default function Auth({ onSuccess }) {
                     icon={<FacebookIcon />}
                     label="Continue with Facebook"
                   />
-
+                  
                   <div className="flex items-center gap-3 my-4">
                     <div className="h-px flex-1 bg-slate-200" />
                     <span className="font-body text-xs text-slate-400 uppercase tracking-wider">or</span>
                     <div className="h-px flex-1 bg-slate-200" />
                   </div>
-
+                    */}
+                  {/* DEJAR ESTO: Son las opciones que sí funcionan fácil con Supabase */}
                   <SocialButton
                     onClick={() => { setMode(MODES.magic); clearError(); }}
                     loading={false}
