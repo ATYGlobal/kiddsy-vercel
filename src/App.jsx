@@ -55,7 +55,7 @@ const NAV_PRIMARY = [
   { id:"mylibrary",   label:"My Library",   icon:Library,   color:C.green,  authRequired:true },
   { id:"games",       label:"Games",        icon:Puzzle,    color:C.red     },
   { id:"wordsearch",  label:"Word Search",  icon:Search,    color:C.cyan    },
-  { id:"animals",     label:"Animals 🐾",   icon:Paw,       color:C.green   },
+  { id:"animals",     label:"Animals 🐾",   icon:PawPrint,       color:C.green   },
   { id:"education",   label:"Learn ABC",    icon:Music,     color:C.orange  },
 ];
 
