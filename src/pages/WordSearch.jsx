@@ -1,5 +1,5 @@
 /**
- * src/pages/WordSearch.jsx — Kiddsy Loop
+ * src/pages/WordSearch.jsx — Kiddsy
  * Bilingual word search: find English words hidden in a grid
  * Words come from the story vocabulary + alphabet module
  */

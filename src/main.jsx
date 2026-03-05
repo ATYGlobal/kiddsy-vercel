@@ -1,5 +1,5 @@
 /**
- * src/main.jsx — Kiddsy Loop entry point
+ * src/main.jsx — Kiddsy entry point
  * AuthProvider wraps the whole app so useAuth() works everywhere
  */
 import React from "react";

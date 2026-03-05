@@ -1,5 +1,5 @@
 /**
- * src/pages/AnimalPuzzle.jsx — Kiddsy Loop
+ * src/pages/AnimalPuzzle.jsx — Kiddsy
  * Real drag-and-drop jigsaw puzzle with animal photos (Unsplash CDN)
  * 3×3 or 4×4 grid, bilingual animal names
  */

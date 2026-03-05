@@ -1,5 +1,5 @@
 /**
- * Games.jsx — Kiddsy Loop
+ * Games.jsx — Kiddsy
  * Two mini-games: Sliding Tile Puzzle + Emoji Memory Match
  * Colorful, animated, designed for young children
  */

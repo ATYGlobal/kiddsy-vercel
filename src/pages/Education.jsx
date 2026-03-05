@@ -1,5 +1,5 @@
 /**
- * Education.jsx — Kiddsy Loop
+ * Education.jsx — Kiddsy
  * Interactive Letters A–Z + Numbers 0–9 with Web Speech API voices
  * Bilingual: says letter name + example word in English & chosen language
  * Color-coded rainbow keyboard aesthetic

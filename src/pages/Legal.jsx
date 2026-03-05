@@ -1,5 +1,5 @@
 /**
- * Legal.jsx — Kiddsy Loop
+ * Legal.jsx — Kiddsy
  * Sections: FAQ accordion + Terms of Use + Privacy Policy
  * Colors from logo: blue #1565C0, red #E53935, yellow #FDD835, green #43A047
  */
@@ -33,8 +33,8 @@ const FAQ_ITEMS = [
     icon: Baby,
     color: C.blue,
     bg: C.blueSoft,
-    q: "Is Kiddsy Loop safe for my children?",
-    a: "Absolutely! Kiddsy Loop is designed with child safety as our top priority. All AI-generated stories go through a content filter to ensure they are age-appropriate, positive, and free from any harmful content. We follow COPPA guidelines and never collect personal data from children under 13.",
+    q: "Is Kiddsy safe for my children?",
+    a: "Absolutely! Kiddsy is designed with child safety as our top priority. All AI-generated stories go through a content filter to ensure they are age-appropriate, positive, and free from any harmful content. We follow COPPA guidelines and never collect personal data from children under 13.",
   },
   {
     icon: Sparkles,
@@ -48,28 +48,28 @@ const FAQ_ITEMS = [
     color: C.green,
     bg: C.greenSoft,
     q: "What data do you collect and store?",
-    a: "We do not require account creation to use Kiddsy Loop. When you generate a story, only the child's first name and chosen theme are sent to the AI — never a surname, email, or any identifying information. We do not store generated stories on our database. See our Privacy Policy for full details.",
+    a: "We do not require account creation to use Kiddsy. When you generate a story, only the child's first name and chosen theme are sent to the AI — never a surname, email, or any identifying information. We do not store generated stories on our database. See our Privacy Policy for full details.",
   },
   {
     icon: Eye,
     color: C.cyan,
     bg: C.cyanSoft,
     q: "Are there ads or in-app purchases?",
-    a: "Kiddsy Loop is currently ad-free. We believe learning should be distraction-free. Our optional donation section exists to help us keep the lights on and expand the app. There are no premium tiers or paid features — everything is free for families.",
+    a: "Kiddsy is currently ad-free. We believe learning should be distraction-free. Our optional donation section exists to help us keep the lights on and expand the app. There are no premium tiers or paid features — everything is free for families.",
   },
   {
     icon: BookOpen,
     color: C.red,
     bg: C.redSoft,
     q: "Which languages are supported?",
-    a: "Right now Kiddsy Loop supports Spanish, French, and Arabic as translation languages, alongside English. We are actively working on adding Portuguese, Mandarin, and Wolof. If you'd like to help translate or contribute, please reach out via our Collaboration form!",
+    a: "Right now Kiddsy supports Spanish, French, and Arabic as translation languages, alongside English. We are actively working on adding Portuguese, Mandarin, and Wolof. If you'd like to help translate or contribute, please reach out via our Collaboration form!",
   },
   {
     icon: Heart,
     color: C.yellow,
     bg: C.yellowSoft,
-    q: "Can I use Kiddsy Loop in a classroom?",
-    a: "Yes! Kiddsy Loop was designed with educators and volunteer teachers in mind. You may freely use it in ESL classrooms, community centers, and family literacy programs. If you are an educator and want a tailored version or bulk story packs, please get in touch via our Collaboration page.",
+    q: "Can I use Kiddsy in a classroom?",
+    a: "Yes! Kiddsy was designed with educators and volunteer teachers in mind. You may freely use it in ESL classrooms, community centers, and family literacy programs. If you are an educator and want a tailored version or bulk story packs, please get in touch via our Collaboration page.",
   },
 ];
 
@@ -154,31 +154,31 @@ function TermsSection() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      text: "By accessing and using Kiddsy Loop ('the App'), you accept and agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the App. These terms apply to all visitors, users, and others who access or use the App.",
+      text: "By accessing and using Kiddsy ('the App'), you accept and agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the App. These terms apply to all visitors, users, and others who access or use the App.",
     },
     {
       title: "2. Description of Service",
-      text: "Kiddsy Loop is a free bilingual storybook application designed to help migrant families learn English together. The App uses artificial intelligence to generate short, educational stories. No account creation is required. The service is provided 'as is' and may be updated or modified at any time.",
+      text: "Kiddsy is a free bilingual storybook application designed to help migrant families learn English together. The App uses artificial intelligence to generate short, educational stories. No account creation is required. The service is provided 'as is' and may be updated or modified at any time.",
     },
     {
       title: "3. User Conduct",
-      text: "You agree to use Kiddsy Loop only for lawful, personal, and non-commercial educational purposes. You must not attempt to reverse-engineer the application, overload our servers, or use the story generation feature for any purpose other than personal family education. Automated or bulk use of the story generator is not permitted.",
+      text: "You agree to use Kiddsy only for lawful, personal, and non-commercial educational purposes. You must not attempt to reverse-engineer the application, overload our servers, or use the story generation feature for any purpose other than personal family education. Automated or bulk use of the story generator is not permitted.",
     },
     {
       title: "4. Intellectual Property",
-      text: "The Kiddsy Loop name, logo, and overall design are the property of Kiddsy Loop and its creators. Stories generated by the AI using your prompts are provided for your personal use. We retain no ownership of personally generated content. The underlying AI model is provided by OpenAI and is subject to their terms of service.",
+      text: "The Kiddsy name, logo, and overall design are the property of Kiddsy and its creators. Stories generated by the AI using your prompts are provided for your personal use. We retain no ownership of personally generated content. The underlying AI model is provided by OpenAI and is subject to their terms of service.",
     },
     {
       title: "5. Children's Privacy (COPPA)",
-      text: "Kiddsy Loop does not knowingly collect personal information from children under 13 years of age. The app is designed to be used by parents or guardians with their children. If you believe a child has provided us with personal information, please contact us immediately at hello@kiddsyloop.com.",
+      text: "Kiddsy does not knowingly collect personal information from children under 13 years of age. The app is designed to be used by parents or guardians with their children. If you believe a child has provided us with personal information, please contact us immediately at kiddsy@atyglobal.com.",
     },
     {
       title: "6. Disclaimer of Warranties",
-      text: "Kiddsy Loop is provided on an 'as is' and 'as available' basis. We make no warranties, expressed or implied, regarding the reliability, accuracy, or suitability of the content generated. AI-generated stories are for educational entertainment purposes and should be reviewed by a parent or guardian.",
+      text: "Kiddsy is provided on an 'as is' and 'as available' basis. We make no warranties, expressed or implied, regarding the reliability, accuracy, or suitability of the content generated. AI-generated stories are for educational entertainment purposes and should be reviewed by a parent or guardian.",
     },
     {
       title: "7. Limitation of Liability",
-      text: "To the fullest extent permitted by law, Kiddsy Loop and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App. Our total liability shall not exceed the amount of any donation you have voluntarily made through the App.",
+      text: "To the fullest extent permitted by law, Kiddsy and its creators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App. Our total liability shall not exceed the amount of any donation you have voluntarily made through the App.",
     },
     {
       title: "8. Changes to Terms",
@@ -186,7 +186,7 @@ function TermsSection() {
     },
     {
       title: "9. Contact",
-      text: "For questions about these Terms, please contact us at: hello@kiddsyloop.com",
+      text: "For questions about these Terms, please contact us at: kiddsy@atyglobal.com",
     },
   ];
 
@@ -251,7 +251,7 @@ function PrivacySection() {
       points: [
         "When you generate a story, the child's name and theme are sent to OpenAI's API",
         "OpenAI processes this to create the story text",
-        "Kiddsy Loop does not store the name or theme after the story is displayed",
+        "Kiddsy does not store the name or theme after the story is displayed",
         "OpenAI's use of API data is governed by their own privacy policy (openai.com/privacy)",
       ],
     },
@@ -277,7 +277,7 @@ function PrivacySection() {
         "Right to delete: Since we don't store your data, there is nothing to delete",
         "Right to object: You can stop using the AI generator at any time",
         "For EU residents: Our legal basis is Legitimate Interest for analytics",
-        "Contact: hello@kiddsyloop.com for any privacy questions",
+        "Contact: kiddsy@atyglobal.com for any privacy questions",
       ],
     },
   ];
@@ -287,7 +287,7 @@ function PrivacySection() {
       <div className="bg-green-50 border-2 border-green-100 rounded-3xl p-5 flex gap-3 items-start">
         <Shield size={20} style={{ color: C.green }} className="flex-shrink-0 mt-0.5" />
         <p className="font-body text-sm text-green-700">
-          <strong>Privacy made simple.</strong> We built Kiddsy Loop for families, not advertisers.
+          <strong>Privacy made simple.</strong> We built Kiddsy for families, not advertisers.
           Here is everything you need to know, no lawyer-speak required.
         </p>
       </div>
@@ -351,7 +351,7 @@ export default function Legal() {
           Help & Legal
         </motion.h1>
         <p className="font-body text-slate-500 text-lg max-w-md mx-auto">
-          Everything you need to know about Kiddsy Loop — written clearly, for every family.
+          Everything you need to know about Kiddsy — written clearly, for every family.
         </p>
       </div>
 

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════
--- Kiddsy Loop — Supabase Database Schema
+-- Kiddsy — Supabase Database Schema
 -- Run this in: Supabase Dashboard → SQL Editor → New Query
 -- ═══════════════════════════════════════════════════════
 

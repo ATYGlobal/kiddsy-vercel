@@ -1,5 +1,5 @@
 /**
- * Donation.jsx — Kiddsy Loop
+ * Donation.jsx — Kiddsy
  * "Buy us a hot chocolate" — PayPal donation integration
  * Warm, cozy aesthetic matching the logo's yellow/red palette
  */
@@ -234,7 +234,7 @@ export default function Donation() {
             Buy us a hot chocolate!
           </h1>
           <p className="font-body text-slate-600 text-lg max-w-xl mx-auto leading-relaxed">
-            Kiddsy Loop is free for every family, forever. But magic needs fuel! 🪄
+            Kiddsy is free for every family, forever. But magic needs fuel! 🪄
             Your donation helps us add stories, languages, and games.
           </p>
         </motion.div>
@@ -358,7 +358,7 @@ export default function Donation() {
             </AnimatePresence>
 
             <p className="font-body text-center text-xs text-slate-400 px-4">
-              You'll be redirected to PayPal. Kiddsy Loop never sees your payment details.
+              You'll be redirected to PayPal. Kiddsy never sees your payment details.
               All donations are voluntary — the app remains 100% free regardless.
             </p>
           </div>

@@ -1,4 +1,4 @@
-# 🔐 Kiddsy Loop — Complete Supabase Auth Setup Guide
+# 🔐 Kiddsy — Complete Supabase Auth Setup Guide
 
 Follow these steps exactly. Total time: ~25 minutes.
 
@@ -60,13 +60,13 @@ You'll need a **Google Cloud Console** account (free).
 ### Step 3.1 — Create a Google Cloud project
 1. Go to **https://console.cloud.google.com**
 2. Top bar → click the project dropdown → **New Project**
-3. Name: `Kiddsy Loop` → **Create**
+3. Name: `Kiddsy` → **Create**
 
 ### Step 3.2 — Enable Google OAuth
 1. Left menu → **APIs & Services → OAuth consent screen**
 2. Choose **External** → **Create**
 3. Fill in:
-   - App name: `Kiddsy Loop`
+   - App name: `Kiddsy`
    - User support email: your email
    - App domain: your Vercel URL (e.g. `https://kiddsy-loop.vercel.app`)
    - Developer contact: your email
@@ -77,7 +77,7 @@ You'll need a **Google Cloud Console** account (free).
 1. Left menu → **APIs & Services → Credentials**
 2. **+ Create Credentials → OAuth Client ID**
 3. Application type: **Web application**
-4. Name: `Kiddsy Loop Web`
+4. Name: `Kiddsy Web`
 5. **Authorized JavaScript origins** — add:
    ```
    https://YOUR_PROJECT_ID.supabase.co
@@ -111,7 +111,7 @@ A popup shows:
 1. Go to **https://developers.facebook.com**
 2. Top right → **My Apps → Create App**
 3. App type: **Consumer**
-4. App name: `Kiddsy Loop`
+4. App name: `Kiddsy`
 5. Click through and create the app
 
 ### Step 4.2 — Get your App ID and Secret

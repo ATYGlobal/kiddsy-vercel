@@ -1,5 +1,5 @@
 /**
- * src/App.jsx — Kiddsy Loop (Fixed + WordSearch + AnimalPuzzle)
+ * src/App.jsx — Kiddsy (Fixed + WordSearch + AnimalPuzzle)
  *
  * FIXES:
  *   - Removed duplicate KiddsyLogo declaration (was both imported and defined)
@@ -13,7 +13,7 @@
  *   import { AuthProvider } from "./context/AuthContext.jsx";
  *   <AuthProvider><App /></AuthProvider>
  */
-
+import KiddsyLogo from "./components/KiddsyLogo.jsx";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -88,7 +88,7 @@ function StarField() {
 }
 
 // ─── Bouncing Kiddsy loader — NO KiddsyLogo component, inline only ─────────
-export function KiddsyLoader({ message = "Loading magic…" }) {
+function KiddsyLoader({ message = "Loading magic…" }){
   const LETTERS = ["K","i","d","d","s","y"];
   const COLORS  = [C.blue, C.blue, C.red, C.yellow, C.green, C.blue];
   return (
@@ -190,7 +190,7 @@ function Navbar({ view, onNav }) {
           >
             {/*
               Replace inner span tags with your real logo:
-              <img src={logoUrl} alt="Kiddsy Loop" className="w-full h-full object-contain" />
+              <img src={logoUrl} alt="Kiddsy" className="w-full h-full object-contain" />
             */}
             <span className="font-display text-base leading-none" style={{ color:C.blue }}>K</span>
             <span className="font-display text-base leading-none" style={{ color:C.red }}>L</span>
@@ -532,7 +532,7 @@ function Collaborate() {
   const handleSubmit = () => {
     const sub  = encodeURIComponent(`Kiddsy Collaboration — ${form.role}`);
     const body = encodeURIComponent(`Name: ${form.name}\nRole: ${form.role}\nEmail: ${form.email}\n\n${form.message}`);
-    window.open(`mailto:hello@kiddsyloop.com?subject=${sub}&body=${body}`);
+    window.open(`mailto:kiddsy@atyglobal.com?subject=${sub}&body=${body}`);
     setSent(true);
   };
   return (

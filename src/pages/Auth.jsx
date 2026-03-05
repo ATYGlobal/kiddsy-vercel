@@ -194,7 +194,7 @@ export default function Auth({ onSuccess }) {
               <motion.div variants={itemVariants} className="inline-block mb-4">
                 {/* 
                   Replace this block with your real logo:
-                  <img src={logoUrl} alt="Kiddsy Loop" className="w-24 h-24 mx-auto object-contain" />
+                  <img src={logoUrl} alt="Kiddsy" className="w-24 h-24 mx-auto object-contain" />
                 */}
                 <motion.div
                   animate={{ rotate: [0, -5, 5, 0] }}

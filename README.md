@@ -1,4 +1,4 @@
-# ✨ Kiddsy Loop — Vercel Edition
+# ✨ Kiddsy — Vercel Edition
 
 Bilingual storybook app for migrant families learning English together.
 
