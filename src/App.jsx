@@ -20,7 +20,7 @@ import {
   BookOpen, Sparkles, ChevronLeft, ChevronRight, ArrowLeft,
   Wand2, Star, Languages, Puzzle, Music, HelpCircle, Heart,
   Users, Menu, X, LogIn, LogOut, Library, Save,
-  CheckCircle, ChevronDown, Search, Paw
+  CheckCircle, ChevronDown, Search, PawPrint
 } from "lucide-react";
 
 import { useAuth }   from "./context/AuthContext.jsx";
