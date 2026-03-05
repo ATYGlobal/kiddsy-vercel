@@ -20,7 +20,7 @@ const C = {
 
 // ─── PayPal donate button ──────────────────────────────────────────────────
 // Replace PAYPAL_BUTTON_ID with your actual PayPal.me link or button hosted ID
-const PAYPAL_ME_URL = "https://www.paypal.com/donate?hosted_button_id=YOUR_BUTTON_ID";
+const PAYPAL_ME_URL = "https://www.paypal.com/donate/?hosted_button_id=8E4HU8UBQNKJ4";
 const PAYPAL_ME_CUSTOM = (amount) =>
   `https://www.paypal.com/paypalme/kiddsyloop/${amount}`;
 
