@@ -20,7 +20,7 @@ import {
   BookOpen, Sparkles, ChevronLeft, ChevronRight, ArrowLeft,
   Wand2, Star, Languages, Puzzle, Music, HelpCircle, Heart,
   Users, Menu, X, LogIn, LogOut, Library, Save,
-  CheckCircle, ChevronDown, Search, PawPrint
+  CheckCircle, ChevronDown, Search, Cat
 } from "lucide-react";
 
 import { useAuth }   from "./context/AuthContext.jsx";
@@ -55,7 +55,7 @@ const NAV_PRIMARY = [
   { id:"mylibrary",   label:"My Library",   icon:Library,   color:C.green,  authRequired:true },
   { id:"games",       label:"Games",        icon:Puzzle,    color:C.red     },
   { id:"wordsearch",  label:"Word Search",  icon:Search,    color:C.cyan    },
-  { id:"animals",     label:"Animals 🐾",   icon:PawPrint,       color:C.green   },
+  { id:"animals",     label:"Animals 🐾",   icon:Cat,       color:C.green   },
   { id:"education",   label:"Learn ABC",    icon:Music,     color:C.orange  },
 ];
 
