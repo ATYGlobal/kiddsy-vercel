@@ -54,7 +54,7 @@ Or connect the repo to Vercel for automatic deployments on push.
 ```bash
 npm run dev
 # Frontend: http://localhost:3000
-# API:      http://localhost:5000
+# API:      http://localhost:10000
 ```
 
 ## Features

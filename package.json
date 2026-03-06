@@ -4,7 +4,7 @@
   "description": "Kiddsy — Bilingual storybook app for families learning English",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node api/server.js\"",
+    "dev": "concurrently \"vite\" \"node --env-file=.env api/server.js\"",
     "dev:frontend": "vite",
     "dev:api": "node api/server.js",
     "build": "vite build",
@@ -12,7 +12,7 @@
     "start": "node api/server.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.45.4",
     "@tailwindcss/typography": "^0.5.19",
     "cors": "^2.8.5",
