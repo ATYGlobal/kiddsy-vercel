@@ -15,7 +15,7 @@
 import { motion } from "framer-motion";
 import {
   Cat, Fish, Bird, Feather, Bug, Zap, Waves, Heart, Moon, Star,
-  Leaf, Sun, Flower2, TreePine, Shield, PawPrint, Anchor,
+  Leaf, Sun, Flower2, TreePine, Shield, Footprints, Anchor,
   Globe, Eye, Music, Hammer, Wrench, Rocket, Sparkles,
   GraduationCap, BookOpen, ShoppingBag, Bus, Activity, Wand2, Puzzle,
 } from "lucide-react";
@@ -371,10 +371,10 @@ export const ANIMAL_CONFIGS = {
   Fox:      { ...mkIcon(Cat),     color:"#E64A19", bg:"#FBE9E7" },
   Koala:    { ...mkIcon(TreePine),color:"#90A4AE", bg:"#ECEFF1" },
   Flamingo: { ...mkIcon(Heart),   color:"#E91E63", bg:"#FCE4EC" },
-  Bear:     { ...mkIcon(PawPrint),color:"#6D4C41", bg:"#EFEBE9" },
+  Bear:     { ...mkIcon(Footprints),color:"#6D4C41", bg:"#EFEBE9" },
   Cheetah:  { ...mkIcon(Zap),     color:"#F57F17", bg:"#FFF8E1" },
   Turtle:   { ...mkIcon(Shield),  color:"#388E3C", bg:"#E8F5E9" },
-  Wolf:     { ...mkIcon(PawPrint),color:"#607D8B", bg:"#ECEFF1" },
+  Wolf:     { ...mkIcon(Footprints),color:"#607D8B", bg:"#ECEFF1" },
   Frog:     { Render: ({ size, color }) => <SvgFrog     size={size} color={color}/>, color:"#43A047", bg:"#E8F5E9" },
   Horse:    { ...mkIcon(Zap),     color:"#8D6E63", bg:"#EFEBE9" },
   Peacock:  { ...mkIcon(Feather), color:"#00897B", bg:"#E0F2F1" },
@@ -387,7 +387,7 @@ export const ANIMAL_CONFIGS = {
 
 export function getAnimalConfig(name) {
   return ANIMAL_CONFIGS[name] ?? {
-    Render: ({ size, color }) => <PawPrint size={size * .78} color={color} strokeWidth={1.8}/>,
+    Render: ({ size, color }) => <Footprints size={size * .78} color={color} strokeWidth={1.8}/>,
     color: "#9E9E9E", bg: "#F5F5F5",
   };
 }
@@ -397,11 +397,11 @@ export function getAnimalConfig(name) {
 // ══════════════════════════════════════════════════════════════════════════
 export const CATEGORY_TILES = {
   animals: [
-    {I:Cat,    c:"#F9A825"}, {I:Fish,    c:"#0288D1"}, {I:Bird,    c:"#388E3C"}, {I:PawPrint,c:"#795548"},
+    {I:Cat,    c:"#F9A825"}, {I:Fish,    c:"#0288D1"}, {I:Bird,    c:"#388E3C"}, {I:Footprints,c:"#795548"},
     {I:Feather,c:"#9C27B0"}, {I:Bug,     c:"#558B2F"}, {I:Waves,   c:"#0097A7"}, {I:TreePine,c:"#2E7D32"},
-    {I:Cat,    c:"#EF6C00"}, {I:Fish,    c:"#00ACC1"}, {I:Bird,    c:"#7B1FA2"}, {I:PawPrint,c:"#E91E63"},
+    {I:Cat,    c:"#EF6C00"}, {I:Fish,    c:"#00ACC1"}, {I:Bird,    c:"#7B1FA2"}, {I:Footprints,c:"#E91E63"},
     {I:Feather,c:"#00897B"}, {I:Bug,     c:"#F57F17"}, {I:Waves,   c:"#1565C0"}, {I:TreePine,c:"#6D4C41"},
-    {I:Cat,    c:"#607D8B"}, {I:Fish,    c:"#E53935"}, {I:Bird,    c:"#5D4037"}, {I:PawPrint,c:"#0288D1"},
+    {I:Cat,    c:"#607D8B"}, {I:Fish,    c:"#E53935"}, {I:Bird,    c:"#5D4037"}, {I:Footprints,c:"#0288D1"},
     {I:Feather,c:"#AD1457"}, {I:Bug,     c:"#43A047"}, {I:Waves,   c:"#7B1FA2"}, {I:Heart,  c:"#E91E63"},
     {I:Shield, c:"#388E3C"},
   ],
@@ -443,7 +443,7 @@ export const STORY_ICON_MAP = {
   "🌞": { Icon: Sun,           color: "#F59E0B" },
   "🚦": { Icon: Activity,      color: "#43A047" },
   "🧺": { Icon: ShoppingBag,   color: "#E65100" },
-  "🐶": { Icon: PawPrint,      color: "#F59E0B" },
+  "🐶": { Icon: Footprints,      color: "#F59E0B" },
   "🌙": { Icon: Moon,          color: "#7C3AED" },
   "🫀": { Icon: Heart,         color: "#E53935" },
   "🧩": { Icon: Puzzle,        color: "#00ACC1" },
