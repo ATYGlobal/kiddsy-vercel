@@ -19,6 +19,7 @@ import {
   Users, Menu, X, LogIn, LogOut, Library, Save,
   CheckCircle, ChevronDown, Search, Cat
 } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 import { useAuth }   from "./context/AuthContext.jsx";
 import { saveStory } from "./lib/supabase.js";
@@ -890,6 +891,7 @@ export default function App() {
           <p className="mt-3 text-xs opacity-40">© {new Date().getFullYear()} Kiddsy · Free for every family</p>
         </footer>
       </div>
+      <Analytics />
     </div>
   );
 }
