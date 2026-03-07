@@ -381,6 +381,12 @@ function StoryReader({ story, lang, onBack }) {
                   </div>
                   {page && (
                   <>
+                  {page.image_svg && (
+                   <div 
+                      className="w-full aspect-square max-h-48 mb-6 flex items-center justify-center bg-white/50 rounded-3xl p-4 shadow-inner"
+                      dangerouslySetInnerHTML={{ __html: page.image_svg }}
+                      />
+                    )}
                     {/* Texto Principal (Inglés) */}
                    <p className="text-2xl text-gray-800 leading-relaxed" style={{ fontFamily: '"Comic Neue", cursive' }}>
                      {page.en}

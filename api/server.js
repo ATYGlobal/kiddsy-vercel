@@ -36,34 +36,32 @@ app.post("/api/generate-story", async (req, res) => {
   const langCode = language || "es";
 
   const prompt = `
-You are a bilingual children's story writer for an app that helps migrant families learn English.
-
+You are a bilingual children's story writer and SVG illustrator.
 Create a short, joyful story for a child named "${childName}" about: "${theme}".
 
 Rules:
 - Exactly 4 pages.
-- Each page has one simple English sentence (max 12 words) and one ${langName} translation.
-- Use the child's name (${childName}) naturally in the story.
-- Warm, encouraging tone for ages 4-9.
-- No unsafe or adult content.
+- Each page must have: 
+  1. One simple English sentence.
+  2. One ${langName} translation.
+  3. One "image_svg": A simple, colorful SVG illustration (viewBox="0 0 100 100"). 
+     Use basic shapes (rect, circle, path) and bright colors. Avoid complex details.
+- Use the child's name (${childName}) naturally.
+- Response must be ONLY a valid JSON object.
 
-Respond ONLY with a valid JSON object — no markdown, no code fences:
+JSON Format:
 {
   "title": "Story Title",
   "emoji": "🌟",
   "color": "from-blue-400 to-cyan-300",
   "pages": [
-    { "en": "English sentence.", "${langCode}": "${langName} translation." },
-    { "en": "English sentence.", "${langCode}": "${langName} translation." },
-    { "en": "English sentence.", "${langCode}": "${langName} translation." },
-    { "en": "English sentence.", "${langCode}": "${langName} translation." }
+    { 
+      "en": "...", 
+      "${langCode}": "...", 
+      "image_svg": "<svg ...>...</svg>" 
+    }
   ]
 }
-
-Color options (pick the best match for the theme):
-"from-blue-400 to-cyan-300" | "from-green-400 to-emerald-300" | "from-yellow-400 to-amber-300" |
-"from-red-400 to-rose-300"  | "from-purple-500 to-indigo-400" | "from-pink-400 to-rose-300"   |
-"from-orange-400 to-amber-300" | "from-teal-400 to-cyan-300"  | "from-yellow-400 to-orange-300"
 `;
 
   const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
