@@ -382,10 +382,9 @@ function StoryReader({ story, lang, onBack }) {
                   {page && (
                   <>
                     {/* Texto Principal (Inglés) */}
-                    <p className="font-body text-xl md:text-2xl text-slate-800 leading-relaxed flex-1 mb-8" style={{fontStyle:"italic"}}>
-                      {page.en}
+                   <p className="text-2xl text-gray-800 leading-relaxed" style={{ fontFamily: '"Comic Neue", cursive' }}>
+                     {page.en}
                     </p>
-
                     {/* Traducción al idioma seleccionado (Español, Francés o Árabe) */}
                     <div className="border-t-2 pt-6 space-y-4" style={{borderColor:accent.primary+"25"}}>
                       <div dir={lang === "ar" ? "rtl" : "ltr"}
