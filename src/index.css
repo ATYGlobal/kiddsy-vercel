@@ -60,12 +60,5 @@
     z-index: 9999;
     opacity: 0.3;
   }
-
-  /* Añade esto a tu index.css */
-.kiddsy-text-gradient {
-  background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-}
+  
 }
