@@ -546,7 +546,6 @@ function StoryGenerator({ onGenerated }) {
             </div>
           </div>
           <div>
-            // Un ejemplo rápido de cómo añadirlo debajo de los botones:
             <div className="mt-4">
               <input 
                 type="text"
@@ -556,7 +555,7 @@ function StoryGenerator({ onGenerated }) {
                 onChange={(e) => setTheme(e.target.value)}
               />
               <p className="text-xs text-gray-400 mt-2 px-2">
-                Ejemplo: "Un viaje a la luna" o "Un perro que habla".
+                Example: “A trip to the moon” or “A talking dog”.
               </p>
             </div>
             <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
