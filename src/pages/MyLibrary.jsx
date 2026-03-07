@@ -14,6 +14,7 @@ import {
 import { useAuth }                from "../context/AuthContext.jsx";
 import { fetchMyStories, deleteStory } from "../lib/supabase.js";
 import { StoryCoverIcon, getStoryIcon, StickerBadge } from "../components/KiddsyIcons.jsx";
+import { supabase } from "../lib/supabase.js";
 
 const C = {
   blue:"#1565C0", blueSoft:"#E3F2FD",
