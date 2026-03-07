@@ -60,5 +60,11 @@
     z-index: 9999;
     opacity: 0.3;
   }
-  
+
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Fredoka', sans-serif;
+}
+
 }
