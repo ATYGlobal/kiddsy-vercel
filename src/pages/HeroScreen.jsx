@@ -391,6 +391,8 @@ export default function HeroScreen({ onPlay }) {
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
+      backgroundColor: "#FFF9C4",
+      zIndex: 1,
     }}>
 
       {/* ── PLAYGROUND BACKGROUND (pure SVG, fills whole screen) ── */}

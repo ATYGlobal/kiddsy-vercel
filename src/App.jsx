@@ -8,6 +8,7 @@
  *  • StoreCoverCard usa StoryCoverIcon del nuevo sistema de iconos
  * ─────────────────────────────────────────────────────────────────────────
  */
+import React, { useState, useEffect } from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -658,7 +659,7 @@ export default function App() {
 
   // Load static stories from server
   useEffect(()=>{
-    fetch("http://localhost:10000/api/stories")
+    fetch("https://tu-url-de-render.com/api/stories")
       .then(r=>r.json())
       .then(data=>setStories(data))
       .catch(err=>console.error("Error cargando biblioteca:", err));
