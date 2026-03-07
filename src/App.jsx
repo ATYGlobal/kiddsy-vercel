@@ -464,10 +464,17 @@ function StoryGenerator({ onGenerated }) {
     if (!childName.trim()||!theme) return;
     setLoading(true); setError(""); setSaved(false);
     try {
-      const res = await fetch("http://localhost:10000/api/generate-story",{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({childName:childName.trim(),theme,language:lang}),
-      });
+      // Definimos la URL de la API dinámicamente
+        const API_URL = window.location.hostname === 'localhost' 
+          ? 'http://localhost:10000' 
+          : 'https://tu-app-en-render.onrender.com'; // <--- AQUÍ VA TU URL DE RENDER
+
+        // Y luego usas esa variable en el fetch
+        const response = await fetch(`${API_URL}/api/generate-story`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ childName, theme, language }),
+        });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error||"Generation failed");
 
