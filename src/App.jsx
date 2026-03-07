@@ -473,10 +473,10 @@ function StoryGenerator({ onGenerated }) {
       : 'https://kiddsy-vercel.onrender.com';
 
     // 2. FETCH (Corregido 'language' por 'lang')
-    const response = await fetch(`${API_URL}/api/generate-story`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      const response = await fetch(`${API_URL}/api/generate-story`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
         childName, 
         theme, 
         language: lang // <--- Aquí usamos 'lang' que es tu variable de estado
@@ -546,6 +546,19 @@ function StoryGenerator({ onGenerated }) {
             </div>
           </div>
           <div>
+            // Un ejemplo rápido de cómo añadirlo debajo de los botones:
+            <div className="mt-4">
+              <input 
+                type="text"
+                placeholder="¿De qué quieres el cuento hoy?"
+                className="w-full p-4 rounded-2xl border-2 border-dashed border-blue-200 focus:border-blue-400 outline-none font-comic"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+              />
+              <p className="text-xs text-gray-400 mt-2 px-2">
+                Ejemplo: "Un viaje a la luna" o "Un perro que habla".
+              </p>
+            </div>
             <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
             <LanguagePicker value={lang} onChange={setLang}/>
           </div>
