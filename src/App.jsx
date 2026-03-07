@@ -8,6 +8,7 @@
  *  • StoreCoverCard usa StoryCoverIcon del nuevo sistema de iconos
  * ─────────────────────────────────────────────────────────────────────────
  */
+import KiddsyTitle from './components/KiddsyTitle';
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -566,20 +567,44 @@ function StoryGenerator({ onGenerated }) {
               className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2"
             ><span>⚠️</span><span>{error}</span></motion.div>
           )}
-          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}}
-            onClick={handleGenerate} disabled={!childName.trim()||!theme}
-            className="w-full py-4 rounded-2xl font-display text-xl text-white shadow-lg transition-all"
-            style={{
-              background:childName.trim()&&theme?`linear-gradient(135deg,${C.blue},#42A5F5)`:"#E5E7EB",
-              color:childName.trim()&&theme?"white":"#9CA3AF",
-              cursor:childName.trim()&&theme?"pointer":"not-allowed",
-              boxShadow:childName.trim()&&theme?"0 8px 24px rgba(21,101,192,0.35)":"none",
-            }}
-          >🪄 Generate Story</motion.button>
+            {/* --- BOTÓN GENERAR CUENTO --- */}
+            <div className="mt-8">
+              <motion.button 
+                whileHover={childName.trim() && theme ? { scale: 1.02 } : {}} 
+                whileTap={childName.trim() && theme ? { scale: 0.98 } : {}}
+                onClick={handleGenerate} 
+                disabled={!childName.trim() || !theme || loading}
+                className="w-full py-5 rounded-3xl font-display shadow-lg transition-all flex items-center justify-center gap-2"
+                style={{
+                  background: childName.trim() && theme 
+                    ? `linear-gradient(135deg, ${C?.blue || '#1565C0'}, #42A5F5)` 
+                    : "#E5E7EB",
+                  color: childName.trim() && theme ? "white" : "#9CA3AF",
+                  cursor: childName.trim() && theme && !loading ? "pointer" : "not-allowed",
+                  boxShadow: childName.trim() && theme ? "0 8px 24px rgba(21,101,192,0.35)" : "none",
+                  opacity: loading ? 0.8 : 1
+                }}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="font-comic text-lg italic text-white/90">Creating magic...</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-2xl">🪄</span>
+                    <KiddsyTitle className="text-2xl text-white">Generate Story</KiddsyTitle>
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </div>
         </div>
-      </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
 }
 
 // ─── Library View ──────────────────────────────────────────────────────────

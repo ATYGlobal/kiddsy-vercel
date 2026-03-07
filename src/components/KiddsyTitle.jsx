@@ -14,3 +14,4 @@ const KiddsyTitle = ({ children, className = "" }) => {
     </span>
   );
 };
+export default KiddsyTitle;
