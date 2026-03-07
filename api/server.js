@@ -16,12 +16,12 @@ app.use(cors());
 app.use(express.json());
 
 // ═══════════════════════════════════════════════════════════════════════════
-// BIBLIOTECA ESTÁTICA — Historias 1-5 + 16-25
+// BIBLIOTECA ESTÁTICA — Historias 1-25
 // Árabe corregido: extraído directamente de Unicode (sin caracteres mojibake)
 // ═══════════════════════════════════════════════════════════════════════════
 const STATIC_STORIES = [
 
-  // ── HISTORIAS ORIGINALES 1-5 ────────────────────────────────────────────
+  // ── HISTORIAS ORIGINALES 1-25 ────────────────────────────────────────────
   {
     id: "story-1",
     title: "A Day at School",
@@ -83,7 +83,7 @@ const STATIC_STORIES = [
     ],
   },
 
-  // ── HISTORIAS 16-25 (extraídas del RTF) ────────────────────────────────
+  // ── HISTORIAS 6-25 (extraídas del RTF) ────────────────────────────────
 
   {
     id: "story-16",
