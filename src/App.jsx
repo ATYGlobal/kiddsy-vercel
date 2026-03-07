@@ -34,7 +34,7 @@ function useAuth() {
 }
 
 // ── Páginas ────────────────────────────────────────────────────────────────
-import HeroScreen   from "./pages/HeroScreen.jsx";
+import HeroScreen from './pages/HeroScreen';
 // import Auth      from "./pages/Auth.jsx";   // reactivar si quieres login
 import MyLibrary    from "./pages/MyLibrary.jsx";
 import Legal        from "./pages/Legal.jsx";

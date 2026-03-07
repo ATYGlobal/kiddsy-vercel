@@ -15,7 +15,7 @@
 import { motion } from "framer-motion";
 import {
   Cat, Fish, Bird, Feather, Bug, Zap, Waves, Heart, Moon, Star,
-  Leaf, Sun, Flower2, TreePine, Shield, PawPrint, Anchor,
+  Leaf, Sun, Flower2, TreePine, Shield, Footprints, Anchor,
   Globe, Eye, Music, Hammer, Wrench, Rocket, Sparkles,
   GraduationCap, BookOpen, ShoppingBag, Bus, Activity, Wand2, Puzzle,
 } from "lucide-react";
