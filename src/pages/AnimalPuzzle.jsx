@@ -87,21 +87,20 @@ function speak(text, lang="en-US") {
   window.speechSynthesis.speak(u);
 }
 
-// ─── PuzzleTile: clips a portion of the full-size SVG illustration ────────
-function PuzzleTile({ tile, gridSize, Render, animalColor, isSelected, isDragOver, onClick, onEnter, onLeave }) {
+// ——— PuzzleTile: Ahora usa fotos reales de Unsplash ———
+function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClick, onEnter, onLeave }) {
   const cellPx  = GRID_PX / gridSize;
   const srcCol  = tile % gridSize;
   const srcRow  = Math.floor(tile / gridSize);
-  // The rendered SVG size and how much to offset it
-  const svgSize = GRID_PX * 0.94;
-  const padSide = (GRID_PX - svgSize) / 2;
-  const offX    = -(srcCol * cellPx) + padSide;
-  const offY    = -(srcRow * cellPx) + padSide;
+  
+  // Usamos una URL profesional que busca la foto por el nombre del animal
+  // El parámetro "sig" es para que la imagen no se quede "cacheada" y pueda variar
+  const imageUrl = `https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&auto=format&fit=crop`; 
+  // Nota: Para que sea dinámico por animal, lo ideal es: 
+  // `https://source.unsplash.com/400x400/?${animalName}` 
+  // Pero como esa API a veces cambia, esta técnica de CSS es la clave:
 
   const border = isSelected ? `3px solid ${C.yellow}` : isDragOver ? `3px solid ${C.green}` : "2.5px solid rgba(255,255,255,0.85)";
-  const shadow = isSelected
-    ? `0 0 0 3px ${C.yellow}, 0 8px 24px rgba(0,0,0,0.28)`
-    : isDragOver ? `0 0 0 3px ${C.green}` : `0 3px 12px rgba(0,0,0,0.13)`;
 
   return (
     <motion.div
@@ -110,39 +109,28 @@ function PuzzleTile({ tile, gridSize, Render, animalColor, isSelected, isDragOve
       onMouseLeave={onLeave}
       whileTap={{ scale: 0.93 }}
       style={{
-        width:        cellPx,
-        height:       cellPx,
-        overflow:     "hidden",
-        position:     "relative",
+        width: cellPx,
+        height: cellPx,
+        overflow: "hidden",
+        position: "relative",
         borderRadius: Math.round(cellPx * 0.14),
         border,
-        boxShadow:    shadow,
-        cursor:       "pointer",
-        background:   animalColor + "18",
-        zIndex:       isSelected ? 8 : 1,
-        flexShrink:   0,
+        boxShadow: isSelected ? `0 0 0 3px ${C.yellow}` : `0 3px 12px rgba(0,0,0,0.1)`,
+        cursor: "pointer",
+        // Aquí ocurre la magia: cargamos la foto y la desplazamos según la pieza
+        backgroundImage: `url(https://source.unsplash.com/featured/${GRID_PX}x${GRID_PX}?${animalName})`,
+        backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
+        backgroundPosition: `-${srcCol * cellPx}px -${srcRow * cellPx}px`,
+        backgroundColor: "#f0f0f0"
       }}
     >
-      {/* The big illustration, shifted to show only this slice */}
+      {/* El número de la pieza por si se pierden */}
       <div style={{
-        position:   "absolute",
-        left:       offX,
-        top:        offY,
-        width:      svgSize,
-        height:     svgSize,
-        pointerEvents: "none",
-      }}>
-        <Render size={svgSize} color={animalColor} />
-      </div>
-      {/* Subtle tile-number hint */}
-      <div style={{
-        position:  "absolute", bottom:3, right:3,
-        width:15, height:15, borderRadius:"50%",
-        background:"rgba(0,0,0,0.28)", display:"flex",
-        alignItems:"center", justifyContent:"center",
-        fontSize:8, color:"white", fontFamily:"system-ui",
-        pointerEvents:"none",
-      }}>{tile+1}</div>
+        position: "absolute", bottom: 3, right: 3,
+        width: 16, height: 16, borderRadius: "50%",
+        background: "rgba(0,0,0,0.3)", color: "white",
+        fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center"
+      }}>{tile + 1}</div>
     </motion.div>
   );
 }

@@ -15,7 +15,7 @@
 import { motion } from "framer-motion";
 import {
   Cat, Fish, Bird, Feather, Bug, Zap, Waves, Heart, Moon, Star,
-  Leaf, Sun, Flower2, TreePine, Shield, PawPrint, Footprints, Anchor,
+  Leaf, Sun, Flower2, TreePine, Shield, Footprints, Anchor,
   Globe, Eye, Music, Hammer, Wrench, Rocket, Sparkles,
   GraduationCap, BookOpen, ShoppingBag, Bus, Activity, Wand2, Puzzle,
 } from "lucide-react";
@@ -387,7 +387,7 @@ export const ANIMAL_CONFIGS = {
 
 export function getAnimalConfig(name) {
   return ANIMAL_CONFIGS[name] ?? {
-    Render: ({ size, color }) => <PawPrint size={size * .78} color={color} strokeWidth={1.8}/>,
+    Render: ({ size, color }) => <Footprints size={size * .78} color={color} strokeWidth={1.8}/>,
     color: "#9E9E9E", bg: "#F5F5F5",
   };
 }
