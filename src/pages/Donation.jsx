@@ -4,7 +4,7 @@
  * Warm, cozy aesthetic matching the logo's yellow/red palette
  */
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Coffee, Star, Sparkles, Users, BookOpen, Globe, Zap } from "lucide-react";
 
@@ -19,8 +19,6 @@ const C = {
 };
 
 // ─── PayPal donate button ──────────────────────────────────────────────────
-// Replace PAYPAL_BUTTON_ID with your actual PayPal.me link or button hosted ID
-const PAYPAL_ME_URL = "https://www.paypal.com/donate/?hosted_button_id=8E4HU8UBQNKJ4";
 const PAYPAL_ME_CUSTOM = (amount) =>
   `https://www.paypal.com/paypalme/kiddsyloop/${amount}`;
 
@@ -28,7 +26,7 @@ const PAYPAL_ME_CUSTOM = (amount) =>
 function FloatingEmojis() {
   const items = ["☕","🍫","📚","🌟","❤️","🎈","✨","🌈","🎉","🍬"];
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
       {items.map((emoji, i) => (
         <motion.span
           key={i}
@@ -56,7 +54,7 @@ function DonationTier({ tier, onSelect, isSelected }) {
       onClick={() => onSelect(tier)}
       whileHover={{ scale: 1.04, y: -4 }}
       whileTap={{ scale: 0.97 }}
-      className="relative w-full rounded-4xl overflow-hidden border-4 transition-all duration-200 text-left"
+      className="relative w-full rounded-3xl overflow-hidden border-4 transition-all duration-200 text-left"
       style={{
         borderColor: isSelected ? tier.color : "white",
         background: isSelected ? tier.softBg : "white",
@@ -75,7 +73,6 @@ function DonationTier({ tier, onSelect, isSelected }) {
       )}
 
       <div className="p-6">
-        {/* Emoji + amount */}
         <div className="flex items-center gap-4 mb-4">
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm"
@@ -84,17 +81,15 @@ function DonationTier({ tier, onSelect, isSelected }) {
             {tier.emoji}
           </div>
           <div>
-            <div className="font-display text-3xl" style={{ color: tier.color }}>
+            <div className="font-display text-3xl font-bold" style={{ color: tier.color }}>
               ${tier.amount}
             </div>
             <div className="font-display text-base text-slate-500">{tier.label}</div>
           </div>
         </div>
 
-        {/* What it funds */}
         <p className="font-body text-sm text-slate-600 leading-relaxed">{tier.description}</p>
 
-        {/* Perks */}
         <div className="mt-4 flex flex-wrap gap-2">
           {tier.perks.map((perk, i) => (
             <span
@@ -108,7 +103,6 @@ function DonationTier({ tier, onSelect, isSelected }) {
         </div>
       </div>
 
-      {/* Selected indicator */}
       <AnimatePresence>
         {isSelected && (
           <motion.div
@@ -135,7 +129,7 @@ function ImpactCard({ icon: Icon, value, label, color, bg, delay }) {
       style={{ background: bg }}
     >
       <Icon size={24} style={{ color }} className="mx-auto mb-2" />
-      <div className="font-display text-3xl mb-1" style={{ color }}>{value}</div>
+      <div className="font-display text-3xl mb-1 font-bold" style={{ color }}>{value}</div>
       <div className="font-body text-xs text-slate-500 leading-tight">{label}</div>
     </motion.div>
   );
@@ -143,46 +137,10 @@ function ImpactCard({ icon: Icon, value, label, color, bg, delay }) {
 
 // ─── Main Donation Component ───────────────────────────────────────────────
 const TIERS = [
-  {
-    amount: 3,
-    emoji: "☕",
-    label: "A hot chocolate",
-    color: C.yellow,
-    softBg: "#FFFDE7",
-    popular: false,
-    description: "Warms us up during late-night coding sessions! Keeps the server running for one week.",
-    perks: ["☕ 1 week server", "💛 Warm thanks"],
-  },
-  {
-    amount: 10,
-    emoji: "📚",
-    label: "A storybook",
-    color: C.blue,
-    softBg: "#E3F2FD",
-    popular: true,
-    description: "Helps us add 5 new bilingual stories to the library for all families to enjoy.",
-    perks: ["📚 5 new stories", "🌟 Name in credits", "💙 Big thanks"],
-  },
-  {
-    amount: 25,
-    emoji: "🌍",
-    label: "A new language",
-    color: C.green,
-    softBg: "#E8F5E9",
-    popular: false,
-    description: "Funds the translation and testing of a new language pair, reaching more families.",
-    perks: ["🌍 New language", "🎨 Custom story", "💚 Sponsor badge"],
-  },
-  {
-    amount: 50,
-    emoji: "🚀",
-    label: "A full feature",
-    color: C.magenta,
-    softBg: "#FCE4EC",
-    popular: false,
-    description: "Sponsors a full new feature — like audio narration or an interactive word game!",
-    perks: ["🚀 Feature sponsor", "📧 Direct update", "❤️ Hero status"],
-  },
+  { amount: 3, emoji: "☕", label: "A hot chocolate", color: C.yellow, softBg: "#FFFDE7", popular: false, description: "Warms us up during late-night coding sessions! Keeps the server running for one week.", perks: ["☕ 1 week server", "💛 Warm thanks"] },
+  { amount: 10, emoji: "📚", label: "A storybook", color: C.blue, softBg: "#E3F2FD", popular: true, description: "Helps us add 5 new bilingual stories to the library for all families to enjoy.", perks: ["📚 5 new stories", "🌟 Name in credits", "💙 Big thanks"] },
+  { amount: 25, emoji: "🌍", label: "A new language", color: C.green, softBg: "#E8F5E9", popular: false, description: "Funds the translation and testing of a new language pair, reaching more families.", perks: ["🌍 New language", "🎨 Custom story", "💚 Sponsor badge"] },
+  { amount: 50, emoji: "🚀", label: "A full feature", color: C.magenta, softBg: "#FCE4EC", popular: false, description: "Sponsors a full new feature — like audio narration or an interactive word game!", perks: ["🚀 Feature sponsor", "📧 Direct update", "❤️ Hero status"] },
 ];
 
 const IMPACT_STATS = [
@@ -200,10 +158,7 @@ export default function Donation() {
   const finalAmount = customAmount || selectedTier.amount;
 
   const handleDonate = () => {
-    // Open PayPal in a new tab
-    const url = customAmount
-      ? PAYPAL_ME_CUSTOM(customAmount)
-      : PAYPAL_ME_CUSTOM(selectedTier.amount);
+    const url = customAmount ? PAYPAL_ME_CUSTOM(customAmount) : PAYPAL_ME_CUSTOM(selectedTier.amount);
     window.open(url, "_blank", "noopener,noreferrer");
     setDonated(true);
     setTimeout(() => setDonated(false), 4000);
@@ -211,26 +166,24 @@ export default function Donation() {
 
   return (
     <div
-      className="min-h-screen relative overflow-x-hidden"
-      style={{ background: "linear-gradient(150deg, #FFFDE7 0%, #FFF8E1 40%, #FFF3E0 100%)" }}
+      className="relative w-full"
+      style={{ 
+        minHeight: "100vh",
+        overflowY: "auto", // ¡Esto arregla el scroll!
+        overflowX: "hidden",
+        paddingBottom: "120px", // Espacio abajo para que no se corte
+        background: "linear-gradient(150deg, #FFFDE7 0%, #FFF8E1 40%, #FFF3E0 100%)" 
+      }}
     >
       <FloatingEmojis />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-14">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 py-14">
         {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: -24 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            animate={{ rotate: [0, -8, 8, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            className="text-7xl mb-4 inline-block"
-          >
+        <motion.div initial={{ opacity: 0, y: -24 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+          <motion.div animate={{ rotate: [0, -8, 8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} className="text-7xl mb-4 inline-block">
             ☕
           </motion.div>
-          <h1 className="font-display text-4xl md:text-5xl mb-3" style={{ color: C.blue }}>
+          <h1 className="font-display text-4xl md:text-5xl mb-3 font-bold" style={{ color: C.blue }}>
             Buy us a hot chocolate!
           </h1>
           <p className="font-body text-slate-600 text-lg max-w-xl mx-auto leading-relaxed">
@@ -240,152 +193,67 @@ export default function Donation() {
         </motion.div>
 
         {/* Impact stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-          {IMPACT_STATS.map((s, i) => (
-            <ImpactCard key={i} {...s} />
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {IMPACT_STATS.map((s, i) => <ImpactCard key={i} {...s} />)}
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Left: Tier picker */}
           <div>
-            <h2 className="font-display text-2xl mb-5" style={{ color: C.blue }}>
+            <h2 className="font-display text-2xl mb-5 font-bold" style={{ color: C.blue }}>
               Choose your contribution
             </h2>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               {TIERS.map((tier) => (
-                <DonationTier
-                  key={tier.amount}
-                  tier={tier}
-                  isSelected={selectedTier.amount === tier.amount && !customAmount}
-                  onSelect={(t) => { setSelectedTier(t); setCustomAmount(""); }}
-                />
+                <DonationTier key={tier.amount} tier={tier} isSelected={selectedTier?.amount === tier.amount && !customAmount} onSelect={(t) => { setSelectedTier(t); setCustomAmount(""); }} />
               ))}
             </div>
           </div>
 
           {/* Right: Summary + CTA */}
           <div className="flex flex-col gap-5">
-            {/* Custom amount */}
-            <div className="bg-white rounded-4xl p-6 shadow-md border-2 border-white">
-              <h3 className="font-display text-lg mb-3" style={{ color: C.blue }}>
-                Or enter a custom amount
-              </h3>
+            <div className="bg-white rounded-3xl p-6 shadow-md border-2 border-white">
+              <h3 className="font-display text-lg mb-3 font-bold" style={{ color: C.blue }}>Or enter a custom amount</h3>
               <div className="flex items-center gap-2 bg-slate-50 rounded-2xl px-4 py-3 border-2 border-slate-200 focus-within:border-blue-400 transition-colors">
                 <span className="font-display text-2xl text-slate-400">$</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="999"
-                  placeholder="Your amount"
-                  value={customAmount}
-                  onChange={(e) => { setCustomAmount(e.target.value); setSelectedTier(null); }}
-                  className="flex-1 bg-transparent font-display text-2xl outline-none text-slate-700 placeholder-slate-300"
-                />
+                <input type="number" min="1" max="999" placeholder="Your amount" value={customAmount} onChange={(e) => { setCustomAmount(e.target.value); setSelectedTier(null); }} className="flex-1 bg-transparent font-display text-2xl outline-none text-slate-700 placeholder-slate-300" />
               </div>
             </div>
 
-            {/* Summary card */}
-            <motion.div
-              key={finalAmount}
-              initial={{ scale: 0.97, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="rounded-4xl p-7 text-white shadow-xl"
-              style={{
-                background: `linear-gradient(135deg, ${C.blue} 0%, ${C.cyan} 100%)`,
-              }}
-            >
+            <motion.div key={finalAmount} initial={{ scale: 0.97, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="rounded-3xl p-7 text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${C.blue} 0%, ${C.cyan} 100%)` }}>
               <div className="text-white/70 font-display mb-1">Your contribution</div>
-              <div className="font-display text-5xl mb-1">${finalAmount || "—"}</div>
+              <div className="font-display text-5xl font-bold mb-1">${finalAmount || "—"}</div>
               {selectedTier && !customAmount && (
-                <div className="font-body text-white/80 text-sm mb-4">
-                  {selectedTier.label} {selectedTier.emoji}
-                </div>
+                <div className="font-body text-white/80 text-sm mb-4">{selectedTier.label} {selectedTier.emoji}</div>
               )}
-
               <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
-                <div className="flex items-center gap-2 text-white/80 font-body text-sm">
-                  <Shield size={14} /> Secure payment via PayPal
-                </div>
-                <div className="flex items-center gap-2 text-white/80 font-body text-sm">
-                  <Heart size={14} /> 100% goes to Kiddsy development
-                </div>
+                <div className="flex items-center gap-2 text-white/80 font-body text-sm"><Shield size={16} /> Secure payment via PayPal</div>
+                <div className="flex items-center gap-2 text-white/80 font-body text-sm"><Heart size={16} /> 100% goes to Kiddsy development</div>
               </div>
             </motion.div>
 
-            {/* Donate button */}
             <AnimatePresence mode="wait">
               {donated ? (
-                <motion.div
-                  key="thanks"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="w-full py-5 rounded-4xl font-display text-xl text-center"
-                  style={{ background: C.green, color: "white" }}
-                >
-                  🎉 Thank you, superstar! ¡Gracias! Merci!
+                <motion.div key="thanks" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="w-full py-5 rounded-3xl font-display text-xl text-center font-bold" style={{ background: C.green, color: "white" }}>
+                  🎉 Thank you, superstar!
                 </motion.div>
               ) : (
-                <motion.button
-                  key="donate-btn"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleDonate}
-                  disabled={!finalAmount || Number(finalAmount) < 1}
-                  className="w-full py-5 rounded-4xl font-display text-xl flex items-center justify-center gap-3 shadow-lg transition-all"
-                  style={{
-                    background: (!finalAmount || Number(finalAmount) < 1)
-                      ? "#E5E7EB"
-                      : `linear-gradient(135deg, ${C.yellow} 0%, #FF8F00 100%)`,
-                    color: (!finalAmount || Number(finalAmount) < 1) ? "#9CA3AF" : "white",
-                    cursor: (!finalAmount || Number(finalAmount) < 1) ? "not-allowed" : "pointer",
-                    boxShadow: (!finalAmount || Number(finalAmount) < 1)
-                      ? "none"
-                      : "0 8px 30px rgba(255, 143, 0, 0.4)",
-                  }}
-                >
-                  <span className="text-2xl">🧡</span>
-                  Donate with PayPal
-                  <img
-                    src="https://www.paypalobjects.com/webstatic/icon/pp258.png"
-                    alt="PayPal"
-                    className="w-7 h-7 rounded-lg"
-                    onError={(e) => e.target.style.display = "none"}
-                  />
+                <motion.button key="donate-btn" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={handleDonate} disabled={!finalAmount || Number(finalAmount) < 1} className="w-full py-5 rounded-3xl font-display text-xl flex items-center justify-center gap-3 shadow-lg transition-all font-bold" style={{ background: (!finalAmount || Number(finalAmount) < 1) ? "#E5E7EB" : `linear-gradient(135deg, ${C.yellow} 0%, #FF8F00 100%)`, color: (!finalAmount || Number(finalAmount) < 1) ? "#9CA3AF" : "white", cursor: (!finalAmount || Number(finalAmount) < 1) ? "not-allowed" : "pointer" }}>
+                  <span className="text-2xl">🧡</span> Donate with PayPal
                 </motion.button>
               )}
             </AnimatePresence>
-
-            <p className="font-body text-center text-xs text-slate-400 px-4">
-              You'll be redirected to PayPal. Kiddsy never sees your payment details.
-              All donations are voluntary — the app remains 100% free regardless.
-            </p>
+            <p className="font-body text-center text-xs text-slate-400 px-4">You'll be redirected to PayPal. Kiddsy never sees your payment details.</p>
           </div>
         </div>
 
         {/* Thank-you wall */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-16 text-center"
-        >
-          <h2 className="font-display text-2xl mb-2" style={{ color: C.blue }}>
-            Thank you to our supporters 💛
-          </h2>
-          <p className="font-body text-slate-500 mb-6 text-sm">
-            These wonderful people keep the magic alive.
-          </p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-16 text-center">
+          <h2 className="font-display text-2xl mb-2 font-bold" style={{ color: C.blue }}>Thank you to our supporters 💛</h2>
+          <p className="font-body text-slate-500 mb-6 text-sm">These wonderful people keep the magic alive.</p>
           <div className="flex flex-wrap justify-center gap-3">
             {["María G.", "Ahmed K.", "Famille Dumont", "Sofia R.", "Omar A.", "The Chen Family", "Yasmin B.", "Lucas F."].map((name, i) => (
-              <motion.span
-                key={i}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.6 + i * 0.07, type: "spring" }}
-                className="px-4 py-2 rounded-full font-body text-sm font-semibold bg-white shadow-sm border-2 border-white text-slate-600"
-              >
+              <motion.span key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6 + i * 0.07, type: "spring" }} className="px-4 py-2 rounded-full font-body text-sm font-semibold bg-white shadow-sm border-2 border-white text-slate-600">
                 ❤️ {name}
               </motion.span>
             ))}
@@ -396,14 +264,9 @@ export default function Donation() {
   );
 }
 
-// ─── Icon import for PrivacySection shield ─────────────────────────────────
 function Shield({ size, style, className }) {
   return (
-    <svg
-      width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      style={style} className={className}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   );

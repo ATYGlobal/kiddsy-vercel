@@ -658,7 +658,7 @@ export default function App() {
 
   // Load static stories from server
   useEffect(()=>{
-    fetch("https://kiddsy-vercel.onrender.com")
+    fetch("https://kiddsy-vercel.onrender.com/api/stories")
       .then(r=>r.json())
       .then(data=>setStories(data))
       .catch(err=>console.error("Error cargando biblioteca:", err));
