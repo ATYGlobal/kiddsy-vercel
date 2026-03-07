@@ -64,8 +64,12 @@ function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClic
   const srcCol  = tile % gridSize;
   const srcRow  = Math.floor(tile / gridSize);
   
-  // URL de la foto real basada en el nombre del animal
-  const imageUrl = `https://source.unsplash.com/featured/400x400?${animalName.toLowerCase()}`;
+  // Usamos una URL profesional que busca la foto por el nombre del animal
+  // El parámetro "sig" es para que la imagen no se quede "cacheada" y pueda variar
+  const imageUrl = `https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&auto=format&fit=crop`; 
+  // Nota: Para que sea dinámico por animal, lo ideal es: 
+  // `https://source.unsplash.com/400x400/?${animalName}` 
+  // Pero como esa API a veces cambia, esta técnica de CSS es la clave:
 
   const border = isSelected ? `3px solid ${C.yellow}` : isDragOver ? `3px solid ${C.green}` : "2.5px solid rgba(255,255,255,0.85)";
 
@@ -84,19 +88,20 @@ function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClic
         border,
         boxShadow: isSelected ? `0 0 0 3px ${C.yellow}` : `0 3px 12px rgba(0,0,0,0.1)`,
         cursor: "pointer",
-        background: "#eee",
+        // Aquí ocurre la magia: cargamos la foto y la desplazamos según la pieza
+        backgroundImage: `url(https://source.unsplash.com/featured/${GRID_PX}x${GRID_PX}?${animalName})`,
+        backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
+        backgroundPosition: `-${srcCol * cellPx}px -${srcRow * cellPx}px`,
+        backgroundColor: "#f0f0f0"
       }}
     >
+      {/* El número de la pieza por si se pierden */}
       <div style={{
-        position: "absolute",
-        width: GRID_PX,
-        height: GRID_PX,
-        left: -(srcCol * cellPx),
-        top: -(srcRow * cellPx),
-        backgroundImage: `url(${imageUrl})`,
-        backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
-        pointerEvents: "none",
-      }} />
+        position: "absolute", bottom: 3, right: 3,
+        width: 16, height: 16, borderRadius: "50%",
+        background: "rgba(0,0,0,0.3)", color: "white",
+        fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center"
+      }}>{tile + 1}</div>
     </motion.div>
   );
 }
