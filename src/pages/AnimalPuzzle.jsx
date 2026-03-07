@@ -58,49 +58,16 @@ function buildPuzzle(size) {
   return tiles;
 }
 
-function Confetti({ active }) {
-  const ps = Array.from({ length: 26 }, (_, i) => ({
-    id:i, x:Math.random()*100, delay:Math.random()*.5, size:Math.random()*10+7,
-    color:["#F9A825","#E53935","#43A047","#1565C0","#D81B60","#00ACC1"][i%6],
-  }));
-  if (!active) return null;
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {ps.map(p => (
-        <motion.div key={p.id} className="absolute rounded-sm top-0"
-          style={{ left:`${p.x}%`, width:p.size, height:p.size, background:p.color }}
-          initial={{ y:-20, opacity:1, rotate:0 }}
-          animate={{ y:"110vh", opacity:0, rotate:720 }}
-          transition={{ duration:1.5+Math.random(), delay:p.delay, ease:"easeIn" }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function speak(text, lang="en-US") {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang=lang; u.rate=0.85; u.pitch=1.1;
-  window.speechSynthesis.speak(u);
-}
-
-// ─── PuzzleTile: clips a portion of the full-size SVG illustration ────────
-function PuzzleTile({ tile, gridSize, Render, animalColor, isSelected, isDragOver, onClick, onEnter, onLeave }) {
+// ——— PuzzleTile: Ahora usa fotos reales de Unsplash ———
+function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClick, onEnter, onLeave }) {
   const cellPx  = GRID_PX / gridSize;
   const srcCol  = tile % gridSize;
   const srcRow  = Math.floor(tile / gridSize);
-  // The rendered SVG size and how much to offset it
-  const svgSize = GRID_PX * 0.94;
-  const padSide = (GRID_PX - svgSize) / 2;
-  const offX    = -(srcCol * cellPx) + padSide;
-  const offY    = -(srcRow * cellPx) + padSide;
+  
+  // URL de la foto real basada en el nombre del animal
+  const imageUrl = `https://source.unsplash.com/featured/400x400?${animalName.toLowerCase()}`;
 
   const border = isSelected ? `3px solid ${C.yellow}` : isDragOver ? `3px solid ${C.green}` : "2.5px solid rgba(255,255,255,0.85)";
-  const shadow = isSelected
-    ? `0 0 0 3px ${C.yellow}, 0 8px 24px rgba(0,0,0,0.28)`
-    : isDragOver ? `0 0 0 3px ${C.green}` : `0 3px 12px rgba(0,0,0,0.13)`;
 
   return (
     <motion.div
@@ -109,39 +76,27 @@ function PuzzleTile({ tile, gridSize, Render, animalColor, isSelected, isDragOve
       onMouseLeave={onLeave}
       whileTap={{ scale: 0.93 }}
       style={{
-        width:        cellPx,
-        height:       cellPx,
-        overflow:     "hidden",
-        position:     "relative",
+        width: cellPx,
+        height: cellPx,
+        overflow: "hidden",
+        position: "relative",
         borderRadius: Math.round(cellPx * 0.14),
         border,
-        boxShadow:    shadow,
-        cursor:       "pointer",
-        background:   animalColor + "18",
-        zIndex:       isSelected ? 8 : 1,
-        flexShrink:   0,
+        boxShadow: isSelected ? `0 0 0 3px ${C.yellow}` : `0 3px 12px rgba(0,0,0,0.1)`,
+        cursor: "pointer",
+        background: "#eee",
       }}
     >
-      {/* The big illustration, shifted to show only this slice */}
       <div style={{
-        position:   "absolute",
-        left:       offX,
-        top:        offY,
-        width:      svgSize,
-        height:     svgSize,
+        position: "absolute",
+        width: GRID_PX,
+        height: GRID_PX,
+        left: -(srcCol * cellPx),
+        top: -(srcRow * cellPx),
+        backgroundImage: `url(${imageUrl})`,
+        backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
         pointerEvents: "none",
-      }}>
-        <Render size={svgSize} color={animalColor} />
-      </div>
-      {/* Subtle tile-number hint */}
-      <div style={{
-        position:  "absolute", bottom:3, right:3,
-        width:15, height:15, borderRadius:"50%",
-        background:"rgba(0,0,0,0.28)", display:"flex",
-        alignItems:"center", justifyContent:"center",
-        fontSize:8, color:"white", fontFamily:"system-ui",
-        pointerEvents:"none",
-      }}>{tile+1}</div>
+      }} />
     </motion.div>
   );
 }
@@ -328,6 +283,7 @@ export default function AnimalPuzzle() {
                   key={idx}
                   tile={tile}
                   gridSize={gridSize}
+                  animalName={animal.name}
                   Render={Render}
                   animalColor={color}
                   isSelected={selected===idx}
