@@ -279,58 +279,29 @@ export default function MyLibrary({ onCreateStory, onReadStory }) {
   const [shown,       setShown]       = useState(PAGE_SIZE);
 
 const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      // 1. CARGAR LOS 20 CUENTOS DE CLAUDE (Desde tu server.js)
-      const serverRes = await fetch("https://kiddsy-vercel.onrender.com/api/stories");
-      const staticStories = serverRes.ok ? await serverRes.json() : [];
+  setLoading(true);
+  try {
+    // Pedimos a Supabase: "Tráeme mis cuentos O los que no tienen dueño (Claude)"
+    const { data, error } = await supabase
+      .from('stories')
+      .select('*')
+      // Esta es la clave: filtramos por el usuario actual o por nulo (públicos)
+      .or(`user_id.eq.${user?.id},user_id.is.null`) 
+      .order('created_at', { ascending: false });
 
-      // 2. CARGAR CUENTOS DE SUPABASE (Solo si el usuario inició sesión)
-      let supabaseStories = [];
-      if (user) {
-        try {
-          supabaseStories = await fetchMyStories(user.id);
-        } catch (e) {
-          console.error("Supabase error:", e);
-        }
-      }
-
-      // 3. CARGAR CUENTOS DE INVITADO (LocalStorage)
-      const guestStories = lsGet("kiddsy_guestStories", []);
-
-      // 4. UNIR TODO EN UNA SOLA LISTA
-      // Usamos un Map para evitar cuentos duplicados por ID
-      const allStories = [...staticStories, ...supabaseStories, ...guestStories];
-      
-      // Eliminar duplicados si los hubiera y guardar en el estado
-      const uniqueStories = Array.from(new Map(allStories.map(s => [s.id, s])).values());
-      setStories(uniqueStories);
-
-    } catch(e) { 
-      setError("Error al cargar la biblioteca: " + e.message); 
-    } finally { 
-      setLoading(false); 
-    }
-  }, [user]);
+    if (error) throw error;
+    setStories(data);
+  } catch (e) {
+    setError(e.message);
+  } finally {
+    setLoading(false);
+  }
+}, [user]);
 
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async id => {
-    // Si el ID empieza por 'story-', es de los 20 de Claude (no se borran del server)
-    if (String(id).startsWith('story-')) {
-      alert("This is a starter story and cannot be deleted.");
-      return;
-    }
-
-    // Borrar de Supabase si es necesario
-    if (user) {
-      await deleteStory(id);
-    }
-    
-    // Borrar del LocalStorage y actualizar pantalla
-    const updatedLocal = lsGet("kiddsy_guestStories", []).filter(s => s.id !== id);
-    lsSet("kiddsy_guestStories", updatedLocal);
+    await deleteStory(id);
     setStories(prev => prev.filter(s => s.id !== id));
   };
 
