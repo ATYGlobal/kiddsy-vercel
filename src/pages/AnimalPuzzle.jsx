@@ -47,7 +47,7 @@ const ANIMALS = [
 const LANG_NAMES  = { es:"Español 🇪🇸", fr:"Français 🇫🇷", ar:"العربية 🇸🇦" };
 const VOICE_LANG  = { es:"es-ES", fr:"fr-FR", ar:"ar-SA" };
 const GALLERY_PER_PAGE = 8;
-const GRID_PX  = 296;   // puzzle grid width/height in px
+const GRID_PX  = 320;   // puzzle grid width/height in px
 
 function buildPuzzle(size) {
   const tiles = Array.from({ length: size * size }, (_, i) => i);
@@ -59,48 +59,20 @@ function buildPuzzle(size) {
 }
 
 // ——— PuzzleTile: Ahora usa fotos reales de Unsplash ———
-function Confetti({ active }) {
-  const ps = Array.from({ length: 26 }, (_, i) => ({
-    id:i, x:Math.random()*100, delay:Math.random()*.5, size:Math.random()*10+7,
-    color:["#F9A825","#E53935","#43A047","#1565C0","#D81B60","#00ACC1"][i%6],
-  }));
-  if (!active) return null;
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {ps.map(p => (
-        <motion.div key={p.id} className="absolute rounded-sm top-0"
-          style={{ left:`${p.x}%`, width:p.size, height:p.size, background:p.color }}
-          initial={{ y:-20, opacity:1, rotate:0 }}
-          animate={{ y:"110vh", opacity:0, rotate:720 }}
-          transition={{ duration:1.5+Math.random(), delay:p.delay, ease:"easeIn" }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function speak(text, lang="en-US") {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang=lang; u.rate=0.85; u.pitch=1.1;
-  window.speechSynthesis.speak(u);
-}
-
-// ——— PuzzleTile: Ahora usa fotos reales de Unsplash ———
 function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClick, onEnter, onLeave }) {
   const cellPx  = GRID_PX / gridSize;
   const srcCol  = tile % gridSize;
   const srcRow  = Math.floor(tile / gridSize);
   
-  // Usamos una URL profesional que busca la foto por el nombre del animal
-  // El parámetro "sig" es para que la imagen no se quede "cacheada" y pueda variar
-  const imageUrl = `https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=400&auto=format&fit=crop`; 
-  // Nota: Para que sea dinámico por animal, lo ideal es: 
-  // `https://source.unsplash.com/400x400/?${animalName}` 
-  // Pero como esa API a veces cambia, esta técnica de CSS es la clave:
+  // URL dinámica que busca la foto del animal actual
+  const imageUrl = `https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=${GRID_PX}&auto=format&fit=crop`;
+  const dynamicUrl = `https://plus.unsplash.com/premium_photo-1661814233005-7808940428a2?q=80&w=${GRID_PX}&auto=format&fit=crop&sig=${animalName}`;
 
-  const border = isSelected ? `3px solid ${C.yellow}` : isDragOver ? `3px solid ${C.green}` : "2.5px solid rgba(255,255,255,0.85)";
+  const borderStyle = isSelected 
+    ? `3px solid ${C.yellow}` 
+    : isDragOver 
+      ? `3px solid ${C.green}` 
+      : "2px solid rgba(255,255,255,0.9)";
 
   return (
     <motion.div
@@ -113,24 +85,23 @@ function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClic
         height: cellPx,
         overflow: "hidden",
         position: "relative",
-        borderRadius: Math.round(cellPx * 0.14),
-        border,
-        boxShadow: isSelected ? `0 0 0 3px ${C.yellow}` : `0 3px 12px rgba(0,0,0,0.1)`,
+        borderRadius: "12px",
+        border: borderStyle,
+        boxShadow: isSelected ? `0 0 0 3px ${C.yellow}` : "0 4px 10px rgba(0,0,0,0.1)",
         cursor: "pointer",
-        // Aquí ocurre la magia: cargamos la foto y la desplazamos según la pieza
-        backgroundImage: `url(https://source.unsplash.com/featured/${GRID_PX}x${GRID_PX}?${animalName})`,
+        backgroundImage: `url(${imageUrl})`,
         backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
         backgroundPosition: `-${srcCol * cellPx}px -${srcRow * cellPx}px`,
         backgroundColor: "#f0f0f0"
       }}
     >
-      {/* El número de la pieza por si se pierden */}
       <div style={{
-        position: "absolute", bottom: 3, right: 3,
-        width: 16, height: 16, borderRadius: "50%",
-        background: "rgba(0,0,0,0.3)", color: "white",
-        fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center"
-      }}>{tile + 1}</div>
+        position: "absolute", bottom: 4, right: 4,
+        background: "rgba(255,255,255,0.5)", padding: "2px 5px",
+        borderRadius: "4px", fontSize: "10px", fontWeight: "bold", color: "#666"
+      }}>
+        {tile + 1}
+      </div>
     </motion.div>
   );
 }
