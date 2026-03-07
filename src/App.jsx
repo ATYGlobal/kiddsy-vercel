@@ -380,23 +380,26 @@ function StoryReader({ story, lang, onBack }) {
                     </div>
                   </div>
                   {page && (
-                    <>
-                      <p className="font-body text-xl md:text-2xl text-slate-800 leading-relaxed flex-1 mb-8" style={{fontStyle:"italic"}}>
-                        {page.text}
-                      </p>
-                      <div className="border-t-2 pt-6 space-y-4" style={{borderColor:accent.primary+"25"}}>
-                        {page.translations && Object.entries(page.translations).map(([code,txt])=>(
-                          <div key={code} dir={code==="ar"?"rtl":"ltr"}
-                            className="flex items-start gap-3 p-3 rounded-2xl"
-                            style={{background:accent.soft}}
-                          >
-                            <span className="text-lg flex-shrink-0">{LANG_FLAGS[code]??""}</span>
-                            <p className="font-body text-base leading-relaxed" style={{color:accent.text}}>{txt}</p>
-                          </div>
-                        ))}
+                  <>
+                    {/* Texto Principal (Inglés) */}
+                    <p className="font-body text-xl md:text-2xl text-slate-800 leading-relaxed flex-1 mb-8" style={{fontStyle:"italic"}}>
+                      {page.en}
+                    </p>
+
+                    {/* Traducción al idioma seleccionado (Español, Francés o Árabe) */}
+                    <div className="border-t-2 pt-6 space-y-4" style={{borderColor:accent.primary+"25"}}>
+                      <div dir={lang === "ar" ? "rtl" : "ltr"}
+                        className="flex items-start gap-3 p-3 rounded-2xl"
+                        style={{background: accent.soft}}
+                      >
+                        <span className="text-lg flex-shrink-0">{LANG_FLAGS[lang] ?? "🌐"}</span>
+                        <p className="font-body text-base leading-relaxed" style={{color: accent.text}}>
+                          {page[lang] || "Translation not available"}
+                        </p>
                       </div>
-                    </>
-                  )}
+                    </div>
+                  </>
+                )}
                 </div>
               </div>
             </div>
