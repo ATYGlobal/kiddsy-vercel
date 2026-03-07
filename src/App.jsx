@@ -461,39 +461,47 @@ function StoryGenerator({ onGenerated }) {
   ];
 
   const handleGenerate = async () => {
-    if (!childName.trim()||!theme) return;
-    setLoading(true); setError(""); setSaved(false);
-    try {
-      // Definimos la URL de la API dinámicamente
-        const API_URL = window.location.hostname === 'localhost' 
-          ? 'http://localhost:10000' 
-          : 'https://kiddsy-vercel.onrender.com'; // <--- AQUÍ VA TU URL DE RENDER
+  if (!childName.trim() || !theme) return;
+  setLoading(true); 
+  setError(""); 
+  setSaved(false);
 
-        // Y luego usas esa variable en el fetch
-        const response = await fetch(`${API_URL}/api/generate-story`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ childName, theme, language }),
-        });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error||"Generation failed");
+  try {
+    // 1. URL Dinámica
+    const API_URL = window.location.hostname === 'localhost' 
+      ? 'http://localhost:10000' 
+      : 'https://kiddsy-vercel.onrender.com';
 
-      // ── Guest mode: save to localStorage ──
-      const existing = lsGet(LS_STORIES, []);
-      const updated  = [data, ...existing].slice(0,20); // max 20 stored
-      lsSet(LS_STORIES, updated);
+    // 2. FETCH (Corregido 'language' por 'lang')
+    const response = await fetch(`${API_URL}/api/generate-story`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        childName, 
+        theme, 
+        language: lang // <--- Aquí usamos 'lang' que es tu variable de estado
+      }),
+    });
 
-      // ── If auth re-enabled, also save to Supabase: ──
-      // if (isAuthenticated && user) {
-      //   try { await saveStory(user.id, data); setSaved(true); } catch {}
-      // }
+    // 3. Lectura de datos (Corregido 'res' por 'response')
+    const data = await response.json(); 
+    
+    if (!response.ok) throw new Error(data.error || "Generation failed");
 
-      onGenerated(data, lang);
-    } catch(e) {
-      setError(e.message||"Something went wrong!"); setLoading(false);
-    }
-  };
+    // ── Guest mode: save to localStorage ──
+    const existing = lsGet(LS_STORIES, []);
+    const updated  = [data, ...existing].slice(0, 20); 
+    lsSet(LS_STORIES, updated);
 
+    // Si todo sale bien, enviamos el cuento al lector
+    onGenerated(data, lang);
+
+  } catch(e) {
+    console.error("Error en la generación:", e);
+    setError(e.message || "Something went wrong!"); 
+    setLoading(false);
+  }
+};
   const themeColorMap = {
     "going to school":"from-blue-400 to-cyan-300","making new friends":"from-green-400 to-emerald-300",
     "shopping":"from-orange-400 to-amber-300","taking the bus":"from-yellow-400 to-amber-300",
