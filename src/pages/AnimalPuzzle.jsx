@@ -8,6 +8,8 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, ChevronLeft, ChevronRight, Volume2, Puzzle } from "lucide-react";
 import { getAnimalConfig, StickerBadge } from "../components/KiddsyIcons.jsx";
+
+
 // --- Componente Confetti (Añádelo para evitar el ReferenceError) ---
 function Confetti({ active }) {
   const particles = Array.from({ length: 25 }, (_, i) => ({
@@ -411,7 +413,7 @@ export default function AnimalPuzzle() {
             {/* Fun fact */}
             <div className="rounded-3xl p-5 border-2 border-white shadow-sm" style={{ background:C.yellowSoft }}>
               <div className="flex items-center gap-2 mb-2">
-                <StickerBadge icon={require("lucide-react").Sparkles || (() => null)} color={C.yellow} size={28} noHover/>
+                <StickerBadge icon={import("lucide-react").Sparkles || (() => null)} color={C.yellow} size={28} noHover/>
                 <span className="font-display text-sm" style={{ color:C.yellow }}>Fun fact!</span>
               </div>
               <p className="font-body text-slate-600 text-sm leading-relaxed">{animal.fact}</p>
