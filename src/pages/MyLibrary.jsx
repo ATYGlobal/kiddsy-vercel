@@ -283,7 +283,7 @@ const load = useCallback(async () => {
     setError("");
     try {
       // 1. CARGAR LOS 20 CUENTOS DE CLAUDE (Desde tu server.js)
-      const serverRes = await fetch("https://TU-URL-DE-RENDER.com/api/stories");
+      const serverRes = await fetch("https://kiddsy-vercel.onrender.com/api/stories");
       const staticStories = serverRes.ok ? await serverRes.json() : [];
 
       // 2. CARGAR CUENTOS DE SUPABASE (Solo si el usuario inició sesión)
