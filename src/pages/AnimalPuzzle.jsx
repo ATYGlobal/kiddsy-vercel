@@ -8,6 +8,39 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, ChevronLeft, ChevronRight, Volume2, Puzzle } from "lucide-react";
 import { getAnimalConfig, StickerBadge } from "../components/KiddsyIcons.jsx";
+// --- Componente Confetti (Añádelo para evitar el ReferenceError) ---
+function Confetti({ active }) {
+  const particles = Array.from({ length: 25 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    delay: Math.random() * 0.5,
+    size: Math.random() * 8 + 6,
+    color: ["#F9A825", "#E53935", "#43A047", "#1565C0", "#D81B60", "#00ACC1"][i % 6],
+  }));
+
+  if (!active) return null;
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 999, overflow: 'hidden' }}>
+      {particles.map(p => (
+        <motion.div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            left: `${p.x}%`,
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            borderRadius: '2px',
+          }}
+          initial={{ y: -20, opacity: 1, rotate: 0 }}
+          animate={{ y: "110vh", opacity: 0, rotate: 720 }}
+          transition={{ duration: 2, delay: p.delay, ease: "easeIn" }}
+        />
+      ))}
+    </div>
+  );
+}
 
 const C = {
   blue:"#1565C0", blueSoft:"#E3F2FD", red:"#E53935",
@@ -73,40 +106,6 @@ function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClic
     : isDragOver 
       ? `3px solid ${C.green}` 
       : "2px solid rgba(255,255,255,0.9)";
-
- // --- Componente Confetti (Añádelo para evitar el ReferenceError) ---
-function Confetti({ active }) {
-  const particles = Array.from({ length: 25 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    delay: Math.random() * 0.5,
-    size: Math.random() * 8 + 6,
-    color: ["#F9A825", "#E53935", "#43A047", "#1565C0", "#D81B60", "#00ACC1"][i % 6],
-  }));
-
-  if (!active) return null;
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 999, overflow: 'hidden' }}>
-      {particles.map(p => (
-        <motion.div
-          key={p.id}
-          style={{
-            position: 'absolute',
-            left: `${p.x}%`,
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-            borderRadius: '2px',
-          }}
-          initial={{ y: -20, opacity: 1, rotate: 0 }}
-          animate={{ y: "110vh", opacity: 0, rotate: 720 }}
-          transition={{ duration: 2, delay: p.delay, ease: "easeIn" }}
-        />
-      ))}
-    </div>
-  );
-}
 
   return (
     <motion.div
