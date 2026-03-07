@@ -467,7 +467,7 @@ function StoryGenerator({ onGenerated }) {
       // Definimos la URL de la API dinámicamente
         const API_URL = window.location.hostname === 'localhost' 
           ? 'http://localhost:10000' 
-          : 'https://tu-app-en-render.onrender.com'; // <--- AQUÍ VA TU URL DE RENDER
+          : 'https://kiddsy-vercel.onrender.com'; // <--- AQUÍ VA TU URL DE RENDER
 
         // Y luego usas esa variable en el fetch
         const response = await fetch(`${API_URL}/api/generate-story`, {
