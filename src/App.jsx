@@ -64,6 +64,15 @@ const C = {
   orange:    "#E65100",
 };
 
+const getGuestId = () => {
+  let gid = localStorage.getItem('kiddsy_guest_id');
+  if (!gid) {
+    gid = crypto.randomUUID(); // Genera un ID único para este navegador
+    localStorage.setItem('kiddsy_guest_id', gid);
+  }
+  return gid;
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── 16 IDIOMAS ───────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
@@ -332,7 +341,6 @@ function Navbar({ view, onNav, lang, onLangChange }) {
           flex:           1,
           justifyContent: "center",
           flexWrap:       "nowrap",
-          overflow:       "hidden",
         }}
           className="desktop-nav"
         >
