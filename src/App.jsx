@@ -408,7 +408,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
           flex:           1,
           justifyContent: "center",
           flexWrap:       "nowrap",
-          overflow:       "hidden",
+          overflow:       "visible",
           minWidth:       0,
         }}
           className="desktop-nav"
