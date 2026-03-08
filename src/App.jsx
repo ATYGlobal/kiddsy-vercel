@@ -1,16 +1,18 @@
 /**
  * src/App.jsx — Kiddsy
  * ─────────────────────────────────────────────────────────────────────────
- * CAMBIOS EN ESTA VERSIÓN:
+ * VERSIÓN ACTUAL — TODO INTEGRADO:
  *  • 16 idiomas: ES, FR, AR, DE, IT, PT, RU, ZH, JA, KO, BN, HI, NL, PL, NO, SV
- *  • LanguagePicker reemplazado por Dropdown elegante con banderas
- *  • Navbar rediseñado: funcional en desktop Y móvil
+ *  • LanguagePicker Dropdown con banderas (desktop + mobile + formulario)
+ *  • Navbar responsive: desktop inline + More dropdown + hamburger móvil
  *  • SVG dangerouslySetInnerHTML intacto
  *  • KiddsyTitle preservado
  *  • API_URL dinámico preservado
- *  • Supabase: saveStory / fetchGuestStories con Guest ID
- *  • SW update toast: aviso cuando hay nueva versión disponible
- *  • Trustpilot link en menú "More"
+ *  • Guest ID: getGuestId() → UUID estable en localStorage (nunca undefined)
+ *  • Supabase: saveStory / fetchUserStories — prioriza user.id real, cae a guestId
+ *    Para activar Supabase: descomenta las 3 líneas marcadas con "▶ ACTIVAR"
+ *  • SW update toast: aparece automáticamente cuando Vercel despliega nueva versión
+ *  • Trustpilot link en menú "More" y mobile
  *  • Guest mode banner en LibraryView
  * ─────────────────────────────────────────────────────────────────────────
  */
@@ -23,6 +25,8 @@ import {
   Users, Menu, X, Library, ChevronDown,
   Search, Cat, Globe, Star, RefreshCw,
 } from "lucide-react";
+// ▶ ACTIVAR Supabase — paso 1/3: descomenta esta línea + instala el paquete
+// import { createClient } from "@supabase/supabase-js";
 
 // ── Auth — stub para modo invitado ─────────────────────────────────────────
 // Si quieres reactivar login, reemplaza este stub con:
@@ -78,55 +82,63 @@ const getGuestId = () => {
 };
 
 // ─── Supabase client (lazy init — no falla si no está configurado) ─────────
-// Para activar: npm install @supabase/supabase-js y añade las vars en .env
-// VITE_SUPABASE_URL=https://xxxx.supabase.co
-// VITE_SUPABASE_ANON_KEY=your-anon-key
+// ▶ ACTIVAR Supabase — paso 2/3: añade estas variables en tu .env
+//   VITE_SUPABASE_URL=https://xxxx.supabase.co
+//   VITE_SUPABASE_ANON_KEY=eyJhbGci...
+// ▶ ACTIVAR Supabase — paso 3/3: descomenta el bloque marcado dentro de getSupabase()
 let _supabase = null;
 function getSupabase() {
   if (_supabase) return _supabase;
   try {
-    const url  = import.meta.env.VITE_SUPABASE_URL;
-    const key  = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
     if (!url || !key) return null;
-    // Dynamic import evita error si el paquete no está instalado
-    // Si usas Supabase, importa createClient en la cabecera y descomenta:
-    // const { createClient } = await import("@supabase/supabase-js");
+    // ── Descomenta las 2 líneas siguientes cuando hayas completado los 3 pasos ──
     // _supabase = createClient(url, key);
-    return null; // placeholder hasta que actives Supabase
+    // return _supabase;
+    return null; // ← elimina esta línea al activar
   } catch { return null; }
 }
 
 /**
- * Guarda un cuento en Supabase (usuario real o guest).
- * Fallback: solo localStorage si Supabase no está configurado.
+ * saveStory — Guarda en Supabase (si activo) + siempre en localStorage.
+ * @param {object} storyData  El cuento generado por Gemini
+ * @param {string} userId     user.id real si está logueado, o getGuestId() si es invitado
  */
 async function saveStory(storyData, userId) {
+  // userId nunca debe ser undefined — getGuestId() lo garantiza
+  if (!userId) {
+    console.warn("[Kiddsy] saveStory: userId vacío, usando guestId de fallback");
+    userId = getGuestId();
+  }
   const sb = getSupabase();
   if (sb) {
     const { error } = await sb.from("stories").insert([{
       ...storyData,
-      user_id: userId,
+      user_id: userId, // UUID del usuario real o del navegador invitado
     }]);
     if (error) console.error("[Kiddsy] Supabase save error:", error.message);
   }
-  // Siempre guardamos en localStorage como backup local
+  // localStorage: backup local siempre activo (funciona offline y sin Supabase)
   const existing = lsGet(LS_STORIES, []);
   lsSet(LS_STORIES, [storyData, ...existing].slice(0, 20));
 }
 
 /**
- * Lee los cuentos del usuario (Supabase si disponible, si no localStorage).
+ * fetchUserStories — Lee de Supabase filtrado por userId, o de localStorage.
+ * @param {string} userId  user.id real o getGuestId()
  */
 async function fetchUserStories(userId) {
+  if (!userId) return lsGet(LS_STORIES, []);
   const sb = getSupabase();
   if (sb) {
     const { data, error } = await sb
       .from("stories")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", userId) // solo los cuentos de este usuario / este dispositivo
       .order("created_at", { ascending: false });
-    if (!error && data) return data;
-    console.error("[Kiddsy] Supabase fetch error:", error?.message);
+    if (!error && data?.length) return data;
+    if (error) console.error("[Kiddsy] Supabase fetch error:", error.message);
   }
   return lsGet(LS_STORIES, []);
 }
@@ -996,7 +1008,7 @@ function StoryReader({ story, lang, onBack }) {
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── STORY GENERATOR ──────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-function StoryGenerator({ onGenerated, lang, onLangChange }) {
+function StoryGenerator({ onGenerated, lang, onLangChange, user }) {
   const [childName, setChildName] = useState(()=>lsGet(LS_NAME,""));
   const [theme,     setTheme]     = useState("");
   const [customTheme, setCustomTheme] = useState("");
@@ -1034,8 +1046,9 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Generation failed");
 
-      // Save with Supabase (or localStorage fallback) using guest/user ID
-      const userId = getGuestId();
+      // Guardar con ID real si está logueado, o con el UUID estable del navegador
+      // Nunca será "undefined" — getGuestId() lo garantiza con crypto.randomUUID()
+      const userId = user?.id || getGuestId();
       await saveStory(data, userId);
 
       onGenerated(data, lang);
@@ -1387,7 +1400,7 @@ export default function App() {
                     <ArrowLeft size={18}/> Back to Library
                   </button>
                 </div>
-                <StoryGenerator onGenerated={handleGenerated} lang={lang} onLangChange={setLang}/>
+                <StoryGenerator onGenerated={handleGenerated} lang={lang} onLangChange={setLang} user={user}/>
               </motion.div>
             ) : view==="reader" && activeStory ? (
               <motion.div key="reader" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
