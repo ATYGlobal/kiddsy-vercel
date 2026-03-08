@@ -8,6 +8,10 @@
  *  • SVG dangerouslySetInnerHTML intacto
  *  • KiddsyTitle preservado
  *  • API_URL dinámico preservado
+ *  • Supabase: saveStory / fetchGuestStories con Guest ID
+ *  • SW update toast: aviso cuando hay nueva versión disponible
+ *  • Trustpilot link en menú "More"
+ *  • Guest mode banner en LibraryView
  * ─────────────────────────────────────────────────────────────────────────
  */
 import KiddsyTitle from './components/KiddsyTitle';
@@ -17,7 +21,7 @@ import {
   BookOpen, Sparkles, ChevronLeft, ChevronRight, ArrowLeft,
   Wand2, Puzzle, Music, HelpCircle, Heart,
   Users, Menu, X, Library, ChevronDown,
-  Search, Cat, Globe,
+  Search, Cat, Globe, Star, RefreshCw,
 } from "lucide-react";
 
 // ── Auth — stub para modo invitado ─────────────────────────────────────────
@@ -73,9 +77,59 @@ const getGuestId = () => {
   return gid;
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ─── 16 IDIOMAS ───────────────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
+// ─── Supabase client (lazy init — no falla si no está configurado) ─────────
+// Para activar: npm install @supabase/supabase-js y añade las vars en .env
+// VITE_SUPABASE_URL=https://xxxx.supabase.co
+// VITE_SUPABASE_ANON_KEY=your-anon-key
+let _supabase = null;
+function getSupabase() {
+  if (_supabase) return _supabase;
+  try {
+    const url  = import.meta.env.VITE_SUPABASE_URL;
+    const key  = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!url || !key) return null;
+    // Dynamic import evita error si el paquete no está instalado
+    // Si usas Supabase, importa createClient en la cabecera y descomenta:
+    // const { createClient } = await import("@supabase/supabase-js");
+    // _supabase = createClient(url, key);
+    return null; // placeholder hasta que actives Supabase
+  } catch { return null; }
+}
+
+/**
+ * Guarda un cuento en Supabase (usuario real o guest).
+ * Fallback: solo localStorage si Supabase no está configurado.
+ */
+async function saveStory(storyData, userId) {
+  const sb = getSupabase();
+  if (sb) {
+    const { error } = await sb.from("stories").insert([{
+      ...storyData,
+      user_id: userId,
+    }]);
+    if (error) console.error("[Kiddsy] Supabase save error:", error.message);
+  }
+  // Siempre guardamos en localStorage como backup local
+  const existing = lsGet(LS_STORIES, []);
+  lsSet(LS_STORIES, [storyData, ...existing].slice(0, 20));
+}
+
+/**
+ * Lee los cuentos del usuario (Supabase si disponible, si no localStorage).
+ */
+async function fetchUserStories(userId) {
+  const sb = getSupabase();
+  if (sb) {
+    const { data, error } = await sb
+      .from("stories")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (!error && data) return data;
+    console.error("[Kiddsy] Supabase fetch error:", error?.message);
+  }
+  return lsGet(LS_STORIES, []);
+}
 const LANGUAGES = [
   { code:"es", name:"Español",            flag:"🇪🇸", dir:"ltr" },
   { code:"fr", name:"Français",           flag:"🇫🇷", dir:"ltr" },
@@ -117,7 +171,7 @@ function getStoryAccent(colorClass = "") {
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── LANGUAGE DROPDOWN ────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-function LanguagePicker({ value, onChange }) {
+function LanguagePicker({ value, onChange, fullWidth = false }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const selected = getLang(value);
@@ -151,7 +205,8 @@ function LanguagePicker({ value, onChange }) {
           fontSize:       14,
           color:          C.blue,
           whiteSpace:     "nowrap",
-          minWidth:       140,
+          minWidth:       fullWidth ? "100%" : 140,
+          width:          fullWidth ? "100%" : "auto",
           justifyContent: "space-between",
         }}
       >
@@ -180,9 +235,9 @@ function LanguagePicker({ value, onChange }) {
             style={{
               position:       "absolute",
               top:            "calc(100% + 8px)",
-              left:           "50%",
-              transform:      "translateX(-50%)",
-              width:          220,
+              left:           fullWidth ? 0 : "50%",
+              transform:      fullWidth ? "none" : "translateX(-50%)",
+              width:          fullWidth ? "100%" : 220,
               background:     "white",
               borderRadius:   20,
               border:         "2.5px solid rgba(21,101,192,0.12)",
@@ -337,10 +392,12 @@ function Navbar({ view, onNav, lang, onLangChange }) {
         <nav style={{
           display:        "flex",
           alignItems:     "center",
-          gap:            4,
+          gap:            2,
           flex:           1,
           justifyContent: "center",
           flexWrap:       "nowrap",
+          overflow:       "hidden",
+          minWidth:       0,
         }}
           className="desktop-nav"
         >
@@ -356,15 +413,15 @@ function Navbar({ view, onNav, lang, onLangChange }) {
                 style={{
                   display:        "flex",
                   alignItems:     "center",
-                  gap:            5,
-                  padding:        "7px 13px",
+                  gap:            4,
+                  padding:        "7px 10px",
                   borderRadius:   999,
                   border:         "none",
                   background:     isActive ? item.color : "transparent",
                   color:          isActive ? "white" : "#64748B",
                   fontFamily:     "var(--font-display,'Nunito',sans-serif)",
                   fontWeight:     700,
-                  fontSize:       13,
+                  fontSize:       12,
                   cursor:         "pointer",
                   transition:     "background 0.18s, color 0.18s",
                   whiteSpace:     "nowrap",
@@ -457,6 +514,32 @@ function Navbar({ view, onNav, lang, onLangChange }) {
                       </button>
                     );
                   })}
+                  {/* ── Trustpilot ── */}
+                  <a
+                    href="https://www.trustpilot.com/evaluate/kiddsy.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMoreOpen(false)}
+                    style={{
+                      display:        "flex",
+                      alignItems:     "center",
+                      gap:            8,
+                      width:          "100%",
+                      padding:        "10px 14px",
+                      borderTop:      "1px solid #F1F5F9",
+                      background:     "transparent",
+                      color:          "#00B67A",
+                      fontFamily:     "var(--font-display,'Nunito',sans-serif)",
+                      fontWeight:     700,
+                      fontSize:       13,
+                      cursor:         "pointer",
+                      textDecoration: "none",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background="#F0FDF4"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background="transparent"; }}
+                  >
+                    <Star size={14} fill="#00B67A" color="#00B67A"/> Rate us on Trustpilot ⭐
+                  </a>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -547,6 +630,30 @@ function Navbar({ view, onNav, lang, onLangChange }) {
                   </motion.button>
                 );
               })}
+              {/* ── Trustpilot mobile ── */}
+              <a
+                href="https://www.trustpilot.com/evaluate/kiddsy.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  display:        "flex",
+                  alignItems:     "center",
+                  gap:            8,
+                  padding:        "12px 14px",
+                  borderRadius:   16,
+                  border:         "2px solid #D1FAE5",
+                  background:     "#F0FDF4",
+                  color:          "#00B67A",
+                  fontFamily:     "var(--font-display,'Nunito',sans-serif)",
+                  fontWeight:     700,
+                  fontSize:       13,
+                  cursor:         "pointer",
+                  textDecoration: "none",
+                }}
+              >
+                <Star size={15} fill="#00B67A" color="#00B67A"/> Trustpilot ⭐
+              </a>
             </div>
           </motion.div>
         )}
@@ -559,7 +666,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
         .mobile-menu-btn { display: none !important; }
         .sm-show { display: inline !important; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 860px) {
           .desktop-nav  { display: none !important; }
           .desktop-lang { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
@@ -595,8 +702,91 @@ function StarField() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ─── GENERATING LOADER ────────────────────────────────────────────────────
+// ─── SW UPDATE TOAST ──────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
+function SwUpdateToast() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShow(true);
+    window.addEventListener("kiddsy-sw-update", handler);
+    return () => window.removeEventListener("kiddsy-sw-update", handler);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ y: 80, opacity: 0 }}
+        animate={{ y: 0,  opacity: 1 }}
+        exit={{    y: 80, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+        style={{
+          position:     "fixed",
+          bottom:       24,
+          left:         "50%",
+          transform:    "translateX(-50%)",
+          zIndex:       9999,
+          background:   "white",
+          borderRadius: 20,
+          boxShadow:    "0 8px 32px rgba(21,101,192,0.22), 0 2px 8px rgba(0,0,0,0.08)",
+          border:       `2.5px solid ${C.blue}`,
+          padding:      "14px 20px",
+          display:      "flex",
+          alignItems:   "center",
+          gap:          12,
+          maxWidth:     "calc(100vw - 32px)",
+          width:        360,
+        }}
+      >
+        <span style={{ fontSize: 26 }}>✨</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontFamily: "var(--font-display,'Nunito',sans-serif)",
+            fontWeight: 700, fontSize: 14, color: C.blue, margin: 0,
+          }}>New magic available!</p>
+          <p style={{
+            fontFamily: "var(--font-body,'Nunito',sans-serif)",
+            fontSize: 12, color: "#64748B", margin: "2px 0 0",
+          }}>A fresh version of Kiddsy is ready.</p>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          onClick={() => window.location.reload()}
+          style={{
+            display:      "flex",
+            alignItems:   "center",
+            gap:          6,
+            padding:      "8px 14px",
+            borderRadius: 999,
+            border:       "none",
+            background:   `linear-gradient(135deg, ${C.blue}, #42A5F5)`,
+            color:        "white",
+            fontFamily:   "var(--font-display,'Nunito',sans-serif)",
+            fontWeight:   700,
+            fontSize:     13,
+            cursor:       "pointer",
+            whiteSpace:   "nowrap",
+            flexShrink:   0,
+          }}
+        >
+          <RefreshCw size={13}/> Update
+        </motion.button>
+        <button
+          onClick={() => setShow(false)}
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            color: "#94A3B8", padding: 4, flexShrink: 0,
+            display: "flex", alignItems: "center",
+          }}
+        ><X size={16}/></button>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+
 function GeneratingLoader({ childName, theme, storyColor }) {
   const accent = getStoryAccent(storyColor);
   const emojis = ["✨","📖","🌟","🪄","💫","🌈","⭐","🎨"];
@@ -844,8 +1034,9 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Generation failed");
 
-      const existing = lsGet(LS_STORIES, []);
-      lsSet(LS_STORIES, [data, ...existing].slice(0, 20));
+      // Save with Supabase (or localStorage fallback) using guest/user ID
+      const userId = getGuestId();
+      await saveStory(data, userId);
 
       onGenerated(data, lang);
     } catch(e) {
@@ -925,7 +1116,9 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
           {/* Language picker (full width in form) */}
           <div>
             <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
-            <LanguagePicker value={lang} onChange={onLangChange}/>
+            <div style={{ width:"100%" }}>
+              <LanguagePicker value={lang} onChange={onLangChange} fullWidth/>
+            </div>
           </div>
 
           {error && (
@@ -960,13 +1153,46 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── LIBRARY VIEW ─────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-function LibraryView({ stories, onSelectStory, onGenerate }) {
+function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}}>
       <div className="text-center mb-10">
         <h2 className="font-display text-4xl md:text-5xl mb-3" style={{color:C.blue}}>Story Library 📚</h2>
         <p className="font-body text-slate-500 text-lg">Pick a story or create your own! ✨</p>
       </div>
+
+      {/* ── Guest mode notice ── */}
+      {isGuest && (
+        <motion.div
+          initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }}
+          style={{
+            display:      "flex",
+            alignItems:   "center",
+            gap:          12,
+            padding:      "14px 18px",
+            marginBottom: 20,
+            borderRadius: 16,
+            background:   "linear-gradient(135deg, #FFF8E1, #FFF3E0)",
+            border:       "2px solid #FFE082",
+            boxShadow:    "0 2px 12px rgba(249,168,37,0.12)",
+          }}
+        >
+          <span style={{ fontSize: 24, flexShrink: 0 }}>👤</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{
+              fontFamily: "var(--font-display,'Nunito',sans-serif)",
+              fontWeight: 700, fontSize: 13, color: C.orange, margin: 0,
+            }}>Using Guest Mode</p>
+            <p style={{
+              fontFamily: "var(--font-body,'Nunito',sans-serif)",
+              fontSize: 12, color: "#92400E", margin: "2px 0 0", lineHeight: 1.4,
+            }}>
+              Stories are saved on this device only. Create an account to sync across devices! 🌍
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} onClick={onGenerate}
         className="w-full mb-8 py-5 rounded-4xl text-white font-display text-xl shadow-xl border-4 border-white flex items-center justify-center gap-3"
         style={{background:`linear-gradient(135deg,${C.yellow},#FF8F00)`,boxShadow:"0 12px 36px rgba(249,168,37,0.35)"}}
@@ -1062,10 +1288,14 @@ function Collaborate() {
 // ─── APP PRINCIPAL ────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 export default function App() {
+  const { user } = useAuth();
   const [view,        setView]        = useState("hero");
   const [lang,        setLang]        = useState(()=>lsGet(LS_LANG,"es"));
   const [stories,     setStories]     = useState([]);
   const [activeStory, setActiveStory] = useState(null);
+
+  // Is the current session a guest (no logged-in user)?
+  const isGuest = !user;
 
   // Persist language choice
   useEffect(()=>{ lsSet(LS_LANG, lang); },[lang]);
@@ -1080,6 +1310,20 @@ export default function App() {
       .then(data=>setStories(data))
       .catch(err=>console.error("Story fetch error:", err));
   },[]);
+
+  // Load user's generated stories from Supabase / localStorage
+  useEffect(()=>{
+    const userId = user?.id || getGuestId();
+    fetchUserStories(userId).then(userStories => {
+      if (userStories.length > 0) {
+        setStories(prev => {
+          // Merge: user stories first, then static, dedup by id
+          const ids = new Set(userStories.map(s=>s.id));
+          return [...userStories, ...prev.filter(s=>!ids.has(s.id))];
+        });
+      }
+    });
+  },[user]);
 
   const handleSelectStory = story => {
     setActiveStory(story); setView("reader");
@@ -1116,6 +1360,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen relative" style={{background:"#FFFDE7"}}>
+      <SwUpdateToast/>
       <StarField/>
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{background:`${C.blue}07`}}/>
@@ -1133,7 +1378,7 @@ export default function App() {
               </motion.div>
             ) : view==="library" ? (
               <motion.div key="library" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={()=>setView("generate")}/>
+                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={()=>setView("generate")} isGuest={isGuest}/>
               </motion.div>
             ) : view==="generate" ? (
               <motion.div key="generate" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
