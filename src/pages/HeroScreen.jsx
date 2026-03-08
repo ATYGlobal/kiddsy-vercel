@@ -373,9 +373,9 @@ function AnimatedSun({ x, y }) {
 // Feature badges (below hero CTA)
 // ──────────────────────────────────────────────────────────────────────────
 const BADGES = [
-  { icon: BookOpen, label: "25 Stories",   color: "#1565C0", bg: "#DBEAFE" },
+  { icon: BookOpen, label: "Unlimited Stories",   color: "#1565C0", bg: "#DBEAFE" },
   { icon: Puzzle,   label: "Fun Games",    color: "#D81B60", bg: "#FCE7F3" },
-  { icon: Star,     label: "4 Languages",  color: "#F9A825", bg: "#FFFDE7" },
+  { icon: Star,     label: "16 Languages",  color: "#F9A825", bg: "#FFFDE7" },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -549,7 +549,7 @@ export default function HeroScreen({ onPlay }) {
             marginBottom: 32,
             lineHeight:  1.6,
           }}>
-            Stories, games &amp; word puzzles in English, Spanish, French &amp; Arabic 🌍
+            Magical bilingual stories and games in 16 global languages
           </p>
         </motion.div>
 
