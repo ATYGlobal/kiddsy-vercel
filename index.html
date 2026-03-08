@@ -1,21 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Kiddsy — Magical bilingual storybooks for families learning English together" />
-    <title>Kiddsy ✨</title>
+
+    <!-- ══════════════════════════════════════════════════════════
+         PWA — MANIFEST
+    ══════════════════════════════════════════════════════════ -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ══════════════════════════════════════════════════════════
+         PWA — ANDROID / CHROME: theme color for the browser chrome
+    ══════════════════════════════════════════════════════════ -->
+    <meta name="theme-color" content="#1565C0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- ══════════════════════════════════════════════════════════
+         PWA — APPLE / IOS
+         iOS no lee el manifest.json — necesita estas meta tags propias
+    ══════════════════════════════════════════════════════════ -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Kiddsy" />
+
+    <!-- Apple Touch Icons (iOS los usa para el icono en la pantalla de inicio) -->
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+
+    <!-- Apple Splash Screens (opcional pero mejora la experiencia) -->
+    <!-- Genera estas imágenes en https://progressier.com/pwa-icons-and-ios-splash-screen-generator -->
+    <!-- <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="..."/> -->
+
+    <!-- ══════════════════════════════════════════════════════════
+         FAVICON
+    ══════════════════════════════════════════════════════════ -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png" />
+    <!-- Fallback -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- ══════════════════════════════════════════════════════════
+         FONTS
+    ══════════════════════════════════════════════════════════ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@300;400;500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Open Graph / Social sharing -->
+    <meta property="og:title"       content="Kiddsy ✨" />
+    <meta property="og:description" content="Magical bilingual storybooks for families learning English together" />
+    <meta property="og:image"       content="/icons/icon-512x512.png" />
+    <meta property="og:type"        content="website" />
+
+    <title>Kiddsy ✨</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SERVICE WORKER REGISTRATION
+         Colócalo DESPUÉS del script de React para no bloquear
+    ══════════════════════════════════════════════════════════ -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/sw.js', { scope: '/' })
+            .then(reg => {
+              console.log('[Kiddsy] Service Worker registrado:', reg.scope);
+
+              // Notificar al usuario si hay una nueva versión disponible
+              reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('[Kiddsy] Nueva versión disponible — recarga para actualizar');
+                    // Opcional: mostrar un toast en la app notificando la actualización
+                    window.dispatchEvent(new CustomEvent('kiddsy-sw-update'));
+                  }
+                });
+              });
+            })
+            .catch(err => console.warn('[Kiddsy] SW registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>

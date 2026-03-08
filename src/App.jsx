@@ -1,42 +1,34 @@
 /**
- * src/App.jsx — Kiddsy  (Hero + Guest Mode update)
+ * src/App.jsx — Kiddsy
  * ─────────────────────────────────────────────────────────────────────────
  * CAMBIOS EN ESTA VERSIÓN:
- *  • HeroScreen como pantalla inicial — acceso libre, sin login
- *  • Modo Invitado: childName y cuentos generados en localStorage
- *  • Auth/Supabase siguen en el proyecto pero son opcionales (ver comentarios)
- *  • StoreCoverCard usa StoryCoverIcon del nuevo sistema de iconos
+ *  • 16 idiomas: ES, FR, AR, DE, IT, PT, RU, ZH, JA, KO, BN, HI, NL, PL, NO, SV
+ *  • LanguagePicker reemplazado por Dropdown elegante con banderas
+ *  • Navbar rediseñado: funcional en desktop Y móvil
+ *  • SVG dangerouslySetInnerHTML intacto
+ *  • KiddsyTitle preservado
+ *  • API_URL dinámico preservado
  * ─────────────────────────────────────────────────────────────────────────
  */
 import KiddsyTitle from './components/KiddsyTitle';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Sparkles, ChevronLeft, ChevronRight, ArrowLeft,
-  Wand2, Star, Puzzle, Music, HelpCircle, Heart,
-  Users, Menu, X, LogIn, LogOut, Library, Save,
-  CheckCircle, ChevronDown, Search, Cat, Rocket,
+  Wand2, Puzzle, Music, HelpCircle, Heart,
+  Users, Menu, X, Library, ChevronDown,
+  Search, Cat, Globe,
 } from "lucide-react";
 
-// ── Auth / Supabase — opcional. Descomenta si quieres reactivar el login ──
-// import { useAuth }   from "./context/AuthContext.jsx";
-// import { saveStory } from "./lib/supabase.js";
-
-// ── Stub de useAuth para modo invitado ─────────────────────────────────────
+// ── Auth — stub para modo invitado ─────────────────────────────────────────
+// Si quieres reactivar login, reemplaza este stub con:
+// import { useAuth } from "./context/AuthContext.jsx";
 function useAuth() {
-  return {
-    user:            null,
-    firstName:       "Explorer",
-    avatarUrl:       null,
-    isAuthenticated: false,
-    loading:         false,
-    logout:          () => {},
-  };
+  return { user: null, isAuthenticated: false, loading: false, logout: () => {} };
 }
 
 // ── Páginas ────────────────────────────────────────────────────────────────
-import HeroScreen from './pages/HeroScreen';
-// import Auth      from "./pages/Auth.jsx";   // reactivar si quieres login
+import HeroScreen   from './pages/HeroScreen';
 import MyLibrary    from "./pages/MyLibrary.jsx";
 import Legal        from "./pages/Legal.jsx";
 import Donation     from "./pages/Donation.jsx";
@@ -44,13 +36,12 @@ import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
 import AnimalPuzzle from "./pages/AnimalPuzzle.jsx";
-
-// ── Icon system ─────────────────────────────────────────────────────────────
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
-// ─── LocalStorage helpers ─────────────────────────────────────────────────
-const LS_NAME   = "kiddsy_childName";
-const LS_STORIES= "kiddsy_guestStories";
+// ─── LocalStorage helpers ──────────────────────────────────────────────────
+const LS_NAME    = "kiddsy_childName";
+const LS_STORIES = "kiddsy_guestStories";
+const LS_LANG    = "kiddsy_lang";
 
 function lsGet(key, fallback = null) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -73,6 +64,33 @@ const C = {
   orange:    "#E65100",
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── 16 IDIOMAS ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+const LANGUAGES = [
+  { code:"es", name:"Español",            flag:"🇪🇸", dir:"ltr" },
+  { code:"fr", name:"Français",           flag:"🇫🇷", dir:"ltr" },
+  { code:"ar", name:"العربية",            flag:"🇸🇦", dir:"rtl" },
+  { code:"de", name:"Deutsch",            flag:"🇩🇪", dir:"ltr" },
+  { code:"it", name:"Italiano",           flag:"🇮🇹", dir:"ltr" },
+  { code:"pt", name:"Português",          flag:"🇧🇷", dir:"ltr" },
+  { code:"ru", name:"Русский",            flag:"🇷🇺", dir:"ltr" },
+  { code:"zh", name:"中文(简体)",          flag:"🇨🇳", dir:"ltr" },
+  { code:"ja", name:"日本語",              flag:"🇯🇵", dir:"ltr" },
+  { code:"ko", name:"한국어",              flag:"🇰🇷", dir:"ltr" },
+  { code:"bn", name:"বাংলা",             flag:"🇧🇩", dir:"ltr" },
+  { code:"hi", name:"हिंदी",             flag:"🇮🇳", dir:"ltr" },
+  { code:"nl", name:"Nederlands",         flag:"🇳🇱", dir:"ltr" },
+  { code:"pl", name:"Polski",             flag:"🇵🇱", dir:"ltr" },
+  { code:"no", name:"Norsk",              flag:"🇳🇴", dir:"ltr" },
+  { code:"sv", name:"Svenska",            flag:"🇸🇪", dir:"ltr" },
+];
+
+function getLang(code) {
+  return LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
+}
+
+// ─── Accent colors from story gradient class ───────────────────────────────
 function getStoryAccent(colorClass = "") {
   if (colorClass.includes("yellow")||colorClass.includes("amber")||colorClass.includes("orange"))
     return { primary:"#F59E0B", soft:"#FFFBEB", text:"#92400E" };
@@ -87,7 +105,148 @@ function getStoryAccent(colorClass = "") {
   return { primary:"#1565C0", soft:"#EFF6FF", text:"#1E3A5F" };
 }
 
-// ─── Nav ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── LANGUAGE DROPDOWN ────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+function LanguagePicker({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = getLang(value);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position:"relative", zIndex:40 }}>
+      {/* Trigger button */}
+      <motion.button
+        whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:        "flex",
+          alignItems:     "center",
+          gap:            8,
+          padding:        "8px 14px 8px 12px",
+          borderRadius:   999,
+          border:         "2.5px solid white",
+          background:     "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(8px)",
+          boxShadow:      "0 4px 14px rgba(21,101,192,0.15)",
+          cursor:         "pointer",
+          fontFamily:     "var(--font-display,'Nunito',sans-serif)",
+          fontWeight:     700,
+          fontSize:       14,
+          color:          C.blue,
+          whiteSpace:     "nowrap",
+          minWidth:       140,
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <Globe size={15} style={{ flexShrink:0 }}/>
+          <span style={{ fontSize:18, lineHeight:1 }}>{selected.flag}</span>
+          <span>{selected.name}</span>
+        </span>
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration:0.2 }}
+          style={{ display:"flex" }}
+        >
+          <ChevronDown size={14}/>
+        </motion.span>
+      </motion.button>
+
+      {/* Dropdown panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity:0, y:-8, scale:0.97 }}
+            animate={{ opacity:1, y:0,  scale:1    }}
+            exit={{    opacity:0, y:-8, scale:0.97 }}
+            transition={{ duration:0.18, ease:"easeOut" }}
+            style={{
+              position:       "absolute",
+              top:            "calc(100% + 8px)",
+              left:           "50%",
+              transform:      "translateX(-50%)",
+              width:          220,
+              background:     "white",
+              borderRadius:   20,
+              border:         "2.5px solid rgba(21,101,192,0.12)",
+              boxShadow:      "0 16px 48px rgba(21,101,192,0.18), 0 4px 12px rgba(0,0,0,0.08)",
+              overflow:       "hidden",
+              maxHeight:      360,
+              overflowY:      "auto",
+              scrollbarWidth: "thin",
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding:        "10px 14px 8px",
+              borderBottom:   "1.5px solid #EFF6FF",
+              fontFamily:     "var(--font-display,'Nunito',sans-serif)",
+              fontWeight:     700,
+              fontSize:       11,
+              color:          C.blue,
+              letterSpacing:  "0.07em",
+              textTransform:  "uppercase",
+              display:        "flex",
+              alignItems:     "center",
+              gap:            6,
+            }}>
+              <Globe size={12}/> Translation language
+            </div>
+            {/* Options */}
+            {LANGUAGES.map(lang => {
+              const isActive = lang.code === value;
+              return (
+                <button
+                  key={lang.code}
+                  onClick={() => { onChange(lang.code); setOpen(false); }}
+                  style={{
+                    display:        "flex",
+                    alignItems:     "center",
+                    gap:            10,
+                    width:          "100%",
+                    padding:        "9px 14px",
+                    border:         "none",
+                    background:     isActive ? C.blueSoft : "transparent",
+                    cursor:         "pointer",
+                    fontFamily:     "var(--font-body,'Nunito',sans-serif)",
+                    fontWeight:     isActive ? 700 : 500,
+                    fontSize:       14,
+                    color:          isActive ? C.blue : "#374151",
+                    textAlign:      "left",
+                    transition:     "background 0.12s",
+                    borderLeft:     isActive ? `3px solid ${C.blue}` : "3px solid transparent",
+                  }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "#F0F9FF"; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <span style={{ fontSize:20, lineHeight:1, flexShrink:0 }}>{lang.flag}</span>
+                  <span style={{ flex:1 }}>{lang.name}</span>
+                  {isActive && (
+                    <span style={{
+                      width:7, height:7, borderRadius:"50%", background:C.blue, flexShrink:0,
+                    }}/>
+                  )}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── NAVBAR ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 const NAV_PRIMARY = [
   { id:"library",    label:"Stories",     icon:BookOpen, color:C.blue    },
   { id:"mylibrary",  label:"My Library",  icon:Library,  color:C.green   },
@@ -97,13 +256,317 @@ const NAV_PRIMARY = [
   { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
 ];
 const NAV_SECONDARY = [
-  { id:"legal",      label:"Help & FAQ",  icon:HelpCircle, color:C.magenta },
-  { id:"donate",     label:"Donate ☕",   icon:Heart,      color:C.yellow  },
-  { id:"collaborate",label:"Collaborate", icon:Users,      color:C.magenta },
+  { id:"legal",       label:"Help & FAQ",  icon:HelpCircle, color:C.magenta },
+  { id:"donate",      label:"Donate ☕",   icon:Heart,      color:C.yellow  },
+  { id:"collaborate", label:"Collaborate", icon:Users,      color:C.magenta },
 ];
 const ALL_NAV = [...NAV_PRIMARY, ...NAV_SECONDARY];
 
-// ─── Estrellas flotantes ───────────────────────────────────────────────────
+function Navbar({ view, onNav, lang, onLangChange }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef(null);
+
+  // Close "more" dropdown on outside click
+  useEffect(() => {
+    const h = e => { if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  return (
+    <header style={{
+      position:       "sticky",
+      top:            0,
+      zIndex:         50,
+      background:     "rgba(255,255,255,0.75)",
+      backdropFilter: "blur(16px)",
+      WebkitBackdropFilter: "blur(16px)",
+      borderBottom:   "2px solid rgba(255,255,255,0.9)",
+      boxShadow:      "0 2px 20px rgba(21,101,192,0.07)",
+    }}>
+      <div style={{
+        maxWidth:       1200,
+        margin:         "0 auto",
+        padding:        "0 20px",
+        height:         64,
+        display:        "flex",
+        alignItems:     "center",
+        gap:            12,
+        justifyContent: "space-between",
+      }}>
+
+        {/* ── Logo ── */}
+        <motion.button
+          onClick={() => onNav("hero")}
+          whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
+          style={{
+            display:    "flex",
+            alignItems: "center",
+            gap:        8,
+            background: "none",
+            border:     "none",
+            cursor:     "pointer",
+            flexShrink: 0,
+          }}
+        >
+          <img src="/kiddsy-logo.png" alt="Kiddsy"
+            style={{ width:38, height:38, objectFit:"contain" }}
+          />
+          <span style={{
+            fontFamily: "var(--font-display,'Nunito',sans-serif)",
+            fontWeight: 900,
+            fontSize:   20,
+            color:      C.blue,
+            display:    "none",
+          }}
+            className="sm-show"
+          >Kiddsy</span>
+        </motion.button>
+
+        {/* ── Desktop nav ── */}
+        <nav style={{
+          display:        "flex",
+          alignItems:     "center",
+          gap:            4,
+          flex:           1,
+          justifyContent: "center",
+          flexWrap:       "nowrap",
+          overflow:       "hidden",
+        }}
+          className="desktop-nav"
+        >
+          {NAV_PRIMARY.map(item => {
+            const Icon = item.icon;
+            const isActive = view === item.id;
+            return (
+              <motion.button
+                key={item.id}
+                onClick={() => onNav(item.id)}
+                whileHover={{ scale:1.06, y:-2 }}
+                whileTap={{ scale:0.95 }}
+                style={{
+                  display:        "flex",
+                  alignItems:     "center",
+                  gap:            5,
+                  padding:        "7px 13px",
+                  borderRadius:   999,
+                  border:         "none",
+                  background:     isActive ? item.color : "transparent",
+                  color:          isActive ? "white" : "#64748B",
+                  fontFamily:     "var(--font-display,'Nunito',sans-serif)",
+                  fontWeight:     700,
+                  fontSize:       13,
+                  cursor:         "pointer",
+                  transition:     "background 0.18s, color 0.18s",
+                  whiteSpace:     "nowrap",
+                  flexShrink:     0,
+                  boxShadow:      isActive ? `0 4px 14px ${item.color}40` : "none",
+                }}
+              >
+                <Icon size={14} strokeWidth={2.2}/>
+                {item.label}
+              </motion.button>
+            );
+          })}
+
+          {/* More dropdown for secondary items */}
+          <div ref={moreRef} style={{ position:"relative", flexShrink:0 }}>
+            <motion.button
+              onClick={() => setMoreOpen(o => !o)}
+              whileHover={{ scale:1.06, y:-2 }} whileTap={{ scale:0.95 }}
+              style={{
+                display:    "flex",
+                alignItems: "center",
+                gap:        5,
+                padding:    "7px 13px",
+                borderRadius: 999,
+                border:     "none",
+                background: NAV_SECONDARY.some(s=>s.id===view) ? C.magenta : "transparent",
+                color:      NAV_SECONDARY.some(s=>s.id===view) ? "white" : "#64748B",
+                fontFamily: "var(--font-display,'Nunito',sans-serif)",
+                fontWeight: 700,
+                fontSize:   13,
+                cursor:     "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              More
+              <motion.span
+                animate={{ rotate: moreOpen ? 180 : 0 }}
+                transition={{ duration:0.18 }}
+                style={{ display:"flex" }}
+              ><ChevronDown size={13}/></motion.span>
+            </motion.button>
+
+            <AnimatePresence>
+              {moreOpen && (
+                <motion.div
+                  initial={{ opacity:0, y:-6, scale:0.97 }}
+                  animate={{ opacity:1, y:0,  scale:1    }}
+                  exit={{    opacity:0, y:-6, scale:0.97 }}
+                  transition={{ duration:0.15 }}
+                  style={{
+                    position:   "absolute",
+                    top:        "calc(100% + 8px)",
+                    left:       "50%",
+                    transform:  "translateX(-50%)",
+                    width:      180,
+                    background: "white",
+                    borderRadius: 16,
+                    border:     "2px solid rgba(21,101,192,0.1)",
+                    boxShadow:  "0 16px 40px rgba(0,0,0,0.12)",
+                    overflow:   "hidden",
+                    zIndex:     60,
+                  }}
+                >
+                  {NAV_SECONDARY.map(item => {
+                    const Icon = item.icon;
+                    const isActive = view === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => { onNav(item.id); setMoreOpen(false); }}
+                        style={{
+                          display:    "flex",
+                          alignItems: "center",
+                          gap:        8,
+                          width:      "100%",
+                          padding:    "10px 14px",
+                          border:     "none",
+                          background: isActive ? item.color : "transparent",
+                          color:      isActive ? "white" : "#374151",
+                          fontFamily: "var(--font-display,'Nunito',sans-serif)",
+                          fontWeight: 600,
+                          fontSize:   13,
+                          cursor:     "pointer",
+                          textAlign:  "left",
+                        }}
+                        onMouseEnter={e => { if (!isActive) e.currentTarget.style.background="#F8FAFC"; }}
+                        onMouseLeave={e => { if (!isActive) e.currentTarget.style.background="transparent"; }}
+                      >
+                        <Icon size={14}/> {item.label}
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </nav>
+
+        {/* ── Right side: Language picker + hamburger ── */}
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+          {/* Language picker — visible always on desktop, hidden on mobile (shown inside mobile menu) */}
+          <div className="desktop-lang">
+            <LanguagePicker value={lang} onChange={onLangChange}/>
+          </div>
+
+          {/* Hamburger — mobile only */}
+          <motion.button
+            onClick={() => setMenuOpen(o => !o)}
+            whileTap={{ scale:0.9 }}
+            className="mobile-menu-btn"
+            style={{
+              width:        42,
+              height:       42,
+              borderRadius: 12,
+              border:       "2px solid rgba(21,101,192,0.12)",
+              background:   "white",
+              display:      "flex",
+              alignItems:   "center",
+              justifyContent:"center",
+              cursor:       "pointer",
+              color:        C.blue,
+              flexShrink:   0,
+            }}
+          >
+            {menuOpen ? <X size={20}/> : <Menu size={20}/>}
+          </motion.button>
+        </div>
+      </div>
+
+      {/* ── Mobile menu ── */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ height:0, opacity:0 }}
+            animate={{ height:"auto", opacity:1 }}
+            exit={{    height:0, opacity:0 }}
+            transition={{ duration:0.22, ease:"easeInOut" }}
+            style={{
+              overflow:   "hidden",
+              background: "rgba(255,255,255,0.97)",
+              borderTop:  "1.5px solid rgba(21,101,192,0.08)",
+            }}
+          >
+            {/* Language picker inside mobile menu */}
+            <div style={{ padding:"14px 16px 4px", display:"flex", justifyContent:"center" }}>
+              <LanguagePicker value={lang} onChange={v => { onLangChange(v); }}/>
+            </div>
+
+            <div style={{
+              padding:             "8px 16px 16px",
+              display:             "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap:                 8,
+            }}>
+              {ALL_NAV.map(item => {
+                const Icon = item.icon;
+                const isActive = view === item.id;
+                return (
+                  <motion.button
+                    key={item.id}
+                    onClick={() => { onNav(item.id); setMenuOpen(false); }}
+                    whileTap={{ scale:0.95 }}
+                    style={{
+                      display:      "flex",
+                      alignItems:   "center",
+                      gap:          8,
+                      padding:      "12px 14px",
+                      borderRadius: 16,
+                      border:       "2px solid transparent",
+                      background:   isActive ? item.color : "#F8FAFC",
+                      color:        isActive ? "white" : "#374151",
+                      fontFamily:   "var(--font-display,'Nunito',sans-serif)",
+                      fontWeight:   700,
+                      fontSize:     13,
+                      cursor:       "pointer",
+                      textAlign:    "left",
+                    }}
+                  >
+                    <Icon size={15}/> {item.label}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Responsive CSS injected inline ── */}
+      <style>{`
+        .desktop-nav   { display: flex !important; }
+        .desktop-lang  { display: block !important; }
+        .mobile-menu-btn { display: none !important; }
+        .sm-show { display: inline !important; }
+
+        @media (max-width: 900px) {
+          .desktop-nav  { display: none !important; }
+          .desktop-lang { display: none !important; }
+          .mobile-menu-btn { display: flex !important; }
+        }
+        @media (max-width: 480px) {
+          .sm-show { display: none !important; }
+        }
+      `}</style>
+    </header>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── BACKGROUND STARS ─────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 function StarField() {
   const stars = Array.from({length:12},(_,i)=>({
     id:i, x:Math.random()*100, y:Math.random()*100,
@@ -123,27 +586,9 @@ function StarField() {
   );
 }
 
-// ─── Loader ────────────────────────────────────────────────────────────────
-function KiddsyLoader({ message="Loading magic…" }) {
-  const LETTERS=["K","i","d","d","s","y"];
-  const COLORS=[C.blue,C.blue,C.red,C.yellow,C.green,C.blue];
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-5">
-      <div className="flex gap-1">
-        {LETTERS.map((l,i)=>(
-          <motion.span key={i} className="font-display text-5xl" style={{color:COLORS[i]}}
-            animate={{y:[0,-18,0]}} transition={{duration:0.7,delay:i*0.1,repeat:Infinity,ease:"easeInOut"}}
-          >{l}</motion.span>
-        ))}
-      </div>
-      <motion.p animate={{opacity:[0.5,1,0.5]}} transition={{duration:1.5,repeat:Infinity}}
-        className="font-body text-slate-500"
-      >{message}</motion.p>
-    </div>
-  );
-}
-
-// ─── Generating Loader ─────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── GENERATING LOADER ────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 function GeneratingLoader({ childName, theme, storyColor }) {
   const accent = getStoryAccent(storyColor);
   const emojis = ["✨","📖","🌟","🪄","💫","🌈","⭐","🎨"];
@@ -189,96 +634,9 @@ function GeneratingLoader({ childName, theme, storyColor }) {
   );
 }
 
-// ─── Language Picker ───────────────────────────────────────────────────────
-const LANG_LABELS = { es:"Español", fr:"Français", ar:"العربية" };
-const LANG_FLAGS  = { es:"🇪🇸", fr:"🇫🇷", ar:"🇸🇦" };
-
-function LanguagePicker({ value, onChange }) {
-  return (
-    <div className="flex items-center gap-1 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow-sm border border-white">
-      {Object.entries(LANG_LABELS).map(([code,label])=>(
-        <button key={code} onClick={()=>onChange(code)}
-          className="px-3 py-1.5 rounded-full font-display text-sm transition-all"
-          style={{background:value===code?C.blue:"transparent",color:value===code?"white":"#6B7280"}}
-        >{LANG_FLAGS[code]} {label}</button>
-      ))}
-    </div>
-  );
-}
-
-// ─── Navbar — Kiddsy logo → goes to hero ──────────────────────────────────
-function KiddsyNavLogo({ onClick }) {
-  return (
-    <motion.button onClick={onClick} whileHover={{scale:1.05}} whileTap={{scale:0.96}}
-      className="flex items-center gap-2.5 flex-shrink-0"
-    >
-      <img src="/kiddsy-logo.png" alt="Kiddsy" className="w-10 h-10 object-contain"/>
-      <span className="font-display text-xl hidden sm:inline" style={{color:C.blue}}>Kiddsy</span>
-    </motion.button>
-  );
-}
-
-function Navbar({ view, onNav }) {
-  const { isAuthenticated } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b-2 border-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <KiddsyNavLogo onClick={()=>onNav("hero")}/>
-
-        <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center flex-wrap">
-          {NAV_PRIMARY.map(item=>{
-            const Icon=item.icon; const isActive=view===item.id;
-            return (
-              <button key={item.id} onClick={()=>onNav(item.id)}
-                className="flex items-center gap-1 px-3 py-2 rounded-2xl font-display text-sm transition-all"
-                style={{background:isActive?item.color:"transparent",color:isActive?"white":"#6B7280"}}
-              ><Icon size={13}/> {item.label}</button>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Optional sign-in button — hidden by default in guest mode */}
-          {/* Uncomment to re-enable auth:
-          <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.96}}
-            onClick={()=>onNav("auth")}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-display text-sm text-white shadow-md"
-            style={{background:`linear-gradient(135deg,${C.blue},#42A5F5)`}}
-          ><LogIn size={15}/> Sign In</motion.button>
-          */}
-          <button onClick={()=>setMenuOpen(o=>!o)}
-            className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center bg-white/80 shadow-sm"
-            style={{color:C.blue}}
-          >{menuOpen?<X size={20}/>:<Menu size={20}/>}</button>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div initial={{height:0,opacity:0}} animate={{height:"auto",opacity:1}} exit={{height:0,opacity:0}}
-            className="lg:hidden border-t border-slate-100 bg-white/95 backdrop-blur-md overflow-hidden"
-          >
-            <div className="px-4 py-3 grid grid-cols-2 gap-2">
-              {ALL_NAV.map(item=>{
-                const Icon=item.icon; const isActive=view===item.id;
-                return (
-                  <button key={item.id} onClick={()=>{onNav(item.id);setMenuOpen(false);}}
-                    className="flex items-center gap-2 px-4 py-3 rounded-2xl font-display text-sm transition-all"
-                    style={{background:isActive?item.color:"#F8FAFC",color:isActive?"white":"#4B5563"}}
-                  ><Icon size={15}/> {item.label}</button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
-  );
-}
-
-// ─── Story Cover Card — with vector sticker icon ──────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── STORY COVER CARD ─────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 function StoryCoverCard({ story, onClick, index }) {
   return (
     <motion.button onClick={onClick}
@@ -294,7 +652,6 @@ function StoryCoverCard({ story, onClick, index }) {
         <div className="absolute inset-0 opacity-10"
           style={{backgroundImage:"repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%)",backgroundSize:"8px 8px"}}/>
         <div className="relative p-5 flex flex-col h-full min-h-[180px]">
-          {/* Vector sticker icon instead of emoji text */}
           <StoryCoverIcon emoji={story.emoji} size={56}/>
           <h3 className="font-display text-white text-lg leading-tight flex-1 drop-shadow mt-3">{story.title}</h3>
           <div className="flex items-center gap-1.5 text-white/75 font-body text-xs mt-2">
@@ -312,18 +669,21 @@ function StoryCoverCard({ story, onClick, index }) {
   );
 }
 
-// ─── Story Reader ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── STORY READER ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 function StoryReader({ story, lang, onBack }) {
-  const [pageIdx, setPageIdx]     = useState(0);
-  const [direction, setDirection] = useState(1);
-  const page  = story.pages[pageIdx];
-  const total = story.pages.length;
-  const accent = getStoryAccent(story.color);
+  const [pageIdx,    setPageIdx]    = useState(0);
+  const [direction,  setDirection]  = useState(1);
+  const page    = story.pages[pageIdx];
+  const total   = story.pages.length;
+  const accent  = getStoryAccent(story.color);
+  const langMeta = getLang(lang);
 
   useEffect(()=>{
     const onKey = e => {
-      if (e.key==="ArrowRight"&&pageIdx<total-1) { setDirection(1);  setPageIdx(p=>p+1); }
-      if (e.key==="ArrowLeft" &&pageIdx>0)       { setDirection(-1); setPageIdx(p=>p-1); }
+      if (e.key==="ArrowRight"&&pageIdx<total-1){ setDirection(1);  setPageIdx(p=>p+1); }
+      if (e.key==="ArrowLeft" &&pageIdx>0)      { setDirection(-1); setPageIdx(p=>p-1); }
     };
     window.addEventListener("keydown",onKey);
     return ()=>window.removeEventListener("keydown",onKey);
@@ -334,7 +694,6 @@ function StoryReader({ story, lang, onBack }) {
     center:  { x:"0%", opacity:1, rotateY:0, scale:1 },
     exit:   d=>({ x:d>0?"-60%":"60%", opacity:0, rotateY:d>0?-15:15, scale:0.92 }),
   };
-  const isArabic = lang==="ar";
 
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}} className="max-w-3xl mx-auto">
@@ -343,9 +702,9 @@ function StoryReader({ story, lang, onBack }) {
           className="flex items-center gap-2 px-4 py-2 rounded-2xl font-display text-sm bg-white/80 shadow-sm border border-white"
           style={{color:C.blue}}
         ><ArrowLeft size={18}/> Library</motion.button>
-        <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full px-4 py-2 shadow-sm border border-white">
-          <StoryCoverIcon emoji={story.emoji} size={32}/>
-          <span className="font-display text-sm" style={{color:C.blue}}>{story.title}</span>
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full px-4 py-2 shadow-sm border border-white overflow-hidden max-w-[200px]">
+          <StoryCoverIcon emoji={story.emoji} size={28}/>
+          <span className="font-display text-sm truncate" style={{color:C.blue}}>{story.title}</span>
         </div>
         <div className="font-display text-sm px-4 py-2 rounded-2xl bg-white/80 shadow-sm border border-white" style={{color:accent.text}}>
           {pageIdx+1} / {total}
@@ -361,51 +720,54 @@ function StoryReader({ story, lang, onBack }) {
             style={{transformStyle:"preserve-3d"}}
           >
             <div className={`bg-gradient-to-br ${story.color||"from-blue-400 to-cyan-300"} p-[5px] rounded-4xl`}
-              style={{boxShadow:`0 24px 60px ${accent.primary}40, 0 8px 20px rgba(0,0,0,0.15), -6px 0 0 ${accent.primary}30`}}
+              style={{boxShadow:`0 24px 60px ${accent.primary}40, 0 8px 20px rgba(0,0,0,0.15)`}}
             >
               <div className="relative bg-gradient-to-b from-amber-50 to-orange-50 rounded-4xl overflow-hidden min-h-[400px] md:min-h-[460px]">
                 <div className="absolute left-0 inset-y-0 w-6 opacity-10"
                   style={{background:`linear-gradient(90deg, ${accent.primary}60, transparent)`}}/>
-                {pageIdx===0&&(
-                  <div className="absolute top-0 left-0 right-0 h-2 rounded-t-4xl" style={{background:`linear-gradient(90deg,${accent.primary}40,transparent,${accent.primary}40)`}}/>
-                )}
                 <div className="p-8 md:p-10 flex flex-col h-full min-h-[400px]">
                   <div className="flex justify-between items-start mb-6">
                     <div className="font-display text-xs px-3 py-1 rounded-full" style={{background:accent.soft,color:accent.text}}>
                       Page {pageIdx+1}
                     </div>
-                    <div className="text-3xl opacity-40">
-                      {String.fromCharCode(9679).repeat(3).split("").map((_,i)=>(
-                        <span key={i} style={{opacity:i===pageIdx%3?1:0.25}}>·</span>
-                      ))}
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-display"
+                      style={{background:accent.soft,color:accent.text}}
+                    >
+                      <span>{langMeta.flag}</span> {langMeta.name}
                     </div>
                   </div>
                   {page && (
-                  <>
-                  {page.image_svg && (
-                   <div 
-                      className="w-full aspect-square max-h-48 mb-6 flex items-center justify-center bg-white/50 rounded-3xl p-4 shadow-inner"
-                      dangerouslySetInnerHTML={{ __html: page.image_svg }}
-                      />
-                    )}
-                    {/* Texto Principal (Inglés) */}
-                   <p className="text-2xl text-gray-800 leading-relaxed" style={{ fontFamily: '"Comic Neue", cursive' }}>
-                     {page.en}
-                    </p>
-                    {/* Traducción al idioma seleccionado (Español, Francés o Árabe) */}
-                    <div className="border-t-2 pt-6 space-y-4" style={{borderColor:accent.primary+"25"}}>
-                      <div dir={lang === "ar" ? "rtl" : "ltr"}
-                        className="flex items-start gap-3 p-3 rounded-2xl"
-                        style={{background: accent.soft}}
+                    <>
+                      {/* ── SVG illustration — dangerouslySetInnerHTML intact ── */}
+                      {page.image_svg && (
+                        <div
+                          className="w-full aspect-square max-h-48 mb-6 flex items-center justify-center bg-white/50 rounded-3xl p-4 shadow-inner"
+                          dangerouslySetInnerHTML={{ __html: page.image_svg }}
+                        />
+                      )}
+
+                      {/* ── English text ── */}
+                      <p className="text-2xl text-gray-800 leading-relaxed mb-6"
+                        style={{ fontFamily:'"Comic Neue", "Nunito", cursive' }}
                       >
-                        <span className="text-lg flex-shrink-0">{LANG_FLAGS[lang] ?? "🌐"}</span>
-                        <p className="font-body text-base leading-relaxed" style={{color: accent.text}}>
-                          {page[lang] || "Translation not available"}
-                        </p>
+                        {page.en}
+                      </p>
+
+                      {/* ── Translation in chosen language ── */}
+                      <div className="border-t-2 pt-5" style={{borderColor:`${accent.primary}25`}}>
+                        <div
+                          dir={langMeta.dir}
+                          className="flex items-start gap-3 p-4 rounded-2xl"
+                          style={{background:accent.soft}}
+                        >
+                          <span className="text-xl flex-shrink-0">{langMeta.flag}</span>
+                          <p className="font-body text-base leading-relaxed" style={{color:accent.text}}>
+                            {page[lang] || "Translation not available"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -433,23 +795,17 @@ function StoryReader({ story, lang, onBack }) {
   );
 }
 
-// ─── Story Generator — with localStorage save for guest ───────────────────
-function StoryGenerator({ onGenerated }) {
-  // Auth disabled — if you re-enable AuthContext, swap these two lines:
-  // const { user, isAuthenticated } = useAuth();
-  const isAuthenticated = false;
-  const user = null;
-
-  // Pre-fill childName from localStorage
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── STORY GENERATOR ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+function StoryGenerator({ onGenerated, lang, onLangChange }) {
   const [childName, setChildName] = useState(()=>lsGet(LS_NAME,""));
-  const [theme, setTheme]         = useState("");
-  const [lang, setLang]           = useState("es");
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
-  const [saved, setSaved]         = useState(false);
+  const [theme,     setTheme]     = useState("");
+  const [customTheme, setCustomTheme] = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState("");
   const [selectedThemeLabel, setSelectedThemeLabel] = useState("");
 
-  // Persist childName as user types
   useEffect(()=>{ lsSet(LS_NAME, childName); },[childName]);
 
   const THEMES = [
@@ -461,56 +817,49 @@ function StoryGenerator({ onGenerated }) {
     { label:"🎉 Birthday Party",   value:"celebrating a birthday" },
   ];
 
+  // Use custom theme if filled, otherwise preset
+  const activeTheme = customTheme.trim() || theme;
+
   const handleGenerate = async () => {
-  if (!childName.trim() || !theme) return;
-  setLoading(true); 
-  setError(""); 
-  setSaved(false);
+    if (!childName.trim() || !activeTheme) return;
+    setLoading(true); setError("");
+    try {
+      const API_URL = window.location.hostname === "localhost"
+        ? "http://localhost:10000"
+        : "https://kiddsy-vercel.onrender.com";
 
-  try {
-    // 1. URL Dinámica
-    const API_URL = window.location.hostname === 'localhost' 
-      ? 'http://localhost:10000' 
-      : 'https://kiddsy-vercel.onrender.com';
-
-    // 2. FETCH (Corregido 'language' por 'lang')
       const response = await fetch(`${API_URL}/api/generate-story`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-        childName, 
-        theme, 
-        language: lang // <--- Aquí usamos 'lang' que es tu variable de estado
-      }),
-    });
+        method:  "POST",
+        headers: { "Content-Type":"application/json" },
+        body:    JSON.stringify({ childName, theme: activeTheme, language: lang }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Generation failed");
 
-    // 3. Lectura de datos (Corregido 'res' por 'response')
-    const data = await response.json(); 
-    
-    if (!response.ok) throw new Error(data.error || "Generation failed");
+      const existing = lsGet(LS_STORIES, []);
+      lsSet(LS_STORIES, [data, ...existing].slice(0, 20));
 
-    // ── Guest mode: save to localStorage ──
-    const existing = lsGet(LS_STORIES, []);
-    const updated  = [data, ...existing].slice(0, 20); 
-    lsSet(LS_STORIES, updated);
-
-    // Si todo sale bien, enviamos el cuento al lector
-    onGenerated(data, lang);
-
-  } catch(e) {
-    console.error("Error en la generación:", e);
-    setError(e.message || "Something went wrong!"); 
-    setLoading(false);
-  }
-};
-  const themeColorMap = {
-    "going to school":"from-blue-400 to-cyan-300","making new friends":"from-green-400 to-emerald-300",
-    "shopping":"from-orange-400 to-amber-300","taking the bus":"from-yellow-400 to-amber-300",
-    "doctor":"from-red-400 to-rose-300","birthday":"from-pink-400 to-rose-300",
+      onGenerated(data, lang);
+    } catch(e) {
+      console.error("Generation error:", e);
+      setError(e.message || "Something went wrong!");
+      setLoading(false);
+    }
   };
-  const loaderColor = Object.entries(themeColorMap).find(([k])=>theme.includes(k))?.[1]||"from-blue-400 to-cyan-300";
 
-  if (loading) return <GeneratingLoader childName={childName} theme={selectedThemeLabel||theme} storyColor={loaderColor}/>;
+  const themeColorMap = {
+    "going to school":   "from-blue-400 to-cyan-300",
+    "making new friends":"from-green-400 to-emerald-300",
+    "shopping":          "from-orange-400 to-amber-300",
+    "taking the bus":    "from-yellow-400 to-amber-300",
+    "doctor":            "from-red-400 to-rose-300",
+    "birthday":          "from-pink-400 to-rose-300",
+  };
+  const loaderColor = Object.entries(themeColorMap).find(([k])=>activeTheme.includes(k))?.[1] || "from-blue-400 to-cyan-300";
+
+  if (loading) return <GeneratingLoader childName={childName} theme={selectedThemeLabel||activeTheme} storyColor={loaderColor}/>;
+
+  const canGenerate = childName.trim() && activeTheme;
 
   return (
     <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="max-w-xl mx-auto">
@@ -526,6 +875,7 @@ function StoryGenerator({ onGenerated }) {
         </div>
 
         <div className="space-y-5">
+          {/* Child name */}
           <div>
             <label className="block font-display text-slate-600 text-sm mb-2">✏️ Child's name</label>
             <input type="text" value={childName} onChange={e=>setChildName(e.target.value)}
@@ -533,81 +883,75 @@ function StoryGenerator({ onGenerated }) {
               className="w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 font-body text-lg focus:outline-none focus:border-blue-400 bg-amber-50 transition-colors placeholder-slate-300"
             />
           </div>
+
+          {/* Preset themes */}
           <div>
             <label className="block font-display text-slate-600 text-sm mb-2">🌟 Story theme</label>
             <div className="grid grid-cols-2 gap-2">
               {THEMES.map(t=>(
                 <button key={t.value}
-                  onClick={()=>{setTheme(t.value);setSelectedThemeLabel(t.label);}}
+                  onClick={()=>{ setTheme(t.value); setCustomTheme(""); setSelectedThemeLabel(t.label); }}
                   className="px-3 py-2.5 rounded-xl font-body text-sm text-left transition-all"
-                  style={{background:theme===t.value?C.blue:"#F8FAFC",color:theme===t.value?"white":"#4B5563",
-                    border:`2px solid ${theme===t.value?C.blue:"#E2E8F0"}`}}
+                  style={{
+                    background: theme===t.value && !customTheme ? C.blue : "#F8FAFC",
+                    color:      theme===t.value && !customTheme ? "white" : "#4B5563",
+                    border:     `2px solid ${theme===t.value && !customTheme ? C.blue : "#E2E8F0"}`,
+                  }}
                 >{t.label}</button>
               ))}
             </div>
           </div>
+
+          {/* Custom theme */}
           <div>
-            <div className="mt-4">
-              <input 
-                type="text"
-                placeholder="¿De qué quieres el cuento hoy?"
-                className="w-full p-4 rounded-2xl border-2 border-dashed border-blue-200 focus:border-blue-400 outline-none font-comic"
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-              />
-              <p className="text-xs text-gray-400 mt-2 px-2">
-                Example: “A trip to the moon” or “A talking dog”.
-              </p>
-            </div>
-            <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
-            <LanguagePicker value={lang} onChange={setLang}/>
+            <label className="block font-display text-slate-600 text-sm mb-2">✍️ Or write your own</label>
+            <input
+              type="text"
+              placeholder="e.g. A trip to the moon, a talking dog…"
+              className="w-full px-5 py-3.5 rounded-2xl border-2 border-dashed border-blue-200 focus:border-blue-400 focus:outline-none font-body text-base bg-blue-50/30 placeholder-slate-300"
+              value={customTheme}
+              onChange={e => { setCustomTheme(e.target.value); setTheme(""); }}
+            />
           </div>
+
+          {/* Language picker (full width in form) */}
+          <div>
+            <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
+            <LanguagePicker value={lang} onChange={onLangChange}/>
+          </div>
+
           {error && (
             <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}}
               className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2"
             ><span>⚠️</span><span>{error}</span></motion.div>
           )}
-            {/* --- BOTÓN GENERAR CUENTO --- */}
-            <div className="mt-8">
-              <motion.button 
-                whileHover={childName.trim() && theme ? { scale: 1.02 } : {}} 
-                whileTap={childName.trim() && theme ? { scale: 0.98 } : {}}
-                onClick={handleGenerate} 
-                disabled={!childName.trim() || !theme || loading}
-                className="w-full py-5 rounded-3xl font-display shadow-lg transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: childName.trim() && theme 
-                    ? `linear-gradient(135deg, ${C?.blue || '#1565C0'}, #42A5F5)` 
-                    : "#E5E7EB",
-                  color: childName.trim() && theme ? "white" : "#9CA3AF",
-                  cursor: childName.trim() && theme && !loading ? "pointer" : "not-allowed",
-                  boxShadow: childName.trim() && theme ? "0 8px 24px rgba(21,101,192,0.35)" : "none",
-                  opacity: loading ? 0.8 : 1
-                }}
-              >
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span className="font-comic text-lg italic text-white/90">Creating magic...</span>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-2xl">🪄</span>
-                    <KiddsyTitle className="text-2xl text-white">Generate Story</KiddsyTitle>
-                  </>
-                )}
-              </motion.button>
-            </div>
-          </div>
+
+          {/* Generate button — KiddsyTitle preserved */}
+          <motion.button
+            whileHover={canGenerate ? { scale:1.02 } : {}}
+            whileTap={canGenerate ? { scale:0.98 } : {}}
+            onClick={handleGenerate}
+            disabled={!canGenerate}
+            className="w-full py-5 rounded-3xl font-display shadow-lg transition-all flex items-center justify-center gap-2 mt-2"
+            style={{
+              background:  canGenerate ? `linear-gradient(135deg,${C.blue},#42A5F5)` : "#E5E7EB",
+              color:       canGenerate ? "white" : "#9CA3AF",
+              cursor:      canGenerate ? "pointer" : "not-allowed",
+              boxShadow:   canGenerate ? "0 8px 24px rgba(21,101,192,0.35)" : "none",
+            }}
+          >
+            <span className="text-2xl">🪄</span>
+            <KiddsyTitle className="text-xl text-white">Generate Story</KiddsyTitle>
+          </motion.button>
         </div>
-      </motion.div>
-    );
+      </div>
+    </motion.div>
+  );
 }
 
-// ─── Library View ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── LIBRARY VIEW ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 function LibraryView({ stories, onSelectStory, onGenerate }) {
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}}>
@@ -623,7 +967,7 @@ function LibraryView({ stories, onSelectStory, onGenerate }) {
         <div className="text-center py-16 text-slate-400 font-body">
           <motion.div animate={{y:[0,-8,0]}} transition={{duration:2,repeat:Infinity}} className="text-5xl mb-3">📡</motion.div>
           <p>Connecting to the story server…</p>
-          <p className="text-xs mt-1 opacity-60">Make sure <code>node api/server.js</code> is running on port 10000</p>
+          <p className="text-xs mt-1 opacity-60">Make sure the API server is running on port 10000</p>
         </div>
       ):(
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -636,7 +980,9 @@ function LibraryView({ stories, onSelectStory, onGenerate }) {
   );
 }
 
-// ─── Collaborate ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── COLLABORATE ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
 function Collaborate() {
   const [form,setForm]=useState({name:"",role:"educator",email:"",message:""});
   const [sent,setSent]=useState(false);
@@ -704,28 +1050,28 @@ function Collaborate() {
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // ─── APP PRINCIPAL ────────────────────────────────────────────────────────
-// ══════════════════════════════════════════════════════════════════════════
-const LANG_FLAGS_MAP = { es:"🇪🇸", fr:"🇫🇷", ar:"🇸🇦" };
-
+// ═══════════════════════════════════════════════════════════════════════════
 export default function App() {
-  // ── Start on "hero" — the playground welcome screen ──
   const [view,        setView]        = useState("hero");
-  const [lang,        setLang]        = useState("es");
+  const [lang,        setLang]        = useState(()=>lsGet(LS_LANG,"es"));
   const [stories,     setStories]     = useState([]);
   const [activeStory, setActiveStory] = useState(null);
 
-  // Load static stories from server
+  // Persist language choice
+  useEffect(()=>{ lsSet(LS_LANG, lang); },[lang]);
+
+  // Load static stories from API
   useEffect(()=>{
-    fetch("https://kiddsy-vercel.onrender.com/api/stories")
+    const API_URL = window.location.hostname === "localhost"
+      ? "http://localhost:10000"
+      : "https://kiddsy-vercel.onrender.com";
+    fetch(`${API_URL}/api/stories`)
       .then(r=>r.json())
       .then(data=>setStories(data))
-      .catch(err=>console.error("Error cargando biblioteca:", err));
+      .catch(err=>console.error("Story fetch error:", err));
   },[]);
-
-  // ── Guest-generated stories also appear at top of library ──
-  const allStories = stories;   // server stories are shown; guest stories added via handleGenerated
 
   const handleSelectStory = story => {
     setActiveStory(story); setView("reader");
@@ -740,16 +1086,13 @@ export default function App() {
   };
 
   const handleNav = id => {
-    // "My Library" in guest mode shows locally-stored stories
     setView(id); setActiveStory(null);
     window.scrollTo({top:0,behavior:"smooth"});
   };
 
-  // "hero" view: full-screen, no navbar
+  // Hero is full-screen — no navbar
   if (view === "hero") {
-    return (
-      <HeroScreen onPlay={() => { setView("library"); window.scrollTo({top:0}); }}/>
-    );
+    return <HeroScreen onPlay={() => { setView("library"); window.scrollTo({top:0}); }}/>;
   }
 
   const FULL_PAGES = {
@@ -760,11 +1103,7 @@ export default function App() {
     legal:       <Legal/>,
     donate:      <Donation/>,
     collaborate: <Collaborate/>,
-    // auth:     <Auth/>,  // re-enable if you want login
-    mylibrary:   <MyLibrary
-                   onCreateStory={()=>handleNav("generate")}
-                   onReadStory={handleSelectStory}
-                 />,
+    mylibrary:   <MyLibrary onCreateStory={()=>handleNav("generate")} onReadStory={handleSelectStory}/>,
   };
 
   return (
@@ -776,38 +1115,32 @@ export default function App() {
       </div>
 
       <div className="relative z-10">
-        <Navbar view={view} onNav={handleNav}/>
-
-        {["library","reader","generate"].includes(view)&&(
-          <div className="flex justify-center pt-5 px-4">
-            <LanguagePicker value={lang} onChange={setLang}/>
-          </div>
-        )}
+        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang}/>
 
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
-            {FULL_PAGES[view]?(
+            {FULL_PAGES[view] ? (
               <motion.div key={view} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="-mx-4">
                 {FULL_PAGES[view]}
               </motion.div>
-            ):view==="library"?(
+            ) : view==="library" ? (
               <motion.div key="library" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                <LibraryView stories={allStories} onSelectStory={handleSelectStory} onGenerate={()=>setView("generate")}/>
+                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={()=>setView("generate")}/>
               </motion.div>
-            ):view==="generate"?(
+            ) : view==="generate" ? (
               <motion.div key="generate" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
                 <div className="mb-6">
                   <button onClick={()=>setView("library")} className="flex items-center gap-2 font-display" style={{color:C.blue}}>
                     <ArrowLeft size={18}/> Back to Library
                   </button>
                 </div>
-                <StoryGenerator onGenerated={handleGenerated}/>
+                <StoryGenerator onGenerated={handleGenerated} lang={lang} onLangChange={setLang}/>
               </motion.div>
-            ):view==="reader"&&activeStory?(
+            ) : view==="reader" && activeStory ? (
               <motion.div key="reader" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
                 <StoryReader story={activeStory} lang={lang} onBack={()=>setView("library")}/>
               </motion.div>
-            ):null}
+            ) : null}
           </AnimatePresence>
         </main>
 
