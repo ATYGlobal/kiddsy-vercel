@@ -242,7 +242,7 @@ function LanguagePicker({ value, onChange, fullWidth = false }) {
               borderRadius:   20,
               border:         "2.5px solid rgba(21,101,192,0.12)",
               boxShadow:      "0 16px 48px rgba(21,101,192,0.18), 0 4px 12px rgba(0,0,0,0.08)",
-              overflow:       "hidden",
+              overflow:       "visible",
               maxHeight:      360,
               overflowY:      "auto",
               scrollbarWidth: "thin",
