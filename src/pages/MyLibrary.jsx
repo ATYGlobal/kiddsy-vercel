@@ -1,480 +1,377 @@
 /**
  * src/pages/MyLibrary.jsx — Kiddsy
  * ─────────────────────────────────────────────────────────────────────────
- * Personal story library with sticker-style vector covers.
- * Story emoji → Lucide icon rendered on a matching gradient cover.
- * Search, lazy-load (12 per page), sliding puzzle mini-game.
+ * ✅ Guest mode: usa localStorage (kiddsy_guest_id + kiddsy_guestStories)
+ * ✅ Sin dependencia de useAuth ni de supabase.js
+ * ✅ No genera UUIDs "undefined" — getGuestId() garantiza un ID válido
+ * ✅ Estilo Burbuja, lógica de puzzle intactos
+ * ─────────────────────────────────────────────────────────────────────────
  */
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Puzzle, Trash2, Plus, RefreshCw,
-  RotateCcw, Search, X, ChevronLeft, ChevronDown,
+  RotateCcw, ChevronLeft,
 } from "lucide-react";
-import { useAuth }                from "../context/AuthContext.jsx";
-import { fetchMyStories, deleteStory } from "../lib/supabase.js";
-import { StoryCoverIcon, getStoryIcon, StickerBadge } from "../components/KiddsyIcons.jsx";
-import { supabase } from "../lib/supabase.js";
 
 const C = {
-  blue:"#1565C0", blueSoft:"#E3F2FD",
-  red:"#E53935",
-  yellow:"#F9A825",
-  green:"#43A047",  greenSoft:"#E8F5E9",
-  magenta:"#D81B60",magentaSoft:"#FCE4EC",
+  blue:       "#1565C0",
+  blueSoft:   "#E3F2FD",
+  red:        "#E53935",
+  redSoft:    "#FFEBEE",
+  yellow:     "#F9A825",
+  green:      "#43A047",
+  greenSoft:  "#E8F5E9",
+  magenta:    "#D81B60",
+  magentaSoft:"#FCE4EC",
 };
-const SPRING = { type:"spring", stiffness:380, damping:16 };
-const PAGE_SIZE = 12;
 
-// ─── Confetti ──────────────────────────────────────────────────────────────
+// ── localStorage helpers ────────────────────────────────────────────────────
+const LS_STORIES = "kiddsy_guestStories";
+
+function lsGet(key, fallback = []) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch { return fallback; }
+}
+
+function lsSet(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
+/**
+ * getGuestId — devuelve (o crea) un UUID estable para este navegador.
+ * ⚠️ No modificar: App.jsx usa la misma clave "kiddsy_guest_id".
+ */
+function getGuestId() {
+  let gid = localStorage.getItem("kiddsy_guest_id");
+  if (!gid) {
+    gid = crypto.randomUUID();
+    localStorage.setItem("kiddsy_guest_id", gid);
+  }
+  return gid;
+}
+
+/**
+ * loadStories — lee los cuentos del usuario desde localStorage.
+ * Si en el futuro activas Supabase, solo hay que cambiar esta función.
+ */
+function loadStories() {
+  const userId = getGuestId();   // siempre un UUID válido, nunca "undefined"
+  const all    = lsGet(LS_STORIES, []);
+  // Filtramos por user_id para que cada navegador/dispositivo
+  // solo vea sus propias historias (preparado para multiusuario)
+  return all.filter((s) => !s.user_id || s.user_id === userId);
+}
+
+/**
+ * removeStory — elimina un cuento del localStorage por id.
+ */
+function removeStory(storyId) {
+  const all     = lsGet(LS_STORIES, []);
+  const updated = all.filter((s) => s.id !== storyId);
+  lsSet(LS_STORIES, updated);
+}
+
+// ── Confetti ─────────────────────────────────────────────────────────────────
 function Confetti({ active }) {
-  const ps = Array.from({ length:26 }, (_,i) => ({
-    id:i, x:Math.random()*100, delay:Math.random()*.5, size:Math.random()*10+7,
-    color:["#F9A825","#E53935","#43A047","#1565C0","#D81B60","#00ACC1"][i%6],
+  const pieces = Array.from({ length: 24 }, (_, i) => ({
+    id: i, x: Math.random() * 100,
+    color: [C.blue, C.red, C.yellow, C.green, C.magenta, "#00ACC1"][i % 6],
+    delay: Math.random() * 0.5, size: Math.random() * 10 + 7,
   }));
   if (!active) return null;
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {ps.map(p=>(
+      {pieces.map((p) => (
         <motion.div key={p.id} className="absolute rounded-sm top-0"
-          style={{ left:`${p.x}%`, width:p.size, height:p.size, background:p.color }}
-          initial={{ y:-20, opacity:1, rotate:0 }}
-          animate={{ y:"110vh", opacity:0, rotate:720 }}
-          transition={{ duration:1.6+Math.random(), delay:p.delay, ease:"easeIn" }}
+          style={{ left: `${p.x}%`, width: p.size, height: p.size, background: p.color }}
+          initial={{ y: -20, opacity: 1, rotate: 0 }}
+          animate={{ y: "110vh", opacity: 0, rotate: 720 }}
+          transition={{ duration: 1.6 + Math.random(), delay: p.delay, ease: "easeIn" }}
         />
       ))}
     </div>
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// STORY PUZZLE MINI-GAME
-// ══════════════════════════════════════════════════════════════════════════
+// ── StoryPuzzle ───────────────────────────────────────────────────────────────
 function StoryPuzzle({ story, onClose }) {
-  const G=3, TOT=G*G;
-  const GOAL=[...Array(TOT-1).keys(),null];
+  const GRID  = 3;
+  const TOTAL = GRID * GRID;
+  const SOLVED = [...Array(TOTAL - 1).keys(), null];
 
-  const shuffle = arr => {
-    const a=[...arr];
-    for (let i=a.length-1;i>0;i--) {
-      const j=Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
-    const ni=a.indexOf(null);
-    [a[ni],a[a.length-1]]=[a[a.length-1],a[ni]];
+    const ni = a.indexOf(null);
+    [a[ni], a[a.length - 1]] = [a[a.length - 1], a[ni]];
     return a;
-  };
+  }
 
-  const [tiles,    setTiles]    = useState(()=>shuffle(GOAL));
-  const [moves,    setMoves]    = useState(0);
-  const [won,      setWon]      = useState(false);
+  const [tiles, setTiles]     = useState(() => shuffle(SOLVED));
+  const [moves, setMoves]     = useState(0);
+  const [won, setWon]         = useState(false);
   const [confetti, setConfetti] = useState(false);
-  const [hoveredTile, setHoveredTile] = useState(null);
 
-  const { Icon, color } = getStoryIcon(story.emoji);
+  const hasRealImage = !!story.image_url;
+  const emojiGrid    = Array.from({ length: TOTAL - 1 }, (_, i) =>
+    story.pages?.[i % story.pages.length]?.emoji ?? story.emoji
+  );
 
-  // Build an array of distinct icon configs based on story colors
-  const tileIcons = useMemo(()=>{
-    const colors=["#F9A825","#1565C0","#43A047","#E53935","#D81B60","#00ACC1","#E64A19","#7B1FA2"];
-    return Array.from({length:TOT-1},(_,i)=>({ Icon, c: colors[i%colors.length] }));
-  },[story.emoji]);
-
-  const handleClick = idx => {
-    if (won) return;
-    const ei=tiles.indexOf(null);
-    const r=Math.floor(idx/G), c=idx%G, er=Math.floor(ei/G), ec=ei%G;
-    const adj=(r===er&&Math.abs(c-ec)===1)||(c===ec&&Math.abs(r-er)===1);
-    if (!adj) return;
-    const next=[...tiles];
-    [next[idx],next[ei]]=[next[ei],next[idx]];
-    setTiles(next); setMoves(m=>m+1);
-    if (next.every((t,i)=>t===GOAL[i])) {
+  const checkWin = (t) => {
+    if (t.every((tile, i) => tile === SOLVED[i])) {
       setWon(true); setConfetti(true);
-      setTimeout(()=>setConfetti(false),2500);
+      setTimeout(() => setConfetti(false), 2500);
     }
   };
 
-  const TILE_SZ = 82;
+  const handleClick = (idx) => {
+    if (won) return;
+    const emptyIdx = tiles.indexOf(null);
+    const r = Math.floor(idx / GRID), c = idx % GRID;
+    const er = Math.floor(emptyIdx / GRID), ec = emptyIdx % GRID;
+    if (!((r === er && Math.abs(c - ec) === 1) || (c === ec && Math.abs(r - er) === 1))) return;
+    const next = [...tiles];
+    [next[idx], next[emptyIdx]] = [next[emptyIdx], next[idx]];
+    setTiles(next); setMoves((m) => m + 1); checkWin(next);
+  };
+
+  const reset = () => { setTiles(shuffle(SOLVED)); setMoves(0); setWon(false); };
 
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background:"rgba(21,101,192,0.88)", backdropFilter:"blur(10px)" }}
-      initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+      style={{ background: "rgba(21,101,192,0.85)", backdropFilter: "blur(8px)" }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
     >
-      <Confetti active={confetti}/>
+      <Confetti active={confetti} />
       <motion.div
-        initial={{ scale:0.82, opacity:0, y:20 }}
-        animate={{ scale:1, opacity:1, y:0 }}
-        exit={{ scale:0.82, opacity:0 }}
-        transition={SPRING}
-        className="bg-white rounded-[2.5rem] shadow-2xl p-8 max-w-sm w-full border-4 border-white"
+        initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full border-4 border-white"
       >
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.90 }} onClick={onClose}
-            className="flex items-center gap-1.5 font-display text-sm" style={{ color:C.blue }}
-          ><ChevronLeft size={16}/> Back</motion.button>
-          <div className="flex flex-col items-center gap-1.5">
-            <div style={{
-              width:52, height:52, borderRadius:"50%",
-              background:`linear-gradient(135deg,${color}33,${color}55)`,
-              border:"3px solid white", boxShadow:`0 6px 20px ${color}40`,
-              display:"flex", alignItems:"center", justifyContent:"center",
-            }}>
-              <Icon size={26} color={color} strokeWidth={2.2}/>
-            </div>
-            <span className="font-display text-sm" style={{ color:C.blue }}>{story.title}</span>
+          <button onClick={onClose} className="flex items-center gap-1 font-display text-sm" style={{ color: C.blue }}>
+            <ChevronLeft size={16} /> Back
+          </button>
+          <div className="text-center">
+            <div className="text-2xl">{story.emoji}</div>
+            <div className="font-display text-sm" style={{ color: C.blue }}>{story.title}</div>
           </div>
-          <div className="font-display text-sm text-slate-400">{moves}m</div>
+          <div className="font-display text-sm text-slate-400">{moves} moves</div>
         </div>
 
         <AnimatePresence>
           {won && (
-            <motion.div initial={{ scale:0.8,opacity:0 }} animate={{ scale:1,opacity:1 }}
-              className="text-center mb-4 py-3 rounded-2xl font-display text-lg text-white"
-              style={{ background:`linear-gradient(135deg,${C.green},#2E7D32)` }}
-            >🏆 Solved in {moves} moves!</motion.div>
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="text-center mb-4 py-3 rounded-2xl font-display text-white"
+              style={{ background: `linear-gradient(135deg,${C.green},#2E7D32)` }}>
+              🏆 Puzzle solved in {moves} moves!
+            </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Puzzle grid */}
-        <div className="grid gap-2 p-2.5 rounded-3xl mb-5 border-4 border-white"
-          style={{
-            gridTemplateColumns:`repeat(${G},${TILE_SZ}px)`,
-            background: color+"18",
-            boxShadow:`0 8px 24px ${color}28`,
-          }}
-        >
-          {tiles.map((tile,idx)=>{
-            const isBlank = tile===null;
-            const conf    = isBlank ? null : tileIcons[tile];
-            const { I: TIcon, c: tc } = conf || {};
-            return (
-              <motion.button
-                key={idx}
-                onClick={()=>handleClick(idx)}
-                onHoverStart={()=>setHoveredTile(idx)}
-                onHoverEnd={()=>setHoveredTile(null)}
-                whileTap={!isBlank?{scale:0.91}:{}}
-                transition={SPRING}
-                style={{
-                  width:  TILE_SZ,
-                  height: TILE_SZ,
-                  borderRadius: 20,
-                  border:     isBlank ? `2px dashed ${color}30` : "3px solid white",
-                  background: isBlank ? "transparent" : (hoveredTile===idx ? tc+"28" : tc+"18"),
-                  boxShadow:  isBlank ? "none" : (hoveredTile===idx ? `0 6px 18px ${tc}45, inset 0 1px 0 rgba(255,255,255,0.5)` : `0 3px 12px ${tc}30`),
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  cursor: isBlank?"default":"pointer",
-                }}
-              >
-                {!isBlank && <TIcon size={38} color={tc} strokeWidth={2.1}/>}
-              </motion.button>
-            );
-          })}
+        <div className="mb-5">
+          {hasRealImage ? (
+            <div className="grid gap-1.5 rounded-3xl overflow-hidden"
+              style={{ gridTemplateColumns: `repeat(${GRID},1fr)`, background: C.blueSoft }}>
+              {tiles.map((tile, idx) => (
+                <motion.button key={idx} onClick={() => handleClick(idx)} whileTap={tile !== null ? { scale: 0.93 } : {}}
+                  className="aspect-square rounded-xl overflow-hidden border-2 transition-all"
+                  style={{ borderColor: tile === null ? "transparent" : C.blue, background: tile === null ? "transparent" : "white" }}>
+                  {tile !== null && (
+                    <div className="w-full h-full relative overflow-hidden">
+                      <img src={story.image_url} alt="" className="absolute"
+                        style={{ width: `${GRID * 100}%`, height: `${GRID * 100}%`,
+                          left: `-${(tile % GRID) * 100}%`, top: `-${Math.floor(tile / GRID) * 100}%`, objectFit: "cover" }} />
+                    </div>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-2 p-2 rounded-3xl"
+              style={{ gridTemplateColumns: `repeat(${GRID},1fr)`, background: C.blueSoft }}>
+              {tiles.map((tile, idx) => (
+                <motion.button key={idx} onClick={() => handleClick(idx)}
+                  whileHover={tile !== null ? { scale: 1.08 } : {}} whileTap={tile !== null ? { scale: 0.93 } : {}}
+                  className="aspect-square rounded-2xl flex items-center justify-center text-3xl border-2 transition-all"
+                  style={{ background: tile === null ? "transparent" : "white",
+                    borderColor: tile === null ? `${C.blue}30` : C.blue,
+                    boxShadow: tile !== null ? "0 3px 10px rgba(0,0,0,0.1)" : "none" }}>
+                  {tile !== null && emojiGrid[tile]}
+                </motion.button>
+              ))}
+            </div>
+          )}
         </div>
 
-        <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.95 }}
-          onClick={() => { setTiles(shuffle(GOAL)); setMoves(0); setWon(false); }}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-display text-white shadow-lg"
-          style={{ background:C.red, boxShadow:`0 6px 18px ${C.red}40` }}
-        ><RotateCcw size={16}/> Shuffle</motion.button>
+        <div className="text-center mb-4">
+          <p className="font-body text-xs text-slate-400 mb-1.5">Arrange in this order:</p>
+          <div className="flex gap-1 justify-center flex-wrap">
+            {emojiGrid.slice(0, TOTAL - 1).map((e, i) => <span key={i} className="text-sm">{e}</span>)}
+          </div>
+        </div>
+
+        <button onClick={reset}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-display text-white"
+          style={{ background: C.red }}>
+          <RotateCcw size={16} /> Shuffle again
+        </button>
       </motion.div>
     </motion.div>
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// STORY COVER CARD  — vector icon on gradient background
-// ══════════════════════════════════════════════════════════════════════════
+// ── StoryCard ─────────────────────────────────────────────────────────────────
 function StoryCard({ story, onRead, onPuzzle, onDelete, index }) {
   const [deleting, setDeleting] = useState(false);
-  const [hovered,  setHovered]  = useState(false);
-  const { Icon, color: iconColor } = getStoryIcon(story.emoji);
-
-  const handleDelete = async () => { setDeleting(true); await onDelete(story.id); };
 
   return (
-    <motion.div
-      initial={{ opacity:0, y:26 }} animate={{ opacity:1, y:0 }}
-      transition={{ delay: Math.min(index, PAGE_SIZE) * 0.05, type:"spring", stiffness:200 }}
-      className="relative group"
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      whileHover={{ y:-5 }}
-    >
-      {/* Book spine */}
-      <div className="absolute left-0 top-2 bottom-2 w-3 rounded-l-xl"
-        style={{ background:"rgba(0,0,0,0.15)", filter:"blur(3px)" }}
-      />
-
-      {/* Cover */}
-      <div className={`relative bg-gradient-to-br ${story.color||"from-blue-400 to-cyan-300"} rounded-3xl overflow-hidden border-4 border-white min-h-[190px]`}
-        style={{ boxShadow: hovered
-          ? `0 20px 50px ${iconColor}50, 0 6px 18px rgba(0,0,0,0.18)`
-          : "0 8px 28px rgba(0,0,0,0.16)"
-        }}
-      >
-        {/* Subtle diagonal texture */}
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage:"repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%)", backgroundSize:"8px 8px" }}
-        />
-
-        {/* Content */}
-        <div className="relative p-5 flex flex-col h-full min-h-[190px]">
-          {/* Vector icon instead of emoji */}
-          <StoryCoverIcon emoji={story.emoji} size={58}/>
-
-          <h3 className="font-display text-white text-base leading-snug mt-3 flex-1 drop-shadow">
-            {story.title}
-          </h3>
-          <div className="flex items-center gap-1.5 text-white/70 font-body text-xs mt-2">
-            <BookOpen size={11}/> {story.pages?.length ?? 0} pages
-          </div>
+    <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, type: "spring", stiffness: 200 }}
+      className="relative group rounded-3xl overflow-hidden border-4 border-white shadow-lg">
+      <div className={`bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} p-5 min-h-[160px] flex flex-col`}>
+        <div className="absolute left-0 inset-y-0 w-3 bg-black/10" />
+        <div className="text-5xl mb-2 drop-shadow">{story.emoji}</div>
+        <h3 className="font-display text-white text-lg leading-tight flex-1 drop-shadow-sm">{story.title}</h3>
+        <div className="flex items-center gap-1.5 text-white/70 font-body text-xs mt-2">
+          <BookOpen size={11} /> {story.pages?.length ?? 0} pages
         </div>
-
-        {/* Hover overlay */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.div
-              initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-              className="absolute inset-0 rounded-3xl flex flex-col items-center justify-center gap-2.5 p-3"
-              style={{ background:"rgba(21,101,192,0.90)", backdropFilter:"blur(4px)" }}
-            >
-              <motion.button
-                whileHover={{ scale:1.07 }} whileTap={{ scale:0.94 }} transition={SPRING}
-                onClick={() => onRead(story)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-display text-sm bg-white shadow-md w-full justify-center"
-                style={{ color:C.blue }}
-              ><BookOpen size={15}/> Read Story</motion.button>
-              <motion.button
-                whileHover={{ scale:1.07 }} whileTap={{ scale:0.94 }} transition={SPRING}
-                onClick={() => onPuzzle(story)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-display text-sm text-white shadow-md w-full justify-center"
-                style={{ background:C.green, boxShadow:`0 4px 14px ${C.green}50` }}
-              ><Puzzle size={15}/> Play Puzzle</motion.button>
-              <motion.button
-                whileHover={{ scale:1.07 }} whileTap={{ scale:0.94 }} transition={SPRING}
-                onClick={handleDelete} disabled={deleting}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-display text-xs text-white/70 hover:text-white transition-colors"
-              ><Trash2 size={13}/> {deleting ? "Deleting…" : "Remove"}</motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      </div>
+      <div className="absolute inset-0 rounded-3xl flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: "rgba(21,101,192,0.92)" }}>
+        <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }} onClick={() => onRead(story)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-display text-sm bg-white shadow-md" style={{ color: C.blue }}>
+          <BookOpen size={15} /> Read Story
+        </motion.button>
+        <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }} onClick={() => onPuzzle(story)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-display text-sm text-white shadow-md" style={{ background: C.green }}>
+          <Puzzle size={15} /> Play Puzzle
+        </motion.button>
+        <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+          onClick={() => { setDeleting(true); onDelete(story.id); }}
+          disabled={deleting}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-display text-xs text-white/70 hover:text-white transition-colors">
+          <Trash2 size={13} /> {deleting ? "Removing…" : "Remove"}
+        </motion.button>
       </div>
     </motion.div>
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// MAIN
-// ══════════════════════════════════════════════════════════════════════════
+// ── MyLibrary ─────────────────────────────────────────────────────────────────
 export default function MyLibrary({ onCreateStory, onReadStory }) {
-  const { user, firstName }      = useAuth();
-  const [stories,     setStories]     = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState("");
+  const [stories, setStories]         = useState([]);
+  const [loading, setLoading]         = useState(true);
   const [puzzleStory, setPuzzleStory] = useState(null);
-  const [query,       setQuery]       = useState("");
-  const [shown,       setShown]       = useState(PAGE_SIZE);
 
-const load = useCallback(async () => {
-  setLoading(true);
-  try {
-    // Pedimos a Supabase: "Tráeme mis cuentos O los que no tienen dueño (Claude)"
-    const { data, error } = await supabase
-      .from('stories')
-      .select('*')
-      // Esta es la clave: filtramos por el usuario actual o por nulo (públicos)
-      .or(`user_id.eq.${user?.id},user_id.is.null`) 
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    setStories(data);
-  } catch (e) {
-    setError(e.message);
-  } finally {
-    setLoading(false);
-  }
-}, [user]);
+  // ── Cargar desde localStorage ──────────────────────────────────────────
+  const load = useCallback(() => {
+    setLoading(true);
+    // Pequeño timeout para que el spinner sea visible al menos 1 frame
+    setTimeout(() => {
+      setStories(loadStories());
+      setLoading(false);
+    }, 60);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  const handleDelete = async id => {
-    await deleteStory(id);
-    setStories(prev => prev.filter(s => s.id !== id));
+  // ── Eliminar cuento ────────────────────────────────────────────────────
+  const handleDelete = (storyId) => {
+    removeStory(storyId);
+    setStories((prev) => prev.filter((s) => s.id !== storyId));
   };
 
-  const filtered = useMemo(() => {
-    if (!query.trim()) return stories;
-    const q = query.toLowerCase();
-    return stories.filter(s => s.title?.toLowerCase().includes(q) || s.emoji?.includes(q));
-  }, [stories, query]);
-
-  const visible = filtered.slice(0, shown);
-  const hasMore = shown < filtered.length;
-
+  // ── UI ─────────────────────────────────────────────────────────────────
   return (
     <>
       <AnimatePresence>
         {puzzleStory && (
-          <StoryPuzzle key="puzzle" story={puzzleStory} onClose={() => setPuzzleStory(null)}/>
+          <StoryPuzzle key="puzzle" story={puzzleStory} onClose={() => setPuzzleStory(null)} />
         )}
       </AnimatePresence>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-
         {/* Header */}
-        <motion.div initial={{ opacity:0, y:-16 }} animate={{ opacity:1, y:0 }} className="mb-6">
-          <div className="flex items-center gap-4 mb-2">
-            <StickerBadge icon={BookOpen} color={C.blue} size={56} noHover/>
-            <div>
-              <h1 className="font-display text-3xl md:text-4xl" style={{ color:C.blue }}>
-                {firstName}'s Library
-              </h1>
-              <p className="font-body text-slate-500 text-sm mt-0.5">
-                Your personalized story collection
-              </p>
-            </div>
-          </div>
+        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h1 className="font-display text-4xl md:text-5xl" style={{ color: C.blue }}>
+            My Library 📚
+          </h1>
+          <p className="font-body text-slate-500 mt-1">
+            Your personal story collection — stored on this device.
+          </p>
         </motion.div>
 
-        {/* Create CTA */}
+        {/* New story CTA */}
         <motion.button
-          whileHover={{ scale:1.02, y:-3 }} whileTap={{ scale:0.97 }} transition={SPRING}
+          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
           onClick={onCreateStory}
-          initial={{ opacity:0 }} animate={{ opacity:1 }} transition_={{ delay:0.1 }}
-          className="w-full mb-6 py-5 rounded-[2rem] font-display text-xl text-white flex items-center justify-center gap-3 border-4 border-white shadow-2xl"
-          style={{ background:`linear-gradient(135deg,${C.yellow},#FF8F00)`, boxShadow:`0 14px 40px rgba(249,168,37,0.38)` }}
-        >
-          <Plus size={24}/> Create a New Story ✨
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
+          className="w-full mb-8 py-5 rounded-3xl font-display text-xl text-white flex items-center justify-center gap-3 border-4 border-white shadow-xl"
+          style={{ background: `linear-gradient(135deg,${C.yellow},#FF8F00)` }}>
+          <Plus size={24} /> Create a New Story ✨
         </motion.button>
-
-        {/* Search */}
-        {!loading && stories.length > 0 && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} className="relative mb-6">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-            <input
-              type="text" value={query}
-              onChange={e => { setQuery(e.target.value); setShown(PAGE_SIZE); }}
-              placeholder="Search your stories…"
-              className="w-full pl-10 pr-10 py-3.5 rounded-2xl border-2 border-slate-100 font-body bg-white/90 backdrop-blur focus:outline-none focus:border-blue-300 placeholder-slate-300 shadow-sm"
-            />
-            {query && (
-              <button onClick={() => setQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              ><X size={16}/></button>
-            )}
-          </motion.div>
-        )}
 
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-16">
-            <motion.div
-              animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:"linear" }}
-              style={{
-                width:64, height:64, borderRadius:"50%",
-                border:"4px solid #E3F2FD",
-                borderTop:`4px solid ${C.blue}`,
-              }}
-            />
-          </div>
-        )}
-
-        {/* Error */}
-        {error && (
-          <div className="text-center py-10 font-body text-red-500">
-            <p>⚠️ {error}</p>
-            <button onClick={load} className="mt-3 flex items-center gap-2 mx-auto font-display text-sm" style={{ color:C.blue }}>
-              <RefreshCw size={14}/> Try again
-            </button>
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="text-5xl">✨</motion.div>
           </div>
         )}
 
         {/* Empty state */}
-        {!loading && !error && stories.length === 0 && (
-          <motion.div initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }}
-            className="text-center py-16 bg-white/80 backdrop-blur rounded-[2rem] border-4 border-white shadow-md"
-          >
-            <motion.div
-              animate={{ y:[0,-10,0] }} transition={{ duration:2.2, repeat:Infinity, ease:"easeInOut" }}
-              className="flex justify-center mb-5"
-            >
-              <StickerBadge icon={BookOpen} color={C.blue} size={80} noHover/>
-            </motion.div>
-            <h2 className="font-display text-3xl mb-2" style={{ color:C.blue }}>No stories yet!</h2>
-            <p className="font-body text-slate-500 mb-7 max-w-xs mx-auto">
+        {!loading && stories.length === 0 && (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-white/80 rounded-3xl border-4 border-white shadow-md">
+            <div className="text-7xl mb-4">📖</div>
+            <h2 className="font-display text-3xl mb-2" style={{ color: C.blue }}>No stories yet!</h2>
+            <p className="font-body text-slate-500 mb-6 max-w-xs mx-auto">
               Generate your first personalized bilingual story and it will appear here.
             </p>
-            <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} transition={SPRING}
-              onClick={onCreateStory}
-              className="px-9 py-4 rounded-2xl font-display text-lg text-white shadow-xl"
-              style={{ background:`linear-gradient(135deg,${C.blue},#42A5F5)`, boxShadow:`0 10px 28px ${C.blue}40` }}
-            >Create First Story 🪄</motion.button>
+            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={onCreateStory}
+              className="px-8 py-4 rounded-2xl font-display text-lg text-white shadow-lg"
+              style={{ background: `linear-gradient(135deg,${C.blue},#42A5F5)` }}>
+              Create First Story 🪄
+            </motion.button>
           </motion.div>
         )}
 
-        {/* No results */}
-        {!loading && stories.length > 0 && filtered.length === 0 && (
-          <div className="text-center py-12 font-body text-slate-400">
-            <div className="text-4xl mb-3">🔍</div>
-            <p>No stories match "<strong>{query}</strong>"</p>
-            <button onClick={() => setQuery("")} className="mt-2 font-display text-sm" style={{ color:C.blue }}>Clear search</button>
-          </div>
-        )}
-
         {/* Story grid */}
-        {!loading && visible.length > 0 && (
+        {!loading && stories.length > 0 && (
           <>
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-4">
               <p className="font-display text-slate-500">
-                {filtered.length} {filtered.length===1?"story":"stories"}
-                {query ? ` matching "${query}"` : " saved"}
+                {stories.length} {stories.length === 1 ? "story" : "stories"} saved
               </p>
-              <button onClick={load}
-                className="flex items-center gap-1.5 font-body text-sm text-slate-400 hover:text-slate-600 transition-colors"
-              ><RefreshCw size={13}/> Refresh</button>
+              <button onClick={load} className="flex items-center gap-1.5 font-body text-sm text-slate-400 hover:text-slate-600 transition-colors">
+                <RefreshCw size={13} /> Refresh
+              </button>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-              {visible.map((story, i) => (
-                <StoryCard
-                  key={story.id}
-                  story={story}
-                  index={i}
-                  onRead={onReadStory}
-                  onPuzzle={setPuzzleStory}
-                  onDelete={handleDelete}
-                />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {stories.map((story, i) => (
+                <StoryCard key={story.id} story={story} index={i}
+                  onRead={onReadStory} onPuzzle={setPuzzleStory} onDelete={handleDelete} />
               ))}
             </div>
-
-            {hasMore && (
-              <div className="flex justify-center mt-8">
-                <motion.button
-                  whileHover={{ scale:1.04, y:-2 }} whileTap={{ scale:0.96 }} transition={SPRING}
-                  onClick={() => setShown(s => s + PAGE_SIZE)}
-                  className="flex items-center gap-2 px-8 py-3.5 rounded-2xl font-display text-white shadow-xl"
-                  style={{ background:C.blue, boxShadow:`0 8px 24px ${C.blue}40` }}
-                >
-                  <ChevronDown size={18}/> Show more ({filtered.length - shown} remaining)
-                </motion.button>
-              </div>
-            )}
           </>
         )}
 
         {/* Puzzle tip */}
         {!loading && stories.length > 0 && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.5 }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
             className="mt-8 rounded-3xl p-4 flex items-center gap-3 border-2 border-white shadow-sm"
-            style={{ background:C.greenSoft }}
-          >
-            <StickerBadge icon={Puzzle} color={C.green} size={36} noHover/>
-            <p className="font-body text-sm" style={{ color:C.green }}>
-              <strong>Tip:</strong> Hover over any story and tap <strong>Play Puzzle</strong> to build a sliding icon puzzle!
+            style={{ background: C.greenSoft }}>
+            <Puzzle size={20} style={{ color: C.green }} />
+            <p className="font-body text-sm" style={{ color: C.green }}>
+              <strong>Tip:</strong> Hover over a story and tap <strong>Play Puzzle</strong> to build a sliding puzzle!
             </p>
           </motion.div>
         )}
