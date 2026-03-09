@@ -1,21 +1,40 @@
 /**
  * src/pages/WordSearch.jsx — Kiddsy
- * ─────────────────────────────────────────────────────────────────────────
- * • 25 themed word packs — 10 words played per round (random selection)
- * • MOBILE FIX: touch-action:none + preventDefault on touch events
- *   maps touch coordinates to grid cells via elementFromPoint
- * • Bilingual word list (EN + ES/FR/AR)
+ * ────────────────────────────────────────────────────────
+ * ✅ 16 idiomas: ES FR AR DE IT PT RU ZH JA KO BN HI NL PL NO SV
+ * ✅ Acepta prop  lang / onLangChange  desde App.jsx
+ * ✅ Dropdown elegante para tema + idioma (reemplaza botones horizontales)
+ * ────────────────────────────────────────────────────────
  */
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, CheckCircle, Star } from "lucide-react";
+import { RotateCcw, CheckCircle, Star, ChevronDown, Globe } from "lucide-react";
 
 const C = {
-  blue:"#1565C0", blueSoft:"#E3F2FD",
-  red:"#E53935", yellow:"#F9A825", yellowSoft:"#FFFDE7",
-  green:"#43A047", greenSoft:"#E8F5E9",
-  magenta:"#D81B60", cyan:"#00ACC1",
+  blue:"#1565C0", blueSoft:"#E3F2FD", red:"#E53935",
+  yellow:"#F9A825", yellowSoft:"#FFFDE7",
+  green:"#43A047", magenta:"#D81B60", cyan:"#00ACC1",
 };
+
+// ── 16 idiomas ─────────────────────────────────────────────────────────────
+const LANGUAGES = [
+  { code:"es", label:"Español",    flag:"🇪🇸", dir:"ltr" },
+  { code:"fr", label:"Français",   flag:"🇫🇷", dir:"ltr" },
+  { code:"ar", label:"العربية",    flag:"🇸🇦", dir:"rtl" },
+  { code:"de", label:"Deutsch",    flag:"🇩🇪", dir:"ltr" },
+  { code:"it", label:"Italiano",   flag:"🇮🇹", dir:"ltr" },
+  { code:"pt", label:"Português",  flag:"🇧🇷", dir:"ltr" },
+  { code:"ru", label:"Русский",    flag:"🇷🇺", dir:"ltr" },
+  { code:"zh", label:"中文",        flag:"🇨🇳", dir:"ltr" },
+  { code:"ja", label:"日本語",      flag:"🇯🇵", dir:"ltr" },
+  { code:"ko", label:"한국어",      flag:"🇰🇷", dir:"ltr" },
+  { code:"bn", label:"বাংলা",     flag:"🇧🇩", dir:"ltr" },
+  { code:"hi", label:"हिंदी",     flag:"🇮🇳", dir:"ltr" },
+  { code:"nl", label:"Nederlands", flag:"🇳🇱", dir:"ltr" },
+  { code:"pl", label:"Polski",     flag:"🇵🇱", dir:"ltr" },
+  { code:"no", label:"Norsk",      flag:"🇳🇴", dir:"ltr" },
+  { code:"sv", label:"Svenska",    flag:"🇸🇪", dir:"ltr" },
+];
 
 const WORD_COLORS = [
   { bg:"#FFF9C4", border:"#F9A825", text:"#E65100" },
@@ -24,575 +43,219 @@ const WORD_COLORS = [
   { bg:"#F8BBD0", border:"#D81B60", text:"#880E4F" },
   { bg:"#B2EBF2", border:"#00ACC1", text:"#006064" },
   { bg:"#E1BEE7", border:"#8E24AA", text:"#4A148C" },
-  { bg:"#FFCCBC", border:"#E64A19", text:"#BF360C" },
-  { bg:"#F0F4C3", border:"#9E9D24", text:"#33691E" },
-  { bg:"#D7CCC8", border:"#6D4C41", text:"#3E2723" },
-  { bg:"#CFD8DC", border:"#607D8B", text:"#263238" },
 ];
 
-// ─── 25 Word Packs (10 words each, shorter words fit better in grid) ───────
-const ALL_PACKS = [
+// ── Packs de palabras — traducidos a 16 idiomas ────────────────────────────
+const PACKS = [
   {
     name:"Animals 🐾", emoji:"🦁",
     words:[
-      {en:"CAT",es:"Gato",fr:"Chat",ar:"قطة"},
-      {en:"DOG",es:"Perro",fr:"Chien",ar:"كلب"},
-      {en:"FISH",es:"Pez",fr:"Poisson",ar:"سمكة"},
-      {en:"BIRD",es:"Pájaro",fr:"Oiseau",ar:"طائر"},
-      {en:"LION",es:"León",fr:"Lion",ar:"أسد"},
-      {en:"BEAR",es:"Oso",fr:"Ours",ar:"دب"},
-      {en:"FROG",es:"Rana",fr:"Grenouille",ar:"ضفدع"},
-      {en:"WOLF",es:"Lobo",fr:"Loup",ar:"ذئب"},
-      {en:"OWL",es:"Búho",fr:"Hibou",ar:"بومة"},
-      {en:"FOX",es:"Zorro",fr:"Renard",ar:"ثعلب"},
+      { en:"CAT",   es:"Gato",    fr:"Chat",    ar:"قطة",   de:"Katze",    it:"Gatto",    pt:"Gato",    ru:"Кошка",   zh:"猫",   ja:"ネコ",    ko:"고양이",  bn:"বিড়াল", hi:"बिल्ली",  nl:"Kat",     pl:"Kot",    no:"Katt",   sv:"Katt"   },
+      { en:"DOG",   es:"Perro",   fr:"Chien",   ar:"كلب",   de:"Hund",     it:"Cane",     pt:"Cão",     ru:"Собака",  zh:"狗",   ja:"イヌ",    ko:"개",      bn:"কুকুর",  hi:"कुत्ता",  nl:"Hond",    pl:"Pies",   no:"Hund",   sv:"Hund"   },
+      { en:"FISH",  es:"Pez",     fr:"Poisson", ar:"سمكة",  de:"Fisch",    it:"Pesce",    pt:"Peixe",   ru:"Рыба",    zh:"鱼",   ja:"サカナ",  ko:"물고기",  bn:"মাছ",    hi:"मछली",    nl:"Vis",     pl:"Ryba",   no:"Fisk",   sv:"Fisk"   },
+      { en:"BIRD",  es:"Pájaro",  fr:"Oiseau",  ar:"طائر",  de:"Vogel",    it:"Uccello",  pt:"Pássaro", ru:"Птица",   zh:"鸟",   ja:"トリ",    ko:"새",      bn:"পাখি",   hi:"पक्षी",   nl:"Vogel",   pl:"Ptak",   no:"Fugl",   sv:"Fågel"  },
+      { en:"LION",  es:"León",    fr:"Lion",    ar:"أسد",   de:"Löwe",     it:"Leone",    pt:"Leão",    ru:"Лев",     zh:"狮子", ja:"ライオン",ko:"사자",    bn:"সিংহ",   hi:"शेर",     nl:"Leeuw",   pl:"Lew",    no:"Løve",   sv:"Lejon"  },
+      { en:"BEAR",  es:"Oso",     fr:"Ours",    ar:"دب",    de:"Bär",      it:"Orso",     pt:"Urso",    ru:"Медведь", zh:"熊",   ja:"クマ",    ko:"곰",      bn:"ভালুক",  hi:"भालू",    nl:"Beer",    pl:"Niedźwiedź",no:"Bjørn",sv:"Björn" },
     ],
   },
   {
-    name:"Family 👨‍👩‍👧", emoji:"👪",
+    name:"Family 👪", emoji:"👨‍👩‍👧",
     words:[
-      {en:"MOM",es:"Mamá",fr:"Maman",ar:"أم"},
-      {en:"DAD",es:"Papá",fr:"Papa",ar:"أب"},
-      {en:"BABY",es:"Bebé",fr:"Bébé",ar:"رضيع"},
-      {en:"LOVE",es:"Amor",fr:"Amour",ar:"حب"},
-      {en:"HOME",es:"Hogar",fr:"Maison",ar:"منزل"},
-      {en:"PLAY",es:"Jugar",fr:"Jouer",ar:"لعب"},
-      {en:"KISS",es:"Beso",fr:"Bisou",ar:"قبلة"},
-      {en:"HUG",es:"Abrazo",fr:"Câlin",ar:"عناق"},
-      {en:"AUNT",es:"Tía",fr:"Tante",ar:"عمة"},
-      {en:"TWIN",es:"Gemelo",fr:"Jumeau",ar:"توأم"},
+      { en:"MOM",  es:"Mamá",  fr:"Maman",    ar:"أم",    de:"Mama",    it:"Mamma",    pt:"Mãe",     ru:"Мама",   zh:"妈妈",  ja:"ママ",    ko:"엄마",   bn:"মা",      hi:"माँ",     nl:"Mama",    pl:"Mama",   no:"Mamma",  sv:"Mamma"  },
+      { en:"DAD",  es:"Papá",  fr:"Papa",     ar:"أب",    de:"Papa",    it:"Papà",     pt:"Pai",     ru:"Папа",   zh:"爸爸",  ja:"パパ",    ko:"아빠",   bn:"বাবা",    hi:"पापा",    nl:"Papa",    pl:"Tata",   no:"Pappa",  sv:"Pappa"  },
+      { en:"BABY", es:"Bebé",  fr:"Bébé",     ar:"رضيع",  de:"Baby",    it:"Bebè",     pt:"Bebê",    ru:"Малыш",  zh:"宝宝",  ja:"アカちゃん",ko:"아기",  bn:"শিশু",    hi:"शिशु",    nl:"Baby",    pl:"Niemowlę",no:"Baby",  sv:"Baby"   },
+      { en:"LOVE", es:"Amor",  fr:"Amour",    ar:"حب",    de:"Liebe",   it:"Amore",    pt:"Amor",    ru:"Любовь", zh:"爱",    ja:"アイ",    ko:"사랑",   bn:"ভালোবাসা",hi:"प्यार",  nl:"Liefde",  pl:"Miłość", no:"Kjærlighet",sv:"Kärlek"},
+      { en:"HOME", es:"Hogar", fr:"Maison",   ar:"منزل",  de:"Heim",    it:"Casa",     pt:"Lar",     ru:"Дом",    zh:"家",    ja:"イエ",    ko:"집",     bn:"বাড়ি",    hi:"घर",      nl:"Thuis",   pl:"Dom",    no:"Hjem",   sv:"Hem"    },
+      { en:"PLAY", es:"Jugar", fr:"Jouer",    ar:"لعب",   de:"Spielen", it:"Giocare",  pt:"Brincar", ru:"Играть", zh:"玩",    ja:"あそぶ",  ko:"놀다",   bn:"খেলা",    hi:"खेलना",   nl:"Spelen",  pl:"Grać",   no:"Leke",   sv:"Leka"   },
     ],
   },
   {
-    name:"School 🏫", emoji:"📚",
+    name:"School 📚", emoji:"🏫",
     words:[
-      {en:"BOOK",es:"Libro",fr:"Livre",ar:"كتاب"},
-      {en:"PEN",es:"Pluma",fr:"Stylo",ar:"قلم"},
-      {en:"DESK",es:"Escritorio",fr:"Bureau",ar:"مكتب"},
-      {en:"READ",es:"Leer",fr:"Lire",ar:"قراءة"},
-      {en:"MATH",es:"Mates",fr:"Maths",ar:"رياضيات"},
-      {en:"MAP",es:"Mapa",fr:"Carte",ar:"خريطة"},
-      {en:"TEST",es:"Prueba",fr:"Test",ar:"اختبار"},
-      {en:"RULE",es:"Regla",fr:"Règle",ar:"مسطرة"},
-      {en:"GLUE",es:"Pegamento",fr:"Colle",ar:"غراء"},
-      {en:"DRAW",es:"Dibujar",fr:"Dessiner",ar:"رسم"},
+      { en:"BOOK",  es:"Libro",    fr:"Livre",     ar:"كتاب",  de:"Buch",      it:"Libro",    pt:"Livro",   ru:"Книга",  zh:"书",  ja:"ホン",   ko:"책",    bn:"বই",      hi:"किताब",   nl:"Boek",    pl:"Książka",  no:"Bok",    sv:"Bok"    },
+      { en:"PEN",   es:"Pluma",    fr:"Stylo",     ar:"قلم",   de:"Stift",     it:"Penna",    pt:"Caneta",  ru:"Ручка",  zh:"笔",  ja:"ペン",   ko:"펜",    bn:"কলম",     hi:"कलम",     nl:"Pen",     pl:"Długopis", no:"Penn",   sv:"Penna"  },
+      { en:"DESK",  es:"Mesa",     fr:"Bureau",    ar:"مكتب",  de:"Schreibtisch",it:"Scrivania",pt:"Mesa",   ru:"Стол",   zh:"桌子",ja:"ツクエ", ko:"책상",  bn:"ডেস্ক",   hi:"मेज़",    nl:"Bureau",  pl:"Biurko",   no:"Pult",   sv:"Skrivbord"},
+      { en:"READ",  es:"Leer",     fr:"Lire",      ar:"قراءة", de:"Lesen",     it:"Leggere",  pt:"Ler",     ru:"Читать", zh:"读",  ja:"ヨむ",   ko:"읽다",  bn:"পড়া",     hi:"पढ़ना",   nl:"Lezen",   pl:"Czytać",   no:"Lese",   sv:"Läsa"   },
+      { en:"WRITE", es:"Escribir", fr:"Écrire",    ar:"كتابة", de:"Schreiben", it:"Scrivere", pt:"Escrever",ru:"Писать", zh:"写",  ja:"かく",   ko:"쓰다",  bn:"লেখা",    hi:"लिखना",   nl:"Schrijven",pl:"Pisać",   no:"Skrive", sv:"Skriva" },
+      { en:"LEARN", es:"Aprender", fr:"Apprendre", ar:"تعلم",  de:"Lernen",    it:"Imparare", pt:"Aprender",ru:"Учить",  zh:"学",  ja:"まなぶ", ko:"배우다", bn:"শেখা",    hi:"सीखना",   nl:"Leren",   pl:"Uczyć",    no:"Lære",   sv:"Lära"   },
     ],
   },
   {
     name:"Food 🍎", emoji:"🥦",
     words:[
-      {en:"APPLE",es:"Manzana",fr:"Pomme",ar:"تفاحة"},
-      {en:"BREAD",es:"Pan",fr:"Pain",ar:"خبز"},
-      {en:"MILK",es:"Leche",fr:"Lait",ar:"حليب"},
-      {en:"RICE",es:"Arroz",fr:"Riz",ar:"أرز"},
-      {en:"EGG",es:"Huevo",fr:"Œuf",ar:"بيضة"},
-      {en:"SOUP",es:"Sopa",fr:"Soupe",ar:"شوربة"},
-      {en:"CAKE",es:"Pastel",fr:"Gâteau",ar:"كعكة"},
-      {en:"TACO",es:"Taco",fr:"Taco",ar:"تاكو"},
-      {en:"FISH",es:"Pescado",fr:"Poisson",ar:"سمك"},
-      {en:"CORN",es:"Maíz",fr:"Maïs",ar:"ذرة"},
+      { en:"APPLE", es:"Manzana", fr:"Pomme",  ar:"تفاحة", de:"Apfel", it:"Mela",  pt:"Maçã",   ru:"Яблоко", zh:"苹果", ja:"リンゴ", ko:"사과", bn:"আপেল", hi:"सेब",   nl:"Appel", pl:"Jabłko", no:"Eple",  sv:"Äpple" },
+      { en:"BREAD", es:"Pan",     fr:"Pain",   ar:"خبز",   de:"Brot",  it:"Pane",  pt:"Pão",    ru:"Хлеб",   zh:"面包", ja:"パン",   ko:"빵",   bn:"রুটি",  hi:"रोटी",  nl:"Brood", pl:"Chleb",  no:"Brød",  sv:"Bröd"  },
+      { en:"MILK",  es:"Leche",   fr:"Lait",   ar:"حليب",  de:"Milch", it:"Latte", pt:"Leite",  ru:"Молоко", zh:"牛奶", ja:"ミルク", ko:"우유", bn:"দুধ",   hi:"दूध",    nl:"Melk",  pl:"Mleko",  no:"Melk",  sv:"Mjölk" },
+      { en:"RICE",  es:"Arroz",   fr:"Riz",    ar:"أرز",   de:"Reis",  it:"Riso",  pt:"Arroz",  ru:"Рис",    zh:"米饭", ja:"コメ",   ko:"쌀",   bn:"চাল",   hi:"चावल",  nl:"Rijst", pl:"Ryż",    no:"Ris",   sv:"Ris"   },
+      { en:"EGG",   es:"Huevo",   fr:"Œuf",    ar:"بيضة",  de:"Ei",    it:"Uovo",  pt:"Ovo",    ru:"Яйцо",   zh:"鸡蛋", ja:"タマゴ", ko:"달걀", bn:"ডিম",   hi:"अंडा",  nl:"Ei",    pl:"Jajko",  no:"Egg",   sv:"Ägg"   },
+      { en:"SOUP",  es:"Sopa",    fr:"Soupe",  ar:"شوربة", de:"Suppe", it:"Zuppa", pt:"Sopa",   ru:"Суп",    zh:"汤",   ja:"スープ", ko:"수프", bn:"স্যুপ",hi:"सूप",   nl:"Soep",  pl:"Zupa",   no:"Suppe", sv:"Soppa" },
     ],
   },
   {
-    name:"Space 🚀", emoji:"🌟",
+    name:"Colors 🌈", emoji:"🎨",
     words:[
-      {en:"STAR",es:"Estrella",fr:"Étoile",ar:"نجمة"},
-      {en:"MOON",es:"Luna",fr:"Lune",ar:"قمر"},
-      {en:"SUN",es:"Sol",fr:"Soleil",ar:"شمس"},
-      {en:"MARS",es:"Marte",fr:"Mars",ar:"المريخ"},
-      {en:"COMET",es:"Cometa",fr:"Comète",ar:"مذنب"},
-      {en:"ORBIT",es:"Órbita",fr:"Orbite",ar:"مدار"},
-      {en:"ALIEN",es:"Alienígena",fr:"Extraterrestre",ar:"كائن فضائي"},
-      {en:"PROBE",es:"Sonda",fr:"Sonde",ar:"مسبار"},
-      {en:"NOVA",es:"Nova",fr:"Nova",ar:"نوفا"},
-      {en:"RING",es:"Anillo",fr:"Anneau",ar:"حلقة"},
-    ],
-  },
-  {
-    name:"Colors 🎨", emoji:"🌈",
-    words:[
-      {en:"RED",es:"Rojo",fr:"Rouge",ar:"أحمر"},
-      {en:"BLUE",es:"Azul",fr:"Bleu",ar:"أزرق"},
-      {en:"GREEN",es:"Verde",fr:"Vert",ar:"أخضر"},
-      {en:"PINK",es:"Rosa",fr:"Rose",ar:"وردي"},
-      {en:"GOLD",es:"Dorado",fr:"Or",ar:"ذهبي"},
-      {en:"GREY",es:"Gris",fr:"Gris",ar:"رمادي"},
-      {en:"CYAN",es:"Cian",fr:"Cyan",ar:"سماوي"},
-      {en:"TAN",es:"Canela",fr:"Beige",ar:"بيج"},
-      {en:"LIME",es:"Lima",fr:"Lime",ar:"ليمي"},
-      {en:"NAVY",es:"Marino",fr:"Marine",ar:"كحلي"},
-    ],
-  },
-  {
-    name:"Body 🫀", emoji:"💪",
-    words:[
-      {en:"EYE",es:"Ojo",fr:"Œil",ar:"عين"},
-      {en:"EAR",es:"Oreja",fr:"Oreille",ar:"أذن"},
-      {en:"NOSE",es:"Nariz",fr:"Nez",ar:"أنف"},
-      {en:"HAND",es:"Mano",fr:"Main",ar:"يد"},
-      {en:"FOOT",es:"Pie",fr:"Pied",ar:"قدم"},
-      {en:"KNEE",es:"Rodilla",fr:"Genou",ar:"ركبة"},
-      {en:"BACK",es:"Espalda",fr:"Dos",ar:"ظهر"},
-      {en:"HEAD",es:"Cabeza",fr:"Tête",ar:"رأس"},
-      {en:"CHIN",es:"Barbilla",fr:"Menton",ar:"ذقن"},
-      {en:"NECK",es:"Cuello",fr:"Cou",ar:"عنق"},
-    ],
-  },
-  {
-    name:"Weather 🌦️", emoji:"☀️",
-    words:[
-      {en:"RAIN",es:"Lluvia",fr:"Pluie",ar:"مطر"},
-      {en:"SNOW",es:"Nieve",fr:"Neige",ar:"ثلج"},
-      {en:"WIND",es:"Viento",fr:"Vent",ar:"ريح"},
-      {en:"HAIL",es:"Granizo",fr:"Grêle",ar:"برد"},
-      {en:"MIST",es:"Niebla",fr:"Brume",ar:"ضباب"},
-      {en:"WARM",es:"Cálido",fr:"Chaud",ar:"دافئ"},
-      {en:"COLD",es:"Frío",fr:"Froid",ar:"بارد"},
-      {en:"STORM",es:"Tormenta",fr:"Tempête",ar:"عاصفة"},
-      {en:"CLOUD",es:"Nube",fr:"Nuage",ar:"سحابة"},
-      {en:"SUN",es:"Sol",fr:"Soleil",ar:"شمس"},
-    ],
-  },
-  {
-    name:"Clothes 👕", emoji:"👗",
-    words:[
-      {en:"HAT",es:"Sombrero",fr:"Chapeau",ar:"قبعة"},
-      {en:"SHOE",es:"Zapato",fr:"Chaussure",ar:"حذاء"},
-      {en:"COAT",es:"Abrigo",fr:"Manteau",ar:"معطف"},
-      {en:"SOCK",es:"Calcetín",fr:"Chaussette",ar:"جورب"},
-      {en:"VEST",es:"Chaleco",fr:"Gilet",ar:"صديري"},
-      {en:"BELT",es:"Cinturón",fr:"Ceinture",ar:"حزام"},
-      {en:"SKIRT",es:"Falda",fr:"Jupe",ar:"تنورة"},
-      {en:"TIE",es:"Corbata",fr:"Cravate",ar:"ربطة عنق"},
-      {en:"SCARF",es:"Bufanda",fr:"Écharpe",ar:"وشاح"},
-      {en:"CAP",es:"Gorra",fr:"Casquette",ar:"كاب"},
-    ],
-  },
-  {
-    name:"Transport 🚌", emoji:"✈️",
-    words:[
-      {en:"CAR",es:"Coche",fr:"Voiture",ar:"سيارة"},
-      {en:"BUS",es:"Autobús",fr:"Bus",ar:"حافلة"},
-      {en:"BIKE",es:"Bici",fr:"Vélo",ar:"دراجة"},
-      {en:"BOAT",es:"Barco",fr:"Bateau",ar:"قارب"},
-      {en:"PLANE",es:"Avión",fr:"Avion",ar:"طائرة"},
-      {en:"TRAIN",es:"Tren",fr:"Train",ar:"قطار"},
-      {en:"TAXI",es:"Taxi",fr:"Taxi",ar:"تاكسي"},
-      {en:"VAN",es:"Furgoneta",fr:"Camionnette",ar:"شاحنة صغيرة"},
-      {en:"TRAM",es:"Tranvía",fr:"Tram",ar:"ترام"},
-      {en:"SHIP",es:"Nave",fr:"Navire",ar:"سفينة"},
-    ],
-  },
-  {
-    name:"Numbers 🔢", emoji:"🧮",
-    words:[
-      {en:"ONE",es:"Uno",fr:"Un",ar:"واحد"},
-      {en:"TWO",es:"Dos",fr:"Deux",ar:"اثنان"},
-      {en:"THREE",es:"Tres",fr:"Trois",ar:"ثلاثة"},
-      {en:"FOUR",es:"Cuatro",fr:"Quatre",ar:"أربعة"},
-      {en:"FIVE",es:"Cinco",fr:"Cinq",ar:"خمسة"},
-      {en:"SIX",es:"Seis",fr:"Six",ar:"ستة"},
-      {en:"NINE",es:"Nueve",fr:"Neuf",ar:"تسعة"},
-      {en:"TEN",es:"Diez",fr:"Dix",ar:"عشرة"},
-      {en:"ZERO",es:"Cero",fr:"Zéro",ar:"صفر"},
-      {en:"HALF",es:"Mitad",fr:"Moitié",ar:"نصف"},
-    ],
-  },
-  {
-    name:"Fruits 🍇", emoji:"🍓",
-    words:[
-      {en:"MANGO",es:"Mango",fr:"Mangue",ar:"مانجو"},
-      {en:"PLUM",es:"Ciruela",fr:"Prune",ar:"برقوق"},
-      {en:"FIG",es:"Higo",fr:"Figue",ar:"تين"},
-      {en:"LIME",es:"Lima",fr:"Citron vert",ar:"ليمون أخضر"},
-      {en:"PEAR",es:"Pera",fr:"Poire",ar:"كمثرى"},
-      {en:"KIWI",es:"Kiwi",fr:"Kiwi",ar:"كيوي"},
-      {en:"DATE",es:"Dátil",fr:"Datte",ar:"تمر"},
-      {en:"MELON",es:"Melón",fr:"Melon",ar:"شمام"},
-      {en:"GRAPE",es:"Uva",fr:"Raisin",ar:"عنب"},
-      {en:"BERRY",es:"Baya",fr:"Baie",ar:"توت"},
-    ],
-  },
-  {
-    name:"Sports ⚽", emoji:"🏆",
-    words:[
-      {en:"SWIM",es:"Nadar",fr:"Nager",ar:"سباحة"},
-      {en:"JUMP",es:"Saltar",fr:"Sauter",ar:"قفز"},
-      {en:"RUN",es:"Correr",fr:"Courir",ar:"ركض"},
-      {en:"KICK",es:"Patear",fr:"Frapper",ar:"ركلة"},
-      {en:"GOAL",es:"Gol",fr:"But",ar:"هدف"},
-      {en:"TEAM",es:"Equipo",fr:"Équipe",ar:"فريق"},
-      {en:"WIN",es:"Ganar",fr:"Gagner",ar:"فوز"},
-      {en:"RACE",es:"Carrera",fr:"Course",ar:"سباق"},
-      {en:"GOLF",es:"Golf",fr:"Golf",ar:"جولف"},
-      {en:"SURF",es:"Surf",fr:"Surf",ar:"ركوب الأمواج"},
-    ],
-  },
-  {
-    name:"Home 🏠", emoji:"🛋️",
-    words:[
-      {en:"BED",es:"Cama",fr:"Lit",ar:"سرير"},
-      {en:"SOFA",es:"Sofá",fr:"Canapé",ar:"أريكة"},
-      {en:"DOOR",es:"Puerta",fr:"Porte",ar:"باب"},
-      {en:"LAMP",es:"Lámpara",fr:"Lampe",ar:"مصباح"},
-      {en:"ROOF",es:"Tejado",fr:"Toit",ar:"سقف"},
-      {en:"WALL",es:"Pared",fr:"Mur",ar:"جدار"},
-      {en:"SINK",es:"Lavabo",fr:"Évier",ar:"حوض"},
-      {en:"STAIR",es:"Escalera",fr:"Escalier",ar:"سلم"},
-      {en:"OVEN",es:"Horno",fr:"Four",ar:"فرن"},
-      {en:"GATE",es:"Puerta",fr:"Portail",ar:"بوابة"},
-    ],
-  },
-  {
-    name:"Nature 🌿", emoji:"🌳",
-    words:[
-      {en:"TREE",es:"Árbol",fr:"Arbre",ar:"شجرة"},
-      {en:"LEAF",es:"Hoja",fr:"Feuille",ar:"ورقة"},
-      {en:"ROCK",es:"Roca",fr:"Rocher",ar:"صخرة"},
-      {en:"LAKE",es:"Lago",fr:"Lac",ar:"بحيرة"},
-      {en:"HILL",es:"Colina",fr:"Colline",ar:"تل"},
-      {en:"CAVE",es:"Cueva",fr:"Grotte",ar:"كهف"},
-      {en:"FERN",es:"Helecho",fr:"Fougère",ar:"سرخس"},
-      {en:"MOSS",es:"Musgo",fr:"Mousse",ar:"طحلب"},
-      {en:"SAND",es:"Arena",fr:"Sable",ar:"رمل"},
-      {en:"SOIL",es:"Tierra",fr:"Sol",ar:"تربة"},
-    ],
-  },
-  {
-    name:"Emotions 😊", emoji:"💛",
-    words:[
-      {en:"HAPPY",es:"Feliz",fr:"Heureux",ar:"سعيد"},
-      {en:"SAD",es:"Triste",fr:"Triste",ar:"حزين"},
-      {en:"CALM",es:"Calmado",fr:"Calme",ar:"هادئ"},
-      {en:"LOVE",es:"Amor",fr:"Amour",ar:"حب"},
-      {en:"FEAR",es:"Miedo",fr:"Peur",ar:"خوف"},
-      {en:"JOY",es:"Alegría",fr:"Joie",ar:"فرح"},
-      {en:"HOPE",es:"Esperanza",fr:"Espoir",ar:"أمل"},
-      {en:"PROUD",es:"Orgulloso",fr:"Fier",ar:"فخور"},
-      {en:"KIND",es:"Amable",fr:"Gentil",ar:"لطيف"},
-      {en:"BRAVE",es:"Valiente",fr:"Courageux",ar:"شجاع"},
-    ],
-  },
-  {
-    name:"Tools 🔧", emoji:"🛠️",
-    words:[
-      {en:"SAW",es:"Sierra",fr:"Scie",ar:"منشار"},
-      {en:"NAIL",es:"Clavo",fr:"Clou",ar:"مسمار"},
-      {en:"BOLT",es:"Perno",fr:"Boulon",ar:"برغي"},
-      {en:"WIRE",es:"Cable",fr:"Fil",ar:"سلك"},
-      {en:"DRILL",es:"Taladro",fr:"Perceuse",ar:"مثقاب"},
-      {en:"PUMP",es:"Bomba",fr:"Pompe",ar:"مضخة"},
-      {en:"PIPE",es:"Tubería",fr:"Tuyau",ar:"أنبوب"},
-      {en:"LOCK",es:"Cerradura",fr:"Serrure",ar:"قفل"},
-      {en:"GLUE",es:"Pegamento",fr:"Colle",ar:"غراء"},
-      {en:"HOOK",es:"Gancho",fr:"Crochet",ar:"خطاف"},
-    ],
-  },
-  {
-    name:"Hygiene 🪥", emoji:"🧼",
-    words:[
-      {en:"SOAP",es:"Jabón",fr:"Savon",ar:"صابون"},
-      {en:"COMB",es:"Peine",fr:"Peigne",ar:"مشط"},
-      {en:"BATH",es:"Baño",fr:"Bain",ar:"حمام"},
-      {en:"FOAM",es:"Espuma",fr:"Mousse",ar:"رغوة"},
-      {en:"WIPE",es:"Toallita",fr:"Lingette",ar:"منديل"},
-      {en:"BRUSH",es:"Cepillo",fr:"Brosse",ar:"فرشاة"},
-      {en:"RINSE",es:"Aclarar",fr:"Rincer",ar:"شطف"},
-      {en:"TOWEL",es:"Toalla",fr:"Serviette",ar:"منشفة"},
-      {en:"PASTE",es:"Pasta",fr:"Dentifrice",ar:"معجون"},
-      {en:"TRIM",es:"Recortar",fr:"Couper",ar:"تقليم"},
-    ],
-  },
-  {
-    name:"Music 🎵", emoji:"🎸",
-    words:[
-      {en:"SONG",es:"Canción",fr:"Chanson",ar:"أغنية"},
-      {en:"DRUM",es:"Tambor",fr:"Tambour",ar:"طبل"},
-      {en:"FLUTE",es:"Flauta",fr:"Flûte",ar:"ناي"},
-      {en:"HARP",es:"Arpa",fr:"Harpe",ar:"قيثارة"},
-      {en:"BEAT",es:"Ritmo",fr:"Rythme",ar:"إيقاع"},
-      {en:"NOTE",es:"Nota",fr:"Note",ar:"نوتة"},
-      {en:"TUNE",es:"Melodía",fr:"Mélodie",ar:"لحن"},
-      {en:"BAND",es:"Banda",fr:"Groupe",ar:"فرقة"},
-      {en:"JAZZ",es:"Jazz",fr:"Jazz",ar:"جاز"},
-      {en:"CLAP",es:"Aplauso",fr:"Applaudir",ar:"تصفيق"},
-    ],
-  },
-  {
-    name:"Ocean 🌊", emoji:"🐠",
-    words:[
-      {en:"WAVE",es:"Ola",fr:"Vague",ar:"موجة"},
-      {en:"REEF",es:"Arrecife",fr:"Récif",ar:"شعاب"},
-      {en:"CRAB",es:"Cangrejo",fr:"Crabe",ar:"سرطان البحر"},
-      {en:"SEAL",es:"Foca",fr:"Phoque",ar:"فقمة"},
-      {en:"KELP",es:"Alga",fr:"Algue",ar:"عشب بحري"},
-      {en:"TIDE",es:"Marea",fr:"Marée",ar:"مد وجزر"},
-      {en:"SAND",es:"Arena",fr:"Sable",ar:"رمل"},
-      {en:"ORCA",es:"Orca",fr:"Orque",ar:"حوت قاتل"},
-      {en:"DEEP",es:"Profundo",fr:"Profond",ar:"عميق"},
-      {en:"FOAM",es:"Espuma",fr:"Écume",ar:"رغوة"},
-    ],
-  },
-  {
-    name:"Garden 🌻", emoji:"🌷",
-    words:[
-      {en:"ROSE",es:"Rosa",fr:"Rose",ar:"وردة"},
-      {en:"SEED",es:"Semilla",fr:"Graine",ar:"بذرة"},
-      {en:"SOIL",es:"Tierra",fr:"Sol",ar:"تربة"},
-      {en:"WORM",es:"Gusano",fr:"Ver",ar:"دودة"},
-      {en:"WASP",es:"Avispa",fr:"Guêpe",ar:"دبور"},
-      {en:"BEE",es:"Abeja",fr:"Abeille",ar:"نحلة"},
-      {en:"BUD",es:"Brote",fr:"Bouton",ar:"برعم"},
-      {en:"HERB",es:"Hierba",fr:"Herbe",ar:"عشبة"},
-      {en:"RAKE",es:"Rastrillo",fr:"Râteau",ar:"مجرفة"},
-      {en:"POND",es:"Estanque",fr:"Étang",ar:"بركة"},
-    ],
-  },
-  {
-    name:"Time ⏰", emoji:"📅",
-    words:[
-      {en:"DAWN",es:"Amanecer",fr:"Aube",ar:"فجر"},
-      {en:"NOON",es:"Mediodía",fr:"Midi",ar:"ظهر"},
-      {en:"DUSK",es:"Anochecer",fr:"Crépuscule",ar:"غسق"},
-      {en:"WEEK",es:"Semana",fr:"Semaine",ar:"أسبوع"},
-      {en:"YEAR",es:"Año",fr:"An",ar:"سنة"},
-      {en:"HOUR",es:"Hora",fr:"Heure",ar:"ساعة"},
-      {en:"LATE",es:"Tarde",fr:"Tard",ar:"متأخر"},
-      {en:"SOON",es:"Pronto",fr:"Bientôt",ar:"قريباً"},
-      {en:"PAST",es:"Pasado",fr:"Passé",ar:"ماضٍ"},
-      {en:"NEXT",es:"Próximo",fr:"Prochain",ar:"التالي"},
-    ],
-  },
-  {
-    name:"Health 🏥", emoji:"💊",
-    words:[
-      {en:"PILL",es:"Pastilla",fr:"Pilule",ar:"حبة دواء"},
-      {en:"COLD",es:"Resfriado",fr:"Rhume",ar:"زكام"},
-      {en:"REST",es:"Descanso",fr:"Repos",ar:"راحة"},
-      {en:"DIET",es:"Dieta",fr:"Régime",ar:"نظام غذائي"},
-      {en:"PAIN",es:"Dolor",fr:"Douleur",ar:"ألم"},
-      {en:"CURE",es:"Cura",fr:"Guérison",ar:"علاج"},
-      {en:"GERM",es:"Germen",fr:"Germe",ar:"جرثومة"},
-      {en:"SCAR",es:"Cicatriz",fr:"Cicatrice",ar:"ندبة"},
-      {en:"XRAY",es:"Rayos X",fr:"Radio",ar:"أشعة سينية"},
-      {en:"CAST",es:"Escayola",fr:"Plâtre",ar:"جبيرة"},
-    ],
-  },
-  {
-    name:"Dinosaurs 🦕", emoji:"🦖",
-    words:[
-      {en:"REX",es:"Rex",fr:"Rex",ar:"ريكس"},
-      {en:"CLAW",es:"Garra",fr:"Griffe",ar:"مخلب"},
-      {en:"BONE",es:"Hueso",fr:"Os",ar:"عظمة"},
-      {en:"HORN",es:"Cuerno",fr:"Corne",ar:"قرن"},
-      {en:"NEST",es:"Nido",fr:"Nid",ar:"عش"},
-      {en:"EGG",es:"Huevo",fr:"Œuf",ar:"بيضة"},
-      {en:"HUGE",es:"Enorme",fr:"Énorme",ar:"ضخم"},
-      {en:"ROAR",es:"Rugido",fr:"Rugissement",ar:"زئير"},
-      {en:"TAIL",es:"Cola",fr:"Queue",ar:"ذيل"},
-      {en:"WING",es:"Ala",fr:"Aile",ar:"جناح"},
-    ],
-  },
-  {
-    name:"Celebrations 🎉", emoji:"🎊",
-    words:[
-      {en:"GIFT",es:"Regalo",fr:"Cadeau",ar:"هدية"},
-      {en:"CAKE",es:"Tarta",fr:"Gâteau",ar:"كعكة"},
-      {en:"WISH",es:"Deseo",fr:"Vœu",ar:"أمنية"},
-      {en:"CARD",es:"Tarjeta",fr:"Carte",ar:"بطاقة"},
-      {en:"SONG",es:"Canción",fr:"Chanson",ar:"أغنية"},
-      {en:"CLAP",es:"Aplauso",fr:"Applaudir",ar:"تصفيق"},
-      {en:"MASK",es:"Máscara",fr:"Masque",ar:"قناع"},
-      {en:"FLAG",es:"Bandera",fr:"Drapeau",ar:"علم"},
-      {en:"BELL",es:"Campana",fr:"Cloche",ar:"جرس"},
-      {en:"DRUM",es:"Tambor",fr:"Tambour",ar:"طبل"},
+      { en:"RED",    es:"Rojo",     fr:"Rouge",   ar:"أحمر", de:"Rot",   it:"Rosso",  pt:"Vermelho",ru:"Красный",zh:"红",  ja:"アカ",  ko:"빨강", bn:"লাল",    hi:"लाल",    nl:"Rood",  pl:"Czerwony", no:"Rød",    sv:"Röd"   },
+      { en:"BLUE",   es:"Azul",     fr:"Bleu",    ar:"أزرق", de:"Blau",  it:"Blu",    pt:"Azul",    ru:"Синий",  zh:"蓝",  ja:"アオ",  ko:"파랑", bn:"নীল",    hi:"नीला",   nl:"Blauw", pl:"Niebieski",no:"Blå",    sv:"Blå"   },
+      { en:"GREEN",  es:"Verde",    fr:"Vert",    ar:"أخضر", de:"Grün",  it:"Verde",  pt:"Verde",   ru:"Зелёный",zh:"绿",  ja:"ミドリ",ko:"초록", bn:"সবুজ",   hi:"हरा",    nl:"Groen", pl:"Zielony",  no:"Grønn",  sv:"Grön"  },
+      { en:"PINK",   es:"Rosa",     fr:"Rose",    ar:"وردي", de:"Rosa",  it:"Rosa",   pt:"Rosa",    ru:"Розовый",zh:"粉",  ja:"ピンク",ko:"분홍", bn:"গোলাপী", hi:"गुलाबी", nl:"Roze",  pl:"Różowy",   no:"Rosa",   sv:"Rosa"  },
+      { en:"GOLD",   es:"Oro",      fr:"Or",      ar:"ذهبي", de:"Gold",  it:"Oro",    pt:"Ouro",    ru:"Золото", zh:"金",  ja:"キン",  ko:"금색", bn:"সোনালী", hi:"सोना",   nl:"Goud",  pl:"Złoto",    no:"Gull",   sv:"Guld"  },
+      { en:"WHITE",  es:"Blanco",   fr:"Blanc",   ar:"أبيض", de:"Weiß",  it:"Bianco", pt:"Branco",  ru:"Белый",  zh:"白",  ja:"シロ",  ko:"흰색", bn:"সাদা",   hi:"सफ़ेद",  nl:"Wit",   pl:"Biały",    no:"Hvit",   sv:"Vit"   },
     ],
   },
 ];
 
-const LANG_LABELS = { es:"Español 🇪🇸", fr:"Français 🇫🇷", ar:"العربية 🇸🇦" };
-const GRID_SIZE = 12;  // slightly larger grid for 10 words
-const WORDS_PER_ROUND = 10;
+const GRID_SIZE = 10;
 
-// ─── Grid builder ──────────────────────────────────────────────────────────
+// ── Grid builder ────────────────────────────────────────────────────────────
 function buildGrid(words) {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const grid = Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(""));
+  const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(""));
   const placed = [];
   const DIRS = [[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
-
   for (const wordObj of words) {
     const word = wordObj.en;
-    let success=false, tries=0;
-    while (!success && tries<300) {
-      tries++;
-      const [dr,dc]=DIRS[Math.floor(Math.random()*DIRS.length)];
-      const r=Math.floor(Math.random()*GRID_SIZE);
-      const c=Math.floor(Math.random()*GRID_SIZE);
-      const cells=[]; let valid=true;
-      for (let i=0;i<word.length;i++) {
+    let ok = false, tries = 0;
+    while (!ok && tries++ < 200) {
+      const [dr,dc] = DIRS[Math.floor(Math.random()*DIRS.length)];
+      const r = Math.floor(Math.random()*GRID_SIZE);
+      const c = Math.floor(Math.random()*GRID_SIZE);
+      const cells = []; let valid = true;
+      for (let i = 0; i < word.length; i++) {
         const nr=r+dr*i, nc=c+dc*i;
-        if (nr<0||nr>=GRID_SIZE||nc<0||nc>=GRID_SIZE){valid=false;break;}
-        if (grid[nr][nc]!==""&&grid[nr][nc]!==word[i]){valid=false;break;}
+        if (nr<0||nr>=GRID_SIZE||nc<0||nc>=GRID_SIZE||
+           (grid[nr][nc]!==""&&grid[nr][nc]!==word[i])){valid=false;break;}
         cells.push({r:nr,c:nc});
       }
-      if (valid) {
-        cells.forEach(({r,c},i)=>{grid[r][c]=word[i];});
-        placed.push({word:wordObj,cells});
-        success=true;
-      }
+      if (valid) { cells.forEach(({r,c},i)=>{grid[r][c]=word[i];}); placed.push({word:wordObj,cells}); ok=true; }
     }
   }
-  for (let r=0;r<GRID_SIZE;r++)
-    for (let c=0;c<GRID_SIZE;c++)
-      if (!grid[r][c]) grid[r][c]=letters[Math.floor(Math.random()*letters.length)];
+  for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++)
+    if (!grid[r][c]) grid[r][c]=letters[Math.floor(Math.random()*letters.length)];
   return {grid,placed};
 }
 
-function Confetti({ active }) {
-  const pieces=Array.from({length:20},(_,i)=>({
-    id:i,x:Math.random()*100,
+// ── Confetti ────────────────────────────────────────────────────────────────
+function Confetti({active}) {
+  const ps = Array.from({length:20},(_,i)=>({id:i,x:Math.random()*100,
     color:[C.blue,C.red,C.yellow,C.green,C.magenta,C.cyan][i%6],
-    delay:Math.random()*0.4,size:Math.random()*10+7,
-  }));
+    delay:Math.random()*0.4,size:Math.random()*10+7}));
   if (!active) return null;
+  return <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+    {ps.map(p=><motion.div key={p.id} className="absolute rounded-sm top-0"
+      style={{left:`${p.x}%`,width:p.size,height:p.size,background:p.color}}
+      initial={{y:-20,opacity:1,rotate:0}} animate={{y:"110vh",opacity:0,rotate:720}}
+      transition={{duration:1.5+Math.random(),delay:p.delay,ease:"easeIn"}}/>)}
+  </div>;
+}
+
+// ── Dropdown genérico ────────────────────────────────────────────────────────
+function Dropdown({label, children, minWidth=160}) {
+  const [open,setOpen]=useState(false);
+  const ref=useRef(null);
+  useEffect(()=>{
+    const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
+    document.addEventListener("mousedown",h); return()=>document.removeEventListener("mousedown",h);
+  },[]);
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {pieces.map(p=>(
-        <motion.div key={p.id} className="absolute rounded-sm top-0"
-          style={{left:`${p.x}%`,width:p.size,height:p.size,background:p.color}}
-          initial={{y:-20,opacity:1,rotate:0}} animate={{y:"110vh",opacity:0,rotate:720}}
-          transition={{duration:1.5+Math.random(),delay:p.delay,ease:"easeIn"}}
-        />
-      ))}
+    <div ref={ref} style={{position:"relative",zIndex:40}}>
+      <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.97}} onClick={()=>setOpen(o=>!o)}
+        style={{display:"flex",alignItems:"center",gap:8,padding:"10px 16px",borderRadius:999,
+          border:"2.5px solid white",background:"rgba(255,255,255,0.92)",backdropFilter:"blur(8px)",
+          boxShadow:"0 4px 16px rgba(21,101,192,0.14)",cursor:"pointer",
+          fontFamily:"var(--font-display,'Nunito',sans-serif)",fontWeight:700,fontSize:14,color:C.blue,
+          whiteSpace:"nowrap",minWidth,justifyContent:"space-between"}}>
+        {label}
+        <motion.span animate={{rotate:open?180:0}} transition={{duration:0.2}} style={{display:"flex"}}>
+          <ChevronDown size={13}/>
+        </motion.span>
+      </motion.button>
+      <AnimatePresence>
+        {open&&<motion.div initial={{opacity:0,y:-8,scale:0.97}} animate={{opacity:1,y:0,scale:1}}
+          exit={{opacity:0,y:-8,scale:0.97}} transition={{duration:0.15}}
+          style={{position:"absolute",top:"calc(100% + 8px)",left:0,minWidth:220,
+            background:"white",borderRadius:18,border:"2px solid rgba(21,101,192,0.12)",
+            boxShadow:"0 16px 48px rgba(21,101,192,0.18)",overflow:"hidden",
+            maxHeight:300,overflowY:"auto",scrollbarWidth:"thin"}}>
+          {children(()=>setOpen(false))}
+        </motion.div>}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ─── Main WordSearch ───────────────────────────────────────────────────────
-export default function WordSearch() {
-  const [packIdx,    setPackIdx]    = useState(0);
-  const [lang,       setLang]       = useState("es");
-  const [gameData,   setGameData]   = useState(null);
-  const [selecting,  setSelecting]  = useState(false);
-  const [selection,  setSelection]  = useState([]);
-  const [found,      setFound]      = useState([]);
-  const [confetti,   setConfetti]   = useState(false);
-  const [won,        setWon]        = useState(false);
-  const gridRef = useRef(null);
+function DropdownItem({active,onClick,children}) {
+  return <button onClick={onClick}
+    style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"9px 14px",
+      border:"none",background:active?C.blueSoft:"transparent",cursor:"pointer",
+      fontFamily:"var(--font-body,'Nunito',sans-serif)",fontWeight:active?700:500,fontSize:13,
+      color:active?C.blue:"#374151",textAlign:"left",
+      borderLeft:active?`3px solid ${C.blue}`:"3px solid transparent"}}
+    onMouseEnter={e=>{if(!active)e.currentTarget.style.background="#F0F9FF";}}
+    onMouseLeave={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
+    {children}
+    {active&&<span style={{width:6,height:6,borderRadius:"50%",background:C.blue,marginLeft:"auto",flexShrink:0}}/>}
+  </button>;
+}
 
-  const pack = ALL_PACKS[packIdx];
+// ── Main ────────────────────────────────────────────────────────────────────
+export default function WordSearch({ lang:propLang, onLangChange }) {
+  const [packIdx,setPackIdx] = useState(0);
+  const [localLang,setLocalLang] = useState("es");
+  const lang = propLang || localLang;
+  const setLang = v => { setLocalLang(v); onLangChange?.(v); };
+
+  const [gameData,setGameData] = useState(null);
+  const [selecting,setSelecting] = useState(false);
+  const [selection,setSelection] = useState([]);
+  const [found,setFound] = useState([]);
+  const [confetti,setConfetti] = useState(false);
+  const [won,setWon] = useState(false);
+
+  const langMeta = LANGUAGES.find(l=>l.code===lang)||LANGUAGES[0];
+  const pack = PACKS[packIdx];
 
   const startGame = useCallback((pIdx=packIdx)=>{
-    // Shuffle and pick WORDS_PER_ROUND words
-    const shuffled=[...ALL_PACKS[pIdx].words].sort(()=>Math.random()-0.5);
-    const chosen=shuffled.slice(0,WORDS_PER_ROUND);
-    const data=buildGrid(chosen);
-    setGameData(data); setFound([]); setSelection([]); setSelecting(false); setWon(false);
+    setGameData(buildGrid(PACKS[pIdx].words));
+    setFound([]); setSelection([]); setSelecting(false); setWon(false);
   },[packIdx]);
 
   useEffect(()=>{ startGame(packIdx); },[packIdx]);
 
-  // Get grid cell r,c from a DOM element
-  const getCellCoords = (el) => {
-    if (!el) return null;
-    const r = el.dataset.r, c = el.dataset.c;
-    if (r===undefined||c===undefined) return null;
-    return {r:parseInt(r),c:parseInt(c)};
-  };
-
-  // Get cell from touch position
-  const getCellFromTouch = (touch) => {
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    return getCellCoords(el);
-  };
-
-  const startSelection = (r,c) => {
-    setSelecting(true);
-    setSelection([{r,c}]);
-  };
-
-  const extendSelection = (r,c) => {
-    if (!selecting||!selection.length) return;
-    const first=selection[0];
-    const dr=Math.sign(r-first.r), dc=Math.sign(c-first.c);
-    const len=Math.max(Math.abs(r-first.r),Math.abs(c-first.c))+1;
-    if (dr!==0&&dc!==0&&Math.abs(r-first.r)!==Math.abs(c-first.c)) return;
-    const newSel=[];
-    for (let i=0;i<len;i++) newSel.push({r:first.r+dr*i,c:first.c+dc*i});
-    setSelection(newSel);
-  };
-
-  const endSelection = () => {
-    if (!selecting) return;
-    setSelecting(false);
-    checkSelection(selection);
-    setSelection([]);
-  };
-
-  const checkSelection = (sel) => {
+  const checkSel = sel=>{
     if (!gameData||sel.length<2) return;
-    const selKey=sel.map(c=>`${c.r},${c.c}`).join("|");
-    const revKey=[...sel].reverse().map(c=>`${c.r},${c.c}`).join("|");
+    const k  = sel.map(c=>`${c.r},${c.c}`).join("|");
+    const rk = [...sel].reverse().map(c=>`${c.r},${c.c}`).join("|");
     gameData.placed.forEach(({word,cells},wi)=>{
       if (found.includes(wi)) return;
-      const wKey=cells.map(c=>`${c.r},${c.c}`).join("|");
-      if (selKey===wKey||revKey===wKey) {
-        const nf=[...found,wi];
-        setFound(nf);
-        if (nf.length===gameData.placed.length) {
-          setWon(true); setConfetti(true);
-          setTimeout(()=>setConfetti(false),2500);
-        }
+      const wk = cells.map(c=>`${c.r},${c.c}`).join("|");
+      if (k===wk||rk===wk){
+        const nf=[...found,wi]; setFound(nf);
+        if (nf.length===gameData.placed.length){setWon(true);setConfetti(true);setTimeout(()=>setConfetti(false),2500);}
       }
     });
   };
 
-  const getCellStyle = (r,c) => {
+  const cellStyle=(r,c)=>{
     if (!gameData) return {};
-    for (const wi of found) {
-      if (gameData.placed[wi].cells.some(cell=>cell.r===r&&cell.c===c)) {
-        const col=WORD_COLORS[wi%WORD_COLORS.length];
-        return {background:col.bg,color:col.text,fontWeight:700};
+    for (const wi of found){
+      if (gameData.placed[wi].cells.some(x=>x.r===r&&x.c===c)){
+        const col=WORD_COLORS[wi%WORD_COLORS.length]; return {background:col.bg,color:col.text,fontWeight:700};
       }
     }
-    if (selection.some(cell=>cell.r===r&&cell.c===c))
-      return {background:C.yellow+"80",color:C.blue,fontWeight:700};
+    if (selection.some(x=>x.r===r&&x.c===c)) return {background:C.yellow+"80",color:C.blue,fontWeight:700};
     return {};
   };
 
-  // ── Touch event handlers with preventDefault ──────────────────────────
-  const handleTouchStart = (e) => {
-    e.preventDefault();
-    const touch=e.touches[0];
-    const coords=getCellFromTouch(touch);
-    if (coords) startSelection(coords.r,coords.c);
+  const onStart=(r,c)=>{setSelecting(true);setSelection([{r,c}]);};
+  const onEnter=(r,c)=>{
+    if (!selecting) return;
+    const f=selection[0]; if (!f) return;
+    const dr=Math.sign(r-f.r),dc=Math.sign(c-f.c);
+    const len=Math.max(Math.abs(r-f.r),Math.abs(c-f.c))+1;
+    if (dr!==0&&dc!==0&&Math.abs(r-f.r)!==Math.abs(c-f.c)) return;
+    setSelection(Array.from({length:len},(_,i)=>({r:f.r+dr*i,c:f.c+dc*i})));
   };
-
-  const handleTouchMove = (e) => {
-    e.preventDefault();
-    const touch=e.touches[0];
-    const coords=getCellFromTouch(touch);
-    if (coords) extendSelection(coords.r,coords.c);
-  };
-
-  const handleTouchEnd = (e) => {
-    e.preventDefault();
-    endSelection();
-  };
-
-  // Attach touch events with {passive:false} via useEffect (required for preventDefault)
-  useEffect(()=>{
-    const el=gridRef.current;
-    if (!el) return;
-    el.addEventListener("touchstart",handleTouchStart,{passive:false});
-    el.addEventListener("touchmove",handleTouchMove,{passive:false});
-    el.addEventListener("touchend",handleTouchEnd,{passive:false});
-    return ()=>{
-      el.removeEventListener("touchstart",handleTouchStart);
-      el.removeEventListener("touchmove",handleTouchMove);
-      el.removeEventListener("touchend",handleTouchEnd);
-    };
-  },[selecting,selection,found,gameData]);
+  const onEnd=()=>{ if (!selecting) return; setSelecting(false); checkSel(selection); setSelection([]); };
 
   return (
     <div className="min-h-screen" style={{background:"linear-gradient(150deg,#E3F2FD 0%,#FFFDE7 50%,#E8F5E9 100%)"}}>
@@ -600,133 +263,112 @@ export default function WordSearch() {
 
       {/* Header */}
       <div className="text-center py-10 px-4">
-        <div className="text-6xl mb-3">🔍</div>
-        <h1 className="font-display text-4xl md:text-5xl mb-2" style={{color:C.blue}}>Word Search</h1>
-        <p className="font-body text-slate-500 text-lg">Find all 10 hidden English words! 🕵️</p>
-        <p className="font-body text-slate-400 text-sm mt-1">{ALL_PACKS.length} themes available</p>
+        <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring"}}
+          className="text-6xl mb-3 inline-block">🔍</motion.div>
+        <motion.h1 initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}}
+          className="font-display text-4xl md:text-5xl mb-2" style={{color:C.blue}}>Word Search</motion.h1>
+        <p className="font-body text-slate-500 text-lg">
+          Find the English words — see them in {langMeta.flag} {langMeta.label}! 🕵️
+        </p>
       </div>
 
-      {/* Pack selector — scrollable row */}
-      <div className="px-4 mb-3">
-        <div className="flex gap-2 overflow-x-auto pb-2 justify-start md:justify-center">
-          {ALL_PACKS.map((p,i)=>(
-            <button key={i} onClick={()=>setPackIdx(i)}
-              className="flex-shrink-0 px-4 py-2 rounded-full font-display text-sm border-2 transition-all"
-              style={{
-                background:packIdx===i?C.blue:"white",
-                color:packIdx===i?"white":"#6B7280",
-                borderColor:packIdx===i?C.blue:"#E2E8F0",
-              }}
-            >{p.emoji} {p.name}</button>
+      {/* ── Controls ── */}
+      <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:10,padding:"0 16px 24px"}}>
+
+        {/* Pack dropdown */}
+        <Dropdown minWidth={185} label={<><span style={{fontSize:18}}>{pack.emoji}</span><span>{pack.name}</span></>}>
+          {close=>PACKS.map((p,i)=>(
+            <DropdownItem key={i} active={packIdx===i} onClick={()=>{setPackIdx(i);startGame(i);close();}}>
+              <span style={{fontSize:22}}>{p.emoji}</span><span>{p.name}</span>
+            </DropdownItem>
           ))}
-        </div>
+        </Dropdown>
+
+        {/* Lang dropdown */}
+        <Dropdown minWidth={175} label={<><Globe size={14}/><span style={{fontSize:18}}>{langMeta.flag}</span><span>{langMeta.label}</span></>}>
+          {close=>[
+            <div key="hdr" style={{padding:"8px 14px 6px",borderBottom:"1.5px solid #EFF6FF",
+              fontFamily:"var(--font-display,'Nunito',sans-serif)",fontWeight:700,fontSize:10,
+              color:C.blue,letterSpacing:"0.08em",textTransform:"uppercase",display:"flex",alignItems:"center",gap:5}}>
+              <Globe size={10}/> Translation language
+            </div>,
+            ...LANGUAGES.map(l=>(
+              <DropdownItem key={l.code} active={lang===l.code} onClick={()=>{setLang(l.code);close();}}>
+                <span style={{fontSize:18,lineHeight:1,flexShrink:0}}>{l.flag}</span>
+                <span>{l.label}</span>
+              </DropdownItem>
+            ))
+          ]}
+        </Dropdown>
+
+        {/* New puzzle */}
+        <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.96}} onClick={()=>startGame()}
+          style={{display:"flex",alignItems:"center",gap:6,padding:"10px 20px",borderRadius:999,
+            border:"2.5px solid white",background:C.red,color:"white",cursor:"pointer",
+            fontFamily:"var(--font-display,'Nunito',sans-serif)",fontWeight:700,fontSize:14,
+            boxShadow:"0 4px 16px rgba(229,57,53,0.3)",whiteSpace:"nowrap"}}>
+          <RotateCcw size={14}/> New puzzle
+        </motion.button>
       </div>
 
-      {/* Lang picker */}
-      <div className="flex justify-center mb-6">
-        <div className="flex gap-1 bg-white/80 rounded-full p-1 shadow-sm">
-          {Object.entries(LANG_LABELS).map(([code,label])=>(
-            <button key={code} onClick={()=>setLang(code)}
-              className="px-3 py-1.5 rounded-full font-display text-xs transition-all"
-              style={{background:lang===code?C.green:"transparent",color:lang===code?"white":"#6B7280"}}
-            >{label}</button>
-          ))}
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 pb-20">
-        {won && (
-          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
-            className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
-            style={{background:`linear-gradient(135deg,${C.green},#2E7D32)`}}
-          >🏆 You found all the words! Amazing! 🎉</motion.div>
-        )}
+      <div className="max-w-4xl mx-auto px-4 pb-20">
+        {won&&<motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
+          className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
+          style={{background:`linear-gradient(135deg,${C.green},#2E7D32)`}}>
+          🏆 You found all the words! Amazing! 🎉
+        </motion.div>}
 
         <div className="grid md:grid-cols-2 gap-8 items-start">
+
           {/* Grid */}
           <div>
-            {/* MOBILE FIX: touch-action:none prevents scroll during swipe */}
-            <div
-              ref={gridRef}
-              className="grid gap-0.5 p-2 rounded-3xl shadow-xl border-4 border-white select-none"
-              style={{
-                gridTemplateColumns:`repeat(${GRID_SIZE},1fr)`,
-                background:C.blueSoft,
-                touchAction:"none",       /* ← prevents page scroll on touch */
-                userSelect:"none",
-                WebkitUserSelect:"none",
-              }}
-              onMouseLeave={endSelection}
-            >
-              {gameData && gameData.grid.map((row,r)=>
-                row.map((letter,c)=>(
-                  <div
-                    key={`${r}-${c}`}
-                    data-r={r}
-                    data-c={c}
-                    className="aspect-square flex items-center justify-center rounded-md font-display cursor-pointer transition-colors"
-                    style={{
-                      background:"white",
-                      color:C.blue,
-                      fontSize:"clamp(9px,1.8vw,14px)",
-                      ...getCellStyle(r,c),
-                    }}
-                    onMouseDown={()=>startSelection(r,c)}
-                    onMouseEnter={()=>extendSelection(r,c)}
-                    onMouseUp={endSelection}
-                  >
-                    {letter}
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.96}}
-                onClick={()=>startGame()}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-md"
-                style={{background:C.red}}
-              ><RotateCcw size={16}/> New puzzle</motion.button>
+            <div className="grid gap-1 p-3 rounded-3xl shadow-xl border-4 border-white select-none"
+              style={{gridTemplateColumns:`repeat(${GRID_SIZE},1fr)`,background:C.blueSoft}}
+              onMouseLeave={onEnd} onTouchEnd={onEnd}>
+              {gameData&&gameData.grid.map((row,r)=>row.map((letter,c)=>(
+                <motion.div key={`${r}-${c}`}
+                  className="aspect-square flex items-center justify-center rounded-lg font-display cursor-pointer transition-all"
+                  style={{background:"white",color:C.blue,fontSize:"clamp(11px,2vw,16px)",...cellStyle(r,c)}}
+                  onMouseDown={()=>onStart(r,c)} onMouseEnter={()=>onEnter(r,c)}
+                  onMouseUp={onEnd} onTouchStart={()=>onStart(r,c)}>
+                  {letter}
+                </motion.div>
+              )))}
             </div>
           </div>
 
           {/* Word list */}
           <div>
             <h3 className="font-display text-xl mb-4" style={{color:C.blue}}>
-              Find these {WORDS_PER_ROUND} words ({found.length}/{gameData?.placed.length??0})
+              Find these words ({found.length}/{pack.words.length})
             </h3>
             <div className="space-y-2">
-              {gameData && gameData.placed.map(({word},wi)=>{
+              {gameData&&gameData.placed.map(({word},wi)=>{
                 const isFound=found.includes(wi);
                 const col=WORD_COLORS[wi%WORD_COLORS.length];
-                return (
-                  <motion.div key={wi}
-                    initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} transition={{delay:wi*0.04}}
-                    className="flex items-center gap-4 p-3 rounded-2xl border-2 transition-all"
-                    style={{background:isFound?col.bg:"white",borderColor:isFound?col.border:"#E2E8F0"}}
-                  >
-                    {isFound
-                      ? <CheckCircle size={18} style={{color:col.text,flexShrink:0}}/>
-                      : <div className="w-4 h-4 rounded-full border-2 border-slate-300 flex-shrink-0"/>
-                    }
-                    <div className="flex-1 min-w-0">
-                      <div className="font-display text-base" style={{color:isFound?col.text:C.blue}}>
-                        {isFound ? word.en : "?".repeat(word.en.length)}
-                      </div>
-                      <div className="font-body text-sm text-slate-500 truncate" dir={lang==="ar"?"rtl":"ltr"}>
-                        {word[lang]}
-                      </div>
+                return <motion.div key={wi} initial={{opacity:0,x:20}} animate={{opacity:1,x:0}}
+                  transition={{delay:wi*0.06}}
+                  className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all"
+                  style={{background:isFound?col.bg:"white",borderColor:isFound?col.border:"#E2E8F0"}}>
+                  {isFound
+                    ? <CheckCircle size={18} style={{color:col.text}}/>
+                    : <div className="w-4 h-4 rounded-full border-2 border-slate-300"/>}
+                  <div className="flex-1">
+                    <div className="font-display text-lg" style={{color:isFound?col.text:C.blue}}>
+                      {isFound?word.en:"?".repeat(word.en.length)}
                     </div>
-                    {isFound && <Star size={14} style={{color:col.text,flexShrink:0}}/>}
-                  </motion.div>
-                );
+                    <div className="font-body text-sm text-slate-500" dir={langMeta.dir}>
+                      {word[lang]||word.en}
+                    </div>
+                  </div>
+                  {isFound&&<Star size={16} style={{color:col.text}}/>}
+                </motion.div>;
               })}
             </div>
-
             <div className="mt-6 rounded-3xl p-4 border-2 border-white shadow-sm" style={{background:C.yellowSoft}}>
-              <p className="font-display text-sm mb-1" style={{color:C.yellow}}>How to play</p>
+              <p className="font-display text-sm mb-1" style={{color:C.yellow}}>💡 How to play</p>
               <p className="font-body text-xs text-slate-600">
-                Click and drag (or swipe on touch screens) to select letters in a straight line — horizontal, vertical, or diagonal. Works on iPad and phones!
+                Click and drag to select a word. Words go in any direction — horizontal, vertical or diagonal!
               </p>
             </div>
           </div>

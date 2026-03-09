@@ -1,464 +1,458 @@
 /**
  * src/pages/AnimalPuzzle.jsx — Kiddsy
- * ─────────────────────────────────────────────────────────────────────────
- * Sticker-puzzle: each tile clips a portion of the large inline SVG / icon.
- * Zero external images — instant load, pixel-perfect on iPad.
+ * ────────────────────────────────────────────────────────
+ * ✅ 16 idiomas: ES FR AR DE IT PT RU ZH JA KO BN HI NL PL NO SV
+ * ✅ Acepta prop  lang / onLangChange  desde App.jsx
+ * ✅ Dropdown elegante para idioma (reemplaza los 3 flag-buttons)
+ * ✅ Lógica de puzzle, fotos Unsplash y estilo "Burbuja" intactos
+ * ────────────────────────────────────────────────────────
  */
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, ChevronLeft, ChevronRight, Volume2, Puzzle } from "lucide-react";
-import { getAnimalConfig, StickerBadge } from "../components/KiddsyIcons.jsx";
-
-
-// --- Componente Confetti (Añádelo para evitar el ReferenceError) ---
-function Confetti({ active }) {
-  const particles = Array.from({ length: 25 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    delay: Math.random() * 0.5,
-    size: Math.random() * 8 + 6,
-    color: ["#F9A825", "#E53935", "#43A047", "#1565C0", "#D81B60", "#00ACC1"][i % 6],
-  }));
-
-  if (!active) return null;
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 999, overflow: 'hidden' }}>
-      {particles.map(p => (
-        <motion.div
-          key={p.id}
-          style={{
-            position: 'absolute',
-            left: `${p.x}%`,
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-            borderRadius: '2px',
-          }}
-          initial={{ y: -20, opacity: 1, rotate: 0 }}
-          animate={{ y: "110vh", opacity: 0, rotate: 720 }}
-          transition={{ duration: 2, delay: p.delay, ease: "easeIn" }}
-        />
-      ))}
-    </div>
-  );
-}
+import { RotateCcw, ChevronLeft, ChevronRight, Volume2, Globe, ChevronDown } from "lucide-react";
 
 const C = {
   blue:"#1565C0", blueSoft:"#E3F2FD", red:"#E53935",
   yellow:"#F9A825", yellowSoft:"#FFFDE7",
-  green:"#43A047",  magenta:"#D81B60", cyan:"#00ACC1",
+  green:"#43A047", greenSoft:"#E8F5E9", magenta:"#D81B60", cyan:"#00ACC1",
 };
-const SPRING = { type:"spring", stiffness:380, damping:16 };
 
-const ANIMALS = [
-  { name:"Lion",     es:"León",       fr:"Lion",        ar:"أسد",          fact:"Lions can sleep 20 hours a day!" },
-  { name:"Elephant", es:"Elefante",   fr:"Éléphant",    ar:"فيل",          fact:"Largest land animal on Earth!" },
-  { name:"Penguin",  es:"Pingüino",   fr:"Manchot",     ar:"بطريق",        fact:"Can't fly but amazing swimmers!" },
-  { name:"Giraffe",  es:"Jirafa",     fr:"Girafe",      ar:"زرافة",        fact:"Tallest animals — up to 6 metres!" },
-  { name:"Tiger",    es:"Tigre",      fr:"Tigre",       ar:"نمر",          fact:"No two tigers have the same stripes!" },
-  { name:"Dolphin",  es:"Delfín",     fr:"Dauphin",     ar:"دلفين",        fact:"They call each other by name!" },
-  { name:"Panda",    es:"Panda",      fr:"Panda",       ar:"الباندا",      fact:"Eats 40 kg of bamboo a day!" },
-  { name:"Parrot",   es:"Loro",       fr:"Perroquet",   ar:"ببغاء",        fact:"Can learn hundreds of words!" },
-  { name:"Zebra",    es:"Cebra",      fr:"Zèbre",       ar:"حمار وحشي",   fact:"Every zebra has unique stripes!" },
-  { name:"Owl",      es:"Búho",       fr:"Hibou",       ar:"بومة",         fact:"Can rotate head 270 degrees!" },
-  { name:"Fox",      es:"Zorro",      fr:"Renard",      ar:"ثعلب",         fact:"Uses Earth's magnetic field to hunt!" },
-  { name:"Koala",    es:"Koala",      fr:"Koala",       ar:"كوالا",        fact:"Sleeps 22 hours a day!" },
-  { name:"Flamingo", es:"Flamenco",   fr:"Flamant rose",ar:"نحام",         fact:"Pink because of the food they eat!" },
-  { name:"Bear",     es:"Oso",        fr:"Ours",        ar:"دب",           fact:"Can smell food from 32 km away!" },
-  { name:"Cheetah",  es:"Guepardo",   fr:"Guépard",     ar:"الفهد",        fact:"Fastest land animal — 112 km/h!" },
-  { name:"Turtle",   es:"Tortuga",    fr:"Tortue",      ar:"سلحفاة",       fact:"Some live for 100+ years!" },
-  { name:"Wolf",     es:"Lobo",       fr:"Loup",        ar:"ذئب",          fact:"Howl to communicate across km!" },
-  { name:"Frog",     es:"Rana",       fr:"Grenouille",  ar:"ضفدع",         fact:"A group of frogs is called an army!" },
-  { name:"Horse",    es:"Caballo",    fr:"Cheval",      ar:"حصان",         fact:"Can sleep standing up!" },
-  { name:"Peacock",  es:"Pavo real",  fr:"Paon",        ar:"طاووس",        fact:"Only males have those tail feathers!" },
-  { name:"Octopus",  es:"Pulpo",      fr:"Pieuvre",     ar:"أخطبوط",       fact:"Three hearts and blue blood!" },
-  { name:"Eagle",    es:"Águila",     fr:"Aigle",       ar:"نسر",          fact:"Spots prey from 3 km away!" },
-  { name:"Rabbit",   es:"Conejo",     fr:"Lapin",       ar:"أرنب",         fact:"Their teeth never stop growing!" },
-  { name:"Shark",    es:"Tiburón",    fr:"Requin",      ar:"قرش",          fact:"On Earth for 450 million years!" },
-  { name:"Monkey",   es:"Mono",       fr:"Singe",       ar:"قرد",          fact:"Use 30+ sounds to communicate!" },
+// ── 16 idiomas ─────────────────────────────────────────────────────────────
+const LANGUAGES = [
+  { code:"es", label:"Español",    flag:"🇪🇸", dir:"ltr", voice:"es-ES" },
+  { code:"fr", label:"Français",   flag:"🇫🇷", dir:"ltr", voice:"fr-FR" },
+  { code:"ar", label:"العربية",    flag:"🇸🇦", dir:"rtl", voice:"ar-SA" },
+  { code:"de", label:"Deutsch",    flag:"🇩🇪", dir:"ltr", voice:"de-DE" },
+  { code:"it", label:"Italiano",   flag:"🇮🇹", dir:"ltr", voice:"it-IT" },
+  { code:"pt", label:"Português",  flag:"🇧🇷", dir:"ltr", voice:"pt-BR" },
+  { code:"ru", label:"Русский",    flag:"🇷🇺", dir:"ltr", voice:"ru-RU" },
+  { code:"zh", label:"中文",        flag:"🇨🇳", dir:"ltr", voice:"zh-CN" },
+  { code:"ja", label:"日本語",      flag:"🇯🇵", dir:"ltr", voice:"ja-JP" },
+  { code:"ko", label:"한국어",      flag:"🇰🇷", dir:"ltr", voice:"ko-KR" },
+  { code:"bn", label:"বাংলা",     flag:"🇧🇩", dir:"ltr", voice:"bn-BD" },
+  { code:"hi", label:"हिंदी",     flag:"🇮🇳", dir:"ltr", voice:"hi-IN" },
+  { code:"nl", label:"Nederlands", flag:"🇳🇱", dir:"ltr", voice:"nl-NL" },
+  { code:"pl", label:"Polski",     flag:"🇵🇱", dir:"ltr", voice:"pl-PL" },
+  { code:"no", label:"Norsk",      flag:"🇳🇴", dir:"ltr", voice:"nb-NO" },
+  { code:"sv", label:"Svenska",    flag:"🇸🇪", dir:"ltr", voice:"sv-SE" },
 ];
 
-const LANG_NAMES  = { es:"Español 🇪🇸", fr:"Français 🇫🇷", ar:"العربية 🇸🇦" };
-const VOICE_LANG  = { es:"es-ES", fr:"fr-FR", ar:"ar-SA" };
-const GALLERY_PER_PAGE = 8;
-const GRID_PX  = 320;   // puzzle grid width/height in px
+// ── Animales — nombres en 16 idiomas ────────────────────────────────────────
+const ANIMALS = [
+  {
+    name:"Lion", emoji:"🦁", color:"#F9A825",
+    img:"https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=600&h=600&fit=crop&auto=format",
+    fact:"Lions can sleep up to 20 hours a day!",
+    es:"León",    fr:"Lion",     ar:"أسد",    de:"Löwe",    it:"Leone",   pt:"Leão",
+    ru:"Лев",     zh:"狮子",     ja:"ライオン",ko:"사자",    bn:"সিংহ",   hi:"शेर",
+    nl:"Leeuw",   pl:"Lew",      no:"Løve",   sv:"Lejon",
+  },
+  {
+    name:"Elephant", emoji:"🐘", color:"#78909C",
+    img:"https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=600&h=600&fit=crop&auto=format",
+    fact:"Elephants are the largest land animals on Earth!",
+    es:"Elefante", fr:"Éléphant", ar:"فيل",  de:"Elefant",  it:"Elefante",pt:"Elefante",
+    ru:"Слон",     zh:"大象",      ja:"ゾウ",  ko:"코끼리",   bn:"হাতি",   hi:"हाथी",
+    nl:"Olifant",  pl:"Słoń",     no:"Elefant",sv:"Elefant",
+  },
+  {
+    name:"Penguin", emoji:"🐧", color:"#37474F",
+    img:"https://images.unsplash.com/photo-1551986782-d0169b3f8fa7?w=600&h=600&fit=crop&auto=format",
+    fact:"Penguins cannot fly but are amazing swimmers!",
+    es:"Pingüino", fr:"Manchot",  ar:"بطريق", de:"Pinguin",  it:"Pinguino",pt:"Pinguim",
+    ru:"Пингвин",  zh:"企鹅",      ja:"ペンギン",ko:"펭귄",   bn:"পেঙ্গুইন",hi:"पेंगुइन",
+    nl:"Pinguïn",  pl:"Pingwin",  no:"Pingvin",sv:"Pingvin",
+  },
+  {
+    name:"Giraffe", emoji:"🦒", color:"#F4A435",
+    img:"https://images.unsplash.com/photo-1547721064-da6cfb341d50?w=600&h=600&fit=crop&auto=format",
+    fact:"Giraffes are the tallest animals — up to 6 meters!",
+    es:"Jirafa",  fr:"Girafe",   ar:"زرافة", de:"Giraffe",  it:"Giraffa", pt:"Girafa",
+    ru:"Жираф",   zh:"长颈鹿",    ja:"キリン", ko:"기린",     bn:"জিরাফ",  hi:"जिराफ",
+    nl:"Giraf",   pl:"Żyrafa",   no:"Sjiraff",sv:"Giraff",
+  },
+  {
+    name:"Tiger", emoji:"🐯", color:"#EF6C00",
+    img:"https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=600&h=600&fit=crop&auto=format",
+    fact:"No two tigers have the same stripe pattern!",
+    es:"Tigre",   fr:"Tigre",    ar:"نمر",   de:"Tiger",    it:"Tigre",   pt:"Tigre",
+    ru:"Тигр",    zh:"老虎",      ja:"トラ",   ko:"호랑이",   bn:"বাঘ",     hi:"बाघ",
+    nl:"Tijger",  pl:"Tygrys",   no:"Tiger",  sv:"Tiger",
+  },
+  {
+    name:"Dolphin", emoji:"🐬", color:"#0288D1",
+    img:"https://images.unsplash.com/photo-1607153333879-c174d265f1d2?w=600&h=600&fit=crop&auto=format",
+    fact:"Dolphins call each other by name using unique whistles!",
+    es:"Delfín",  fr:"Dauphin",  ar:"دلفين", de:"Delfin",   it:"Delfino", pt:"Golfinho",
+    ru:"Дельфин", zh:"海豚",      ja:"イルカ", ko:"돌고래",   bn:"ডলফিন",  hi:"डॉल्फिन",
+    nl:"Dolfijn", pl:"Delfin",   no:"Delfin", sv:"Delfin",
+  },
+  {
+    name:"Panda", emoji:"🐼", color:"#546E7A",
+    img:"https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=600&h=600&fit=crop&auto=format",
+    fact:"A panda eats up to 40 kg of bamboo per day!",
+    es:"Panda",   fr:"Panda",    ar:"الباندا",de:"Panda",   it:"Panda",   pt:"Panda",
+    ru:"Панда",   zh:"熊猫",      ja:"パンダ",  ko:"판다",     bn:"পান্ডা",  hi:"पांडा",
+    nl:"Panda",   pl:"Panda",    no:"Panda",  sv:"Panda",
+  },
+  {
+    name:"Parrot", emoji:"🦜", color:"#2E7D32",
+    img:"https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=600&h=600&fit=crop&auto=format",
+    fact:"Parrots can learn and repeat human words!",
+    es:"Loro",    fr:"Perroquet",ar:"ببغاء",  de:"Papagei",  it:"Pappagallo",pt:"Papagaio",
+    ru:"Попугай", zh:"鹦鹉",      ja:"オウム",  ko:"앵무새",   bn:"টিয়া",   hi:"तोता",
+    nl:"Papegaai",pl:"Papuga",   no:"Papegøye",sv:"Papegoja",
+  },
+  {
+    name:"Koala", emoji:"🐨", color:"#8E24AA",
+    img:"https://images.unsplash.com/photo-1459262838948-3e2de6c1ec80?w=600&h=600&fit=crop&auto=format",
+    fact:"Koalas sleep up to 22 hours a day!",
+    es:"Koala",   fr:"Koala",    ar:"كوالا",  de:"Koala",    it:"Koala",   pt:"Coala",
+    ru:"Коала",   zh:"考拉",      ja:"コアラ",  ko:"코알라",   bn:"কোয়ালা", hi:"कोआला",
+    nl:"Koala",   pl:"Koala",    no:"Koala",  sv:"Koala",
+  },
+  {
+    name:"Fox", emoji:"🦊", color:"#E65100",
+    img:"https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=600&h=600&fit=crop&auto=format",
+    fact:"Foxes use Earth's magnetic field to hunt prey!",
+    es:"Zorro",   fr:"Renard",   ar:"ثعلب",  de:"Fuchs",    it:"Volpe",   pt:"Raposa",
+    ru:"Лиса",    zh:"狐狸",      ja:"キツネ", ko:"여우",     bn:"শেয়াল",  hi:"लोमड़ी",
+    nl:"Vos",     pl:"Lis",      no:"Rev",    sv:"Räv",
+  },
+  {
+    name:"Owl", emoji:"🦉", color:"#795548",
+    img:"https://images.unsplash.com/photo-1490718720478-364a07a997cd?w=600&h=600&fit=crop&auto=format",
+    fact:"Owls can rotate their heads 270 degrees!",
+    es:"Búho",    fr:"Hibou",    ar:"بومة",  de:"Eule",     it:"Gufo",    pt:"Coruja",
+    ru:"Сова",    zh:"猫头鹰",    ja:"フクロウ",ko:"부엉이",  bn:"পেঁচা",   hi:"उल्लू",
+    nl:"Uil",     pl:"Sowa",     no:"Ugle",  sv:"Uggla",
+  },
+  {
+    name:"Frog", emoji:"🐸", color:"#2E7D32",
+    img:"https://images.unsplash.com/photo-1516901408945-6cf8e2b2e00b?w=600&h=600&fit=crop&auto=format",
+    fact:"Frogs can jump 20 times their own body length!",
+    es:"Rana",    fr:"Grenouille",ar:"ضفدع", de:"Frosch",   it:"Rana",    pt:"Sapo",
+    ru:"Лягушка", zh:"青蛙",      ja:"カエル", ko:"개구리",   bn:"ব্যাঙ",   hi:"मेंढक",
+    nl:"Kikker",  pl:"Żaba",     no:"Frosk", sv:"Groda",
+  },
+];
 
+// ── Puzzle helpers ───────────────────────────────────────────────────────────
 function buildPuzzle(size) {
-  const tiles = Array.from({ length: size * size }, (_, i) => i);
-  for (let i = tiles.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
-  }
+  const tiles = Array.from({length:size*size},(_,i)=>i);
+  for (let i=tiles.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[tiles[i],tiles[j]]=[tiles[j],tiles[i]];}
   return tiles;
 }
+function isSolved(tiles){return tiles.every((t,i)=>t===i);}
 
-// ——— PuzzleTile: Ahora usa fotos reales de Unsplash ———
-function PuzzleTile({ tile, gridSize, animalName, isSelected, isDragOver, onClick, onEnter, onLeave }) {
-  const cellPx  = GRID_PX / gridSize;
-  const srcCol  = tile % gridSize;
-  const srcRow  = Math.floor(tile / gridSize);
-  
-  // URL dinámica que busca la foto del animal actual
-  const imageUrl = `https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=${GRID_PX}&auto=format&fit=crop`;
-  const dynamicUrl = `https://plus.unsplash.com/premium_photo-1661814233005-7808940428a2?q=80&w=${GRID_PX}&auto=format&fit=crop&sig=${animalName}`;
+// ── Speech ───────────────────────────────────────────────────────────────────
+function speak(text, voice="en-US"){
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=voice; u.rate=0.85; u.pitch=1.1;
+  window.speechSynthesis.speak(u);
+}
 
-  const borderStyle = isSelected 
-    ? `3px solid ${C.yellow}` 
-    : isDragOver 
-      ? `3px solid ${C.green}` 
-      : "2px solid rgba(255,255,255,0.9)";
+// ── Confetti ──────────────────────────────────────────────────────────────────
+function Confetti({active}){
+  const ps=Array.from({length:24},(_,i)=>({id:i,x:Math.random()*100,
+    color:[C.blue,C.red,C.yellow,C.green,C.magenta,C.cyan][i%6],
+    delay:Math.random()*0.5,size:Math.random()*10+7}));
+  if (!active) return null;
+  return <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+    {ps.map(p=><motion.div key={p.id} className="absolute rounded-sm top-0"
+      style={{left:`${p.x}%`,width:p.size,height:p.size,background:p.color}}
+      initial={{y:-20,opacity:1,rotate:0}} animate={{y:"110vh",opacity:0,rotate:720}}
+      transition={{duration:1.5+Math.random(),delay:p.delay,ease:"easeIn"}}/>)}
+  </div>;
+}
 
+// ── Language Dropdown ─────────────────────────────────────────────────────────
+function LangDropdown({value, onChange}){
+  const [open,setOpen]=useState(false);
+  const ref=useRef(null);
+  const sel=LANGUAGES.find(l=>l.code===value)||LANGUAGES[0];
+  useEffect(()=>{
+    const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
+    document.addEventListener("mousedown",h); return()=>document.removeEventListener("mousedown",h);
+  },[]);
   return (
-    <motion.div
-      onClick={onClick}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      whileTap={{ scale: 0.93 }}
-      style={{
-        width: cellPx,
-        height: cellPx,
-        overflow: "hidden",
-        position: "relative",
-        borderRadius: "12px",
-        border: borderStyle,
-        boxShadow: isSelected ? `0 0 0 3px ${C.yellow}` : "0 4px 10px rgba(0,0,0,0.1)",
-        cursor: "pointer",
-        backgroundImage: `url(${imageUrl})`,
-        backgroundSize: `${GRID_PX}px ${GRID_PX}px`,
-        backgroundPosition: `-${srcCol * cellPx}px -${srcRow * cellPx}px`,
-        backgroundColor: "#f0f0f0"
-      }}
-    >
-      <div style={{
-        position: "absolute", bottom: 4, right: 4,
-        background: "rgba(255,255,255,0.5)", padding: "2px 5px",
-        borderRadius: "4px", fontSize: "10px", fontWeight: "bold", color: "#666"
-      }}>
-        {tile + 1}
-      </div>
-    </motion.div>
+    <div ref={ref} style={{position:"relative",zIndex:40}}>
+      <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.97}} onClick={()=>setOpen(o=>!o)}
+        style={{display:"flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:999,
+          border:"2.5px solid white",background:"rgba(255,255,255,0.92)",backdropFilter:"blur(8px)",
+          boxShadow:"0 4px 16px rgba(67,160,71,0.18)",cursor:"pointer",
+          fontFamily:"var(--font-display,'Nunito',sans-serif)",fontWeight:700,fontSize:13,color:C.green,
+          whiteSpace:"nowrap",minWidth:165,justifyContent:"space-between"}}>
+        <span style={{display:"flex",alignItems:"center",gap:6}}>
+          <Globe size={13} style={{flexShrink:0}}/>
+          <span style={{fontSize:18,lineHeight:1}}>{sel.flag}</span>
+          <span>{sel.label}</span>
+        </span>
+        <motion.span animate={{rotate:open?180:0}} transition={{duration:0.2}} style={{display:"flex"}}>
+          <ChevronDown size={13}/>
+        </motion.span>
+      </motion.button>
+      <AnimatePresence>
+        {open&&<motion.div initial={{opacity:0,y:-8,scale:0.97}} animate={{opacity:1,y:0,scale:1}}
+          exit={{opacity:0,y:-8,scale:0.97}} transition={{duration:0.15}}
+          style={{position:"absolute",top:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",
+            width:210,background:"white",borderRadius:18,border:"2px solid rgba(67,160,71,0.15)",
+            boxShadow:"0 16px 48px rgba(67,160,71,0.18)",overflow:"hidden",
+            maxHeight:320,overflowY:"auto",scrollbarWidth:"thin"}}>
+          <div style={{padding:"8px 14px 6px",borderBottom:"1.5px solid #E8F5E9",
+            fontFamily:"var(--font-display,'Nunito',sans-serif)",fontWeight:700,fontSize:10,
+            color:C.green,letterSpacing:"0.08em",textTransform:"uppercase",
+            display:"flex",alignItems:"center",gap:5}}>
+            <Globe size={10}/> Language
+          </div>
+          {LANGUAGES.map(l=>{
+            const isA=l.code===value;
+            return <button key={l.code} onClick={()=>{onChange(l.code);setOpen(false);}}
+              style={{display:"flex",alignItems:"center",gap:9,width:"100%",padding:"8px 14px",
+                border:"none",background:isA?C.greenSoft:"transparent",cursor:"pointer",
+                fontFamily:"var(--font-body,'Nunito',sans-serif)",fontWeight:isA?700:500,fontSize:13,
+                color:isA?C.green:"#374151",textAlign:"left",
+                borderLeft:isA?`3px solid ${C.green}`:"3px solid transparent"}}
+              onMouseEnter={e=>{if(!isA)e.currentTarget.style.background="#F1F8E9";}}
+              onMouseLeave={e=>{if(!isA)e.currentTarget.style.background="transparent";}}>
+              <span style={{fontSize:18,lineHeight:1,flexShrink:0}}>{l.flag}</span>
+              <span style={{flex:1}}>{l.label}</span>
+              {isA&&<span style={{width:6,height:6,borderRadius:"50%",background:C.green,flexShrink:0}}/>}
+            </button>;
+          })}
+        </motion.div>}
+      </AnimatePresence>
+    </div>
   );
 }
 
+// ── Main ──────────────────────────────────────────────────────────────────────
+export default function AnimalPuzzle({ lang:propLang, onLangChange }){
+  const [animalIdx,setAnimalIdx] = useState(0);
+  const [gridSize,setGridSize]   = useState(3);
+  const [tiles,setTiles]         = useState(()=>buildPuzzle(3));
+  const [selected,setSelected]   = useState(null);
+  const [dragOver,setDragOver]   = useState(null);
+  const [won,setWon]             = useState(false);
+  const [confetti,setConfetti]   = useState(false);
+  const [localLang,setLocalLang] = useState("es");
+  const [moves,setMoves]         = useState(0);
+  const [imgLoaded,setImgLoaded] = useState(false);
+  const GRID_PX = 288;
 
-// ─── Gallery thumbnail ─────────────────────────────────────────────────────
-function AnimalThumb({ animal, isActive, onClick }) {
-  const { Render, color, bg } = getAnimalConfig(animal.name);
-  return (
-    <motion.button
-      onClick={onClick}
-      title={animal.name}
-      whileHover={{ scale: 1.12, y: -3 }}
-      whileTap={{ scale: 0.90 }}
-      transition={SPRING}
-      style={{
-        aspectRatio:    "1",
-        borderRadius:   "50%",
-        overflow:       "hidden",
-        background:     isActive ? bg : color + "12",
-        border:         isActive ? `3.5px solid ${color}` : "2.5px solid white",
-        boxShadow:      isActive ? `0 0 0 2.5px ${color}55, 0 6px 18px ${color}40` : "0 2px 8px rgba(0,0,0,0.10)",
-        display:        "flex",
-        alignItems:     "center",
-        justifyContent: "center",
-        padding:        5,
-        cursor:         "pointer",
-      }}
-    >
-      <Render size={34} color={color} />
-    </motion.button>
-  );
-}
+  const lang    = propLang || localLang;
+  const setLang = v=>{ setLocalLang(v); onLangChange?.(v); };
 
-// ─── Main ──────────────────────────────────────────────────────────────────
-export default function AnimalPuzzle() {
-  const [animalIdx,  setAnimalIdx]  = useState(0);
-  const [gridSize,   setGridSize]   = useState(3);
-  const [tiles,      setTiles]      = useState(() => buildPuzzle(3));
-  const [selected,   setSelected]   = useState(null);
-  const [dragOver,   setDragOver]   = useState(null);
-  const [won,        setWon]        = useState(false);
-  const [confetti,   setConfetti]   = useState(false);
-  const [lang,       setLang]       = useState("es");
-  const [moves,      setMoves]      = useState(0);
-  const [galPage,    setGalPage]    = useState(0);
-
+  const langMeta = LANGUAGES.find(l=>l.code===lang)||LANGUAGES[0];
   const animal   = ANIMALS[animalIdx];
-  const { Render, color, bg } = getAnimalConfig(animal.name);
-  const cellPx   = GRID_PX / gridSize;
-  const totalPages = Math.ceil(ANIMALS.length / GALLERY_PER_PAGE);
-  const galSlice   = ANIMALS.slice(galPage * GALLERY_PER_PAGE, (galPage + 1) * GALLERY_PER_PAGE);
 
-  const reset = useCallback(() => {
-    setTiles(buildPuzzle(gridSize));
-    setSelected(null); setDragOver(null); setWon(false); setMoves(0);
-  }, [gridSize]);
+  const reset=useCallback((aIdx=animalIdx,gSize=gridSize)=>{
+    setTiles(buildPuzzle(gSize)); setSelected(null); setDragOver(null);
+    setWon(false); setMoves(0); setImgLoaded(false);
+  },[animalIdx,gridSize]);
 
-  useEffect(() => { reset(); }, [animalIdx, gridSize]);
+  useEffect(()=>{ reset(animalIdx,gridSize); },[animalIdx,gridSize]);
 
-  const handleClick = (idx) => {
+  const handleTileDown=idx=>{
     if (won) return;
-    if (selected === null) { setSelected(idx); return; }
-    const next = [...tiles];
-    [next[selected], next[idx]] = [next[idx], next[selected]];
-    setTiles(next); setMoves(m => m+1); setSelected(null); setDragOver(null);
-    if (next.every((t,i) => t === i))
-      setTimeout(() => { setWon(true); setConfetti(true); setTimeout(() => setConfetti(false), 2600); }, 200);
+    if (selected===null){setSelected(idx);}
+    else {
+      const t=[...tiles]; [t[selected],t[idx]]=[t[idx],t[selected]];
+      setTiles(t); setMoves(m=>m+1); setSelected(null); setDragOver(null);
+      if (isSolved(t)) setTimeout(()=>{setWon(true);setConfetti(true);setTimeout(()=>setConfetti(false),2500);},200);
+    }
   };
 
+  const prev=()=>setAnimalIdx(i=>(i-1+ANIMALS.length)%ANIMALS.length);
+  const next=()=>setAnimalIdx(i=>(i+1)%ANIMALS.length);
+
+  // ── UI ─────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen" style={{ background:"linear-gradient(155deg,#E8F5E9 0%,#FFFDE7 55%,#E3F2FD 100%)" }}>
+    <div className="min-h-screen" style={{background:"linear-gradient(150deg,#E8F5E9 0%,#FFFDE7 50%,#E3F2FD 100%)"}}>
       <Confetti active={confetti}/>
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="text-center py-10 px-4">
-        <motion.div
-          initial={{ scale:0.7, opacity:0 }} animate={{ scale:1, opacity:1 }} transition={{ type:"spring", stiffness:220 }}
-          className="inline-block mb-4"
-        >
-          <StickerBadge icon={Puzzle} color={C.green} size={68} noHover/>
-        </motion.div>
-        <motion.h1 initial={{ opacity:0,y:-14 }} animate={{ opacity:1,y:0 }}
-          className="font-display text-4xl md:text-5xl mb-2" style={{ color:C.green }}
-        >Animal Puzzle</motion.h1>
-        <p className="font-body text-slate-500 text-lg">Tap two pieces to swap — build the animal! 🎨</p>
-        <p className="font-body text-slate-400 text-sm mt-1">{ANIMALS.length} animals to discover</p>
+        <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring"}}
+          className="text-6xl mb-3 inline-block">🧩</motion.div>
+        <motion.h1 initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}}
+          className="font-display text-4xl md:text-5xl mb-2" style={{color:C.green}}>Animal Puzzle</motion.h1>
+        <p className="font-body text-slate-500 text-lg">Tap two pieces to swap them — build the animal! 🎨</p>
       </div>
 
-      {/* ── Controls ── */}
+      {/* Controls */}
       <div className="flex flex-wrap justify-center gap-3 px-4 mb-6">
         {/* Grid size */}
-        <div className="flex bg-white/80 backdrop-blur rounded-full p-1 shadow-sm gap-1 border border-white">
-          {[3,4].map(s => (
-            <button key={s} onClick={() => setGridSize(s)}
+        <div className="flex bg-white/80 rounded-full p-1 shadow-sm gap-1">
+          {[3,4].map(s=>(
+            <button key={s} onClick={()=>setGridSize(s)}
               className="px-5 py-2 rounded-full font-display text-sm transition-all"
-              style={{ background:gridSize===s?C.green:"transparent", color:gridSize===s?"white":"#6B7280" }}
-            >{s}×{s}</button>
+              style={{background:gridSize===s?C.green:"transparent",color:gridSize===s?"white":"#6B7280"}}>
+              {s}×{s}
+            </button>
           ))}
         </div>
-        {/* Lang */}
-        <div className="flex bg-white/80 backdrop-blur rounded-full p-1 shadow-sm gap-1 border border-white">
-          {Object.entries(LANG_NAMES).map(([code, label]) => (
-            <button key={code} onClick={() => setLang(code)}
-              className="px-3 py-2 rounded-full font-display text-xs transition-all"
-              style={{ background:lang===code?C.blue:"transparent", color:lang===code?"white":"#6B7280" }}
-            >{label}</button>
-          ))}
-        </div>
+        {/* Lang dropdown */}
+        <LangDropdown value={lang} onChange={setLang}/>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 pb-24">
+      <div className="max-w-4xl mx-auto px-4 pb-20">
         <div className="grid md:grid-cols-2 gap-8 items-start">
 
-          {/* ── LEFT: Puzzle ── */}
+          {/* Left — Puzzle */}
           <div className="flex flex-col items-center">
-            {/* Animal navigator */}
-            <div className="flex items-center gap-4 mb-5 bg-white/80 backdrop-blur rounded-full px-5 py-3 shadow-md border border-white">
-              <motion.button whileHover={{ scale:1.14 }} whileTap={{ scale:0.88 }} onClick={() => { setAnimalIdx(i => (i-1+ANIMALS.length)%ANIMALS.length); setGalPage(0); }}
-                className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm"
-                style={{ background:C.green, color:"white" }}
-              ><ChevronLeft size={20}/></motion.button>
-
-              <div className="text-center min-w-[130px]">
-                {/* Mini sticker icon in navigator */}
-                <motion.div
-                  key={animalIdx}
-                  initial={{ scale:0.7, opacity:0 }} animate={{ scale:1, opacity:1 }} transition={SPRING}
-                  className="flex justify-center mb-1"
-                >
-                  <div style={{
-                    width:36, height:36, borderRadius:"50%",
-                    background: bg, border:"2.5px solid white",
-                    boxShadow:`0 4px 14px ${color}40`,
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                  }}>
-                    <Render size={24} color={color}/>
-                  </div>
-                </motion.div>
-                <div className="font-display text-base" style={{ color:C.green }}>{animal.name}</div>
-                <div className="font-body text-sm text-slate-400" dir={lang==="ar"?"rtl":"ltr"}>{animal[lang]}</div>
-                <div className="font-body text-xs text-slate-300">{animalIdx+1} / {ANIMALS.length}</div>
+            {/* Animal nav */}
+            <div className="flex items-center gap-4 mb-5 bg-white/80 rounded-full px-5 py-3 shadow-sm">
+              <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={prev}
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{background:C.green,color:"white"}}><ChevronLeft size={18}/></motion.button>
+              <div className="text-center">
+                <div className="font-display text-xl" style={{color:C.green}}>{animal.emoji} {animal.name}</div>
+                <div className="font-body text-sm text-slate-400" dir={langMeta.dir}>{animal[lang]||animal.name}</div>
               </div>
-
-              <motion.button whileHover={{ scale:1.14 }} whileTap={{ scale:0.88 }} onClick={() => { setAnimalIdx(i => (i+1)%ANIMALS.length); setGalPage(0); }}
-                className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm"
-                style={{ background:C.green, color:"white" }}
-              ><ChevronRight size={20}/></motion.button>
+              <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={next}
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{background:C.green,color:"white"}}><ChevronRight size={18}/></motion.button>
             </div>
 
             {/* Stats */}
             <div className="flex gap-3 mb-4">
-              <div className="px-4 py-2 bg-white/90 backdrop-blur rounded-full font-display text-sm shadow-sm border border-white" style={{ color:C.green }}>
+              <div className="px-4 py-2 bg-white rounded-full font-display text-sm shadow-sm" style={{color:C.green}}>
                 🎯 {moves} swaps
               </div>
-              {won && (
-                <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={SPRING}
-                  className="px-4 py-2 rounded-full font-display text-sm text-white shadow-lg" style={{ background:C.green }}
-                >🏆 Solved!</motion.div>
-              )}
+              {won&&<motion.div initial={{scale:0}} animate={{scale:1}}
+                className="px-4 py-2 rounded-full font-display text-sm text-white shadow-lg"
+                style={{background:C.green}}>🏆 Solved!</motion.div>}
             </div>
 
+            {/* Win banner */}
             <AnimatePresence>
-              {won && (
-                <motion.div initial={{ opacity:0, y:-12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-                  className="w-full text-center py-4 rounded-3xl font-display text-xl text-white mb-4 shadow-xl"
-                  style={{ background:`linear-gradient(135deg,${C.green},#1B5E20)` }}
-                >🎉 You built the {animal.name}! Amazing!</motion.div>
-              )}
+              {won&&<motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}} exit={{opacity:0}}
+                className="w-full text-center py-4 rounded-3xl font-display text-xl text-white mb-4 shadow-lg"
+                style={{background:`linear-gradient(135deg,${C.green},#1B5E20)`}}>
+                🎉 You built the {animal.name}! Amazing!
+              </motion.div>}
             </AnimatePresence>
 
-            {/* ── THE PUZZLE GRID ── */}
-            <div style={{
-              display:             "grid",
-              gridTemplateColumns: `repeat(${gridSize},${cellPx}px)`,
-              gap:                 3,
-              padding:             3,
-              background:          "#CBD5E1",
-              borderRadius:        24,
-              border:              "4px solid white",
-              boxShadow:           `0 20px 60px ${color}30, 0 6px 20px rgba(0,0,0,0.14)`,
-            }}>
-              {tiles.map((tile, idx) => (
-                <PuzzleTile
-                  key={idx}
-                  tile={tile}
-                  gridSize={gridSize}
-                  animalName={animal.name}
-                  Render={Render}
-                  animalColor={color}
-                  isSelected={selected===idx}
-                  isDragOver={dragOver===idx}
-                  onClick={() => handleClick(idx)}
-                  onEnter={() => { if (selected!==null && selected!==idx) setDragOver(idx); }}
-                  onLeave={() => setDragOver(null)}
-                />
-              ))}
+            {/* Puzzle grid */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white"
+              style={{width:GRID_PX,height:GRID_PX,background:C.blueSoft}}>
+              <img src={animal.img} alt="" className="hidden" onLoad={()=>setImgLoaded(true)}/>
+              {!imgLoaded&&<div className="absolute inset-0 flex items-center justify-center">
+                <motion.div animate={{rotate:360}} transition={{duration:1,repeat:Infinity,ease:"linear"}}
+                  className="text-4xl">{animal.emoji}</motion.div>
+              </div>}
+              {imgLoaded&&<div className="grid gap-0.5 p-0.5"
+                style={{gridTemplateColumns:`repeat(${gridSize},1fr)`,width:"100%",height:"100%",background:"#CBD5E1"}}>
+                {tiles.map((tile,idx)=>{
+                  const srcCol=tile%gridSize, srcRow=Math.floor(tile/gridSize);
+                  const isSel=selected===idx, isDO=dragOver===idx;
+                  return <motion.div key={idx}
+                    className="relative cursor-pointer overflow-hidden rounded-sm border-2 transition-all"
+                    style={{borderColor:isSel?C.yellow:isDO?C.green:"transparent",
+                      boxShadow:isSel?`0 0 0 2px ${C.yellow},0 4px 16px rgba(0,0,0,0.3)`:"none",zIndex:isSel?10:1}}
+                    whileHover={{scale:won?1:1.04}} whileTap={{scale:won?1:0.95}}
+                    onClick={()=>handleTileDown(idx)}
+                    onMouseEnter={()=>{if(selected!==null&&selected!==idx)setDragOver(idx);}}
+                    onMouseLeave={()=>setDragOver(null)}>
+                    <div className="w-full h-full" style={{
+                      backgroundImage:`url(${animal.img})`,backgroundSize:`${gridSize*100}%`,
+                      backgroundPosition:`${srcCol*100/Math.max(gridSize-1,1)}% ${srcRow*100/Math.max(gridSize-1,1)}%`,
+                      backgroundRepeat:"no-repeat",aspectRatio:"1"}}/>
+                    {!won&&<div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white font-display"
+                      style={{background:"rgba(0,0,0,0.25)",fontSize:9}}>{tile+1}</div>}
+                  </motion.div>;
+                })}
+              </div>}
             </div>
 
             {/* Reference */}
-            <div className="mt-5 flex items-center gap-3">
-              <motion.div
-                whileHover={{ scale:1.1, rotate:[-3,3,0] }}
-                transition={SPRING}
-                style={{
-                  width:72, height:72, borderRadius:18,
-                  background: bg,
-                  border:"4px solid white",
-                  boxShadow:`0 8px 24px ${color}35`,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  cursor:"pointer",
-                }}
-              >
-                <Render size={52} color={color}/>
-              </motion.div>
-              <p className="font-body text-xs text-slate-400 max-w-[100px]">Target — assemble to match this!</p>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="rounded-2xl overflow-hidden border-2 border-white shadow-md" style={{width:64,height:64}}>
+                <img src={animal.img} alt={animal.name} className="w-full h-full object-cover"/>
+              </div>
+              <p className="font-body text-xs text-slate-400">Reference image</p>
             </div>
 
-            <motion.button whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }} onClick={reset}
-              className="mt-5 flex items-center gap-2 px-7 py-3 rounded-2xl font-display text-white shadow-xl"
-              style={{ background:C.red, boxShadow:`0 8px 22px ${C.red}45` }}
-            ><RotateCcw size={16}/> Shuffle</motion.button>
+            <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.96}} onClick={()=>reset()}
+              className="mt-4 flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-md"
+              style={{background:C.red}}><RotateCcw size={16}/> Shuffle</motion.button>
           </div>
 
-          {/* ── RIGHT: Info ── */}
+          {/* Right — Info */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <motion.div
-                key={animalIdx}
-                initial={{ scale:0.7, rotate:-15, opacity:0 }}
-                animate={{ scale:1, rotate:0, opacity:1 }}
-                transition={SPRING}
-                style={{
-                  width:60, height:60, borderRadius:"50%",
-                  background: bg, border:"3.5px solid white",
-                  boxShadow:`0 8px 24px ${color}45`,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                }}
-              >
-                <Render size={42} color={color}/>
-              </motion.div>
-              <h3 className="font-display text-2xl" style={{ color:C.green }}>{animal.name}</h3>
-            </div>
+            <h3 className="font-display text-2xl" style={{color:C.green}}>{animal.emoji} {animal.name}</h3>
 
-            {/* Translations */}
-            <div className="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-md border-2 border-white">
+            {/* How to say it — muestra idioma activo + inglés */}
+            <div className="bg-white/90 rounded-3xl p-6 shadow-md border-2 border-white">
               <h4 className="font-display text-base mb-3 text-slate-500">How to say it</h4>
-              {Object.entries({ es:"Español 🇪🇸", fr:"Français 🇫🇷", ar:"العربية 🇸🇦" }).map(([code, label]) => (
-                <div key={code} className="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0">
-                  <span className="font-body text-sm text-slate-400">{label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-display text-lg" style={{ color:C.blue }} dir={code==="ar"?"rtl":"ltr"}>{animal[code]}</span>
-                    <motion.button whileHover={{ scale:1.16 }} whileTap={{ scale:0.9 }}
-                      onClick={() => speak(animal[code], VOICE_LANG[code])}
-                      className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
-                      style={{ background:C.blueSoft, color:C.blue }}
-                    ><Volume2 size={14}/></motion.button>
-                  </div>
-                </div>
-              ))}
-              <div className="flex items-center justify-between pt-2.5">
-                <span className="font-body text-sm text-slate-400">English 🇬🇧</span>
+
+              {/* Active language highlighted */}
+              <div className="flex items-center justify-between py-3 px-4 rounded-2xl mb-2"
+                style={{background:C.greenSoft,border:`2px solid ${C.green}`}}>
                 <div className="flex items-center gap-2">
-                  <span className="font-display text-lg" style={{ color:C.blue }}>{animal.name}</span>
-                  <motion.button whileHover={{ scale:1.16 }} whileTap={{ scale:0.9 }}
-                    onClick={() => speak(animal.name, "en-US")}
-                    className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
-                    style={{ background:C.blueSoft, color:C.blue }}
-                  ><Volume2 size={14}/></motion.button>
+                  <span style={{fontSize:20}}>{langMeta.flag}</span>
+                  <span className="font-body text-sm text-slate-500">{langMeta.label}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-xl" style={{color:C.green}} dir={langMeta.dir}>
+                    {animal[lang]||animal.name}
+                  </span>
+                  <button onClick={()=>speak(animal[lang]||animal.name, langMeta.voice)}
+                    className="w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{background:C.green,color:"white"}}><Volume2 size={13}/></button>
                 </div>
               </div>
+
+              {/* English always */}
+              <div className="flex items-center justify-between py-2.5">
+                <span className="font-body text-sm text-slate-400">English 🇬🇧</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-lg" style={{color:C.blue}}>{animal.name}</span>
+                  <button onClick={()=>speak(animal.name,"en-US")}
+                    className="w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{background:C.blueSoft,color:C.blue}}><Volume2 size={13}/></button>
+                </div>
+              </div>
+
+              {/* 3 other langs as teasers */}
+              {LANGUAGES.filter(l=>l.code!==lang).slice(0,3).map(l=>(
+                <div key={l.code} className="flex items-center justify-between py-2 border-t border-slate-50">
+                  <span className="font-body text-sm text-slate-300">{l.flag} {l.label}</span>
+                  <span className="font-body text-sm text-slate-400" dir={l.dir}>{animal[l.code]||""}</span>
+                </div>
+              ))}
             </div>
 
             {/* Fun fact */}
-            <div className="rounded-3xl p-5 border-2 border-white shadow-sm" style={{ background:C.yellowSoft }}>
-              <div className="flex items-center gap-2 mb-2">
-                <StickerBadge icon={import("lucide-react").Sparkles || (() => null)} color={C.yellow} size={28} noHover/>
-                <span className="font-display text-sm" style={{ color:C.yellow }}>Fun fact!</span>
-              </div>
+            <div className="rounded-3xl p-5 border-2 border-white shadow-sm" style={{background:C.yellowSoft}}>
+              <div className="font-display text-sm mb-1" style={{color:C.yellow}}>🌟 Fun fact!</div>
               <p className="font-body text-slate-600 text-sm leading-relaxed">{animal.fact}</p>
             </div>
 
             {/* Gallery */}
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-display text-sm" style={{ color:C.green }}>All {ANIMALS.length} animals</h4>
-                <span className="font-body text-xs text-slate-400">{galPage+1}/{totalPages}</span>
-              </div>
-              <div className="grid grid-cols-4 gap-2.5">
-                {galSlice.map((a, i) => {
-                  const realIdx = galPage * GALLERY_PER_PAGE + i;
-                  return (
-                    <AnimalThumb
-                      key={realIdx}
-                      animal={a}
-                      isActive={animalIdx===realIdx}
-                      onClick={() => setAnimalIdx(realIdx)}
-                    />
-                  );
-                })}
-              </div>
-              <div className="flex items-center gap-2 justify-center mt-3">
-                <button onClick={() => setGalPage(p => Math.max(0, p-1))} disabled={galPage===0}
-                  className="px-3 py-1.5 rounded-full font-display text-xs bg-white/90 shadow-sm border border-white disabled:opacity-30" style={{ color:C.green }}
-                >← Prev</button>
-                {Array.from({ length:totalPages }, (_, i) => (
-                  <button key={i} onClick={() => setGalPage(i)}
-                    className="w-6 h-6 rounded-full font-display text-xs transition-all"
-                    style={{ background:i===galPage?C.green:"#E2E8F0", color:i===galPage?"white":"#6B7280" }}
-                  >{i+1}</button>
+              <h4 className="font-display text-base mb-3" style={{color:C.green}}>More animals</h4>
+              <div className="grid grid-cols-4 gap-2">
+                {ANIMALS.map((a,i)=>(
+                  <motion.button key={i} whileHover={{scale:1.08}} whileTap={{scale:0.94}}
+                    onClick={()=>setAnimalIdx(i)}
+                    className="aspect-square rounded-2xl overflow-hidden"
+                    style={{border:animalIdx===i?`3px solid ${C.green}`:"3px solid white",
+                      boxShadow:animalIdx===i?`0 0 0 2px ${C.green}`:"0 2px 8px rgba(0,0,0,0.08)"}}>
+                    <img src={a.img} alt={a.name} className="w-full h-full object-cover"/>
+                  </motion.button>
                 ))}
-                <button onClick={() => setGalPage(p => Math.min(totalPages-1, p+1))} disabled={galPage===totalPages-1}
-                  className="px-3 py-1.5 rounded-full font-display text-xs bg-white/90 shadow-sm border border-white disabled:opacity-30" style={{ color:C.green }}
-                >Next →</button>
               </div>
             </div>
 
             {/* How to play */}
-            <div className="rounded-3xl p-4 border-2 border-white shadow-sm" style={{ background:C.blueSoft }}>
-              <p className="font-display text-sm mb-1" style={{ color:C.blue }}>How to play</p>
+            <div className="rounded-3xl p-4 border-2 border-white shadow-sm" style={{background:C.blueSoft}}>
+              <p className="font-display text-sm mb-1" style={{color:C.blue}}>💡 How to play</p>
               <p className="font-body text-xs text-slate-600">
-                Tap a tile to select it (golden glow), then tap another to swap them. Reassemble the picture to win! 🏆
+                Tap a piece to select it (it glows yellow), then tap another to swap. Keep swapping until you build the complete animal!
               </p>
             </div>
           </div>
