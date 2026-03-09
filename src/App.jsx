@@ -320,9 +320,9 @@ const NAV_PRIMARY = [
   { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
 ];
 const NAV_SECONDARY = [
-  { id:"legal",       label:"Help & FAQ",  icon:HelpCircle, color:C.magenta },
-  { id:"donate",      label:"Donate ☕",   icon:Heart,      color:C.yellow  },
-  { id:"collaborate", label:"Collaborate", icon:Users,      color:C.magenta },
+  { id:"legal",       label:"Privacy & Terms", icon:HelpCircle, color:C.magenta, email: "legal@kiddsy.org" },
+  { id:"support",     label:"Support ☕",      icon:Heart,      color:C.yellow,  email: "support@kiddsy.org" },
+  { id:"collaborate", label:"Collaborate",    icon:Users,      color:C.magenta, email: "hello@kiddsy.org" },
 ];
 const ALL_NAV = [...NAV_PRIMARY, ...NAV_SECONDARY];
 
@@ -396,7 +396,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
           flex:           1,
           justifyContent: "center",
           flexWrap:       "nowrap",
-          overflow:       "hidden",
+          overflow:       "visible",
           minWidth:       0,
         }}
           className="desktop-nav"
