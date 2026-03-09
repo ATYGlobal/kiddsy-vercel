@@ -21,7 +21,7 @@ import {
   BookOpen, Sparkles, ChevronLeft, ChevronRight, ArrowLeft,
   Wand2, Puzzle, Music, HelpCircle, Heart,
   Users, Menu, X, Library, ChevronDown,
-  Search, Cat, Globe, Star, RefreshCw,
+  Search, Globe, Star, RefreshCw,
 } from "lucide-react";
 
 // ── Auth — stub para modo invitado ─────────────────────────────────────────
@@ -39,7 +39,7 @@ import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
-import AnimalPuzzle from "./pages/AnimalPuzzle.jsx";
+import PuzzleMaster from "./pages/PuzzleMaster.jsx";
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────
@@ -101,14 +101,11 @@ function getSupabase() {
  * Fallback: solo localStorage si Supabase no está configurado.
  */
 async function saveStory(storyData, userId) {
-  // ⛔ Guard: nunca enviar user_id=undefined a Supabase (causaría error de UUID)
-  const safeUserId = userId || getGuestId();
-
   const sb = getSupabase();
   if (sb) {
     const { error } = await sb.from("stories").insert([{
       ...storyData,
-      user_id: safeUserId,
+      user_id: userId,
     }]);
     if (error) console.error("[Kiddsy] Supabase save error:", error.message);
   }
@@ -319,7 +316,7 @@ const NAV_PRIMARY = [
   { id:"mylibrary",  label:"My Library",  icon:Library,  color:C.green   },
   { id:"games",      label:"Games",       icon:Puzzle,   color:C.red     },
   { id:"wordsearch", label:"Word Search", icon:Search,   color:C.cyan    },
-  { id:"animals",    label:"Animals",     icon:Cat,      color:C.green   },
+  { id:"puzzles",    label:"Puzzles",     icon:Puzzle,   color:C.green   },
   { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
 ];
 const NAV_SECONDARY = [
@@ -705,80 +702,9 @@ function StarField() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ─── SERVICE WORKER — Registro + Auto-reload ──────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
-/**
- * registerServiceWorker
- * ─────────────────────────────────────────────────────────────────────────
- * • Registra /sw.js en todos los navegadores que lo soportan.
- * • Detecta si el SW entrante (waiting) ya existe al cargar la página
- *   y si hay una nueva versión (onupdatefound) una vez registrado.
- * • En ambos casos manda SKIP_WAITING → el SW llama self.skipWaiting()
- *   → activa inmediatamente → envía "SW_UPDATED" a todos los clientes
- *   → App escucha ese mensaje y recarga con window.location.reload().
- *
- * Flujo completo:
- *   1. SW install  → self.skipWaiting()           (sw.js)
- *   2. SW activate → self.clients.claim()          (sw.js)
- *              → postMessage({ type:"SW_UPDATED" }) (sw.js)
- *   3. App.jsx   → navigator.serviceWorker.addEventListener("message")
- *              → window.location.reload()          (App.jsx)
- * ─────────────────────────────────────────────────────────────────────────
- */
-function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-
-  // Recarga automática cuando el SW activo envía "SW_UPDATED"
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data?.type === "SW_UPDATED") {
-      console.log("[Kiddsy] New SW activated — reloading…");
-      window.location.reload();
-    }
-  });
-
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((registration) => {
-        console.log("[Kiddsy] SW registered:", registration.scope);
-
-        // ── Caso A: ya hay un SW esperando al cargar ────────────────────
-        if (registration.waiting) {
-          registration.waiting.postMessage({ type: "SKIP_WAITING" });
-        }
-
-        // ── Caso B: el navegador detecta una nueva versión del SW ────────
-        registration.addEventListener("updatefound", () => {
-          const newWorker = registration.installing;
-          if (!newWorker) return;
-
-          newWorker.addEventListener("statechange", () => {
-            if (
-              newWorker.state === "installed" &&
-              navigator.serviceWorker.controller
-            ) {
-              // Hay un SW nuevo instalado y hay uno activo en uso →
-              // forzamos la transición inmediata sin esperar al usuario.
-              newWorker.postMessage({ type: "SKIP_WAITING" });
-            }
-          });
-        });
-      })
-      .catch((err) => {
-        console.warn("[Kiddsy] SW registration failed:", err);
-      });
-  });
-}
-
-// Llamar a la función de registro una sola vez al cargar el módulo
-registerServiceWorker();
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ─── SW UPDATE TOAST (manual, por si el usuario quiere decidir) ───────────
+// ─── SW UPDATE TOAST ──────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 function SwUpdateToast() {
-  // El auto-reload ya se encarga de recargar — este toast ahora es solo
-  // un respaldo visual por si el mensaje llega antes del registro completo.
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -1423,9 +1349,9 @@ export default function App() {
 
   const FULL_PAGES = {
     games:       <Games/>,
-    wordsearch:  <WordSearch   lang={lang} onLangChange={setLang}/>,
-    animals:     <AnimalPuzzle lang={lang} onLangChange={setLang}/>,
-    education:   <Education    lang={lang} onLangChange={setLang}/>,
+    wordsearch:  <WordSearch/>,
+    puzzles:     <PuzzleMaster lang={lang} onLangChange={setLang}/>,
+    education:   <Education/>,
     legal:       <Legal/>,
     donate:      <Donation/>,
     collaborate: <Collaborate/>,
