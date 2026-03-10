@@ -962,36 +962,57 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
                 <StarRow count={diff.starCount} size={10}/> {diff.label} · {diff.desc}
               </div>
               {won&&(
-                <motion.div initial={{ scale:0 }} animate={{ scale:1 }}
+                <motion.div 
+                  initial={{ scale: 0 }} 
+                  animate={{ scale: 1 }}
                   style={{
-                    padding:"5px 13px", borderRadius:999,
-                    background:accent, color:"white",
-                    fontFamily:"var(--font-display,'Nunito',sans-serif)",
-                    fontWeight:700, fontSize:12,
-                    boxShadow:`0 4px 14px ${accent}55`,
-                  }}style={{ display:"flex", alignItems:"center", gap:5 }}><Trophy size={12} strokeWidth={2}/> Solved!</motion.div>
-              )}
-            </div>
-
-            {/* Win banner */}
-            <AnimatePresence>
-              {won&&(
-                <motion.div
-                  initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-                  style={{
-                    width:"100%", textAlign:"center",
-                    padding:"13px 0", borderRadius:18, marginBottom:10,
-                    background:`linear-gradient(135deg,${accent},${accent}BB)`,
-                    color:"white",
-                    fontFamily:"var(--font-display,'Nunito',sans-serif)",
-                    fontWeight:700, fontSize:17,
-                    boxShadow:`0 6px 24px ${accent}55`,
+                    padding: "5px 13px", 
+                    borderRadius: 999,
+                    background: accent, 
+                    color: "white",
+                    fontFamily: "var(--font-display, 'Nunito', sans-serif)",
+                    fontWeight: 700, 
+                    fontSize: 12,
+                    boxShadow: `0 4px 14px ${accent}55`,
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: 5
                   }}
-                 style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-                  <CheckCircle size={18} strokeWidth={2}/> You completed {item[lang]||item.name}!
-                </motion.div>
+                >
+                <Trophy size={12} strokeWidth={2}/> Solved!
+              </motion.div>
               )}
-            </AnimatePresence>
+                          </div>
+
+         {/* Win banner */}
+              <AnimatePresence>
+                {won && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    exit={{ opacity: 0 }}
+                    style={{
+                      width: "100%", 
+                      textAlign: "center",
+                      padding: "13px 0", 
+                      borderRadius: 18, 
+                      marginBottom: 10,
+                      background: `linear-gradient(135deg, ${accent}, ${accent}BB)`,
+                      color: "white",
+                      fontFamily: "var(--font-display, 'Nunito', sans-serif)",
+                      fontWeight: 700, 
+                      fontSize: 17,
+                      boxShadow: `0 6px 24px ${accent}55`,
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center", 
+                      gap: 8 
+                    }}
+                  >
+                    <CheckCircle size={18} strokeWidth={2}/> You completed {item[lang] || item.name}!
+                  </motion.div>
+                      )}
+          </AnimatePresence>
 
             {/* Puzzle grid */}
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white"
