@@ -5,7 +5,7 @@
  */
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Trophy, CheckCircle, Star, Search, PawPrint, Users, BookOpen, Utensils } from "lucide-react";
+import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils } from "lucide-react";
 
 // ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
 // fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
@@ -95,7 +95,7 @@ const PACKS = [
   {
     name: "Animals",
     emoji: "🦁",
-    icon: PawPrint,
+    icon: Loader,
     words: [
       { en: "CAT",      es: "Gato",     fr: "Chat",    ar: "قطة"  },
       { en: "DOG",      es: "Perro",    fr: "Chien",   ar: "كلب"  },

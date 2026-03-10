@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
-  Star, PawPrint, Trophy, Target, CheckCircle,
+  Star, Loader, Trophy, Target, CheckCircle,
 } from "lucide-react";
 // ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
 // fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
@@ -669,7 +669,7 @@ function Confetti({ active }) {
 }
 
 // ── Miniatura ─────────────────────────────────────────────────────────────
-function Thumb({ item, size = 28, FallbackIcon = PawPrint }) {  const [ok, setOk] = useState(false);
+function Thumb({ item, size = 28, FallbackIcon = Loader }) {  const [ok, setOk] = useState(false);
   return (
     <div style={{
       width:size, height:size, borderRadius:"50%", overflow:"hidden", flexShrink:0,
