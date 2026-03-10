@@ -39,7 +39,7 @@ import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
-import PuzzleMaster from './pages/PuzzleMaster.jsx';
+import AnimalPuzzle from "./pages/AnimalPuzzle.jsx";
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────
@@ -321,7 +321,7 @@ const NAV_PRIMARY = [
 ];
 const NAV_SECONDARY = [
   { id:"legal",       label:"Help & FAQ",  icon:HelpCircle, color:C.magenta },
-  { id:"donate",      label:"Donate ☕",   icon:Heart,      color:C.yellow  },
+  { id:"donate",      label:"Donate",      icon:Heart,      color:C.yellow  },
   { id:"collaborate", label:"Collaborate", icon:Users,      color:C.magenta },
 ];
 const ALL_NAV = [...NAV_PRIMARY, ...NAV_SECONDARY];
@@ -538,7 +538,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
                     onMouseEnter={e => { e.currentTarget.style.background="#F0FDF4"; }}
                     onMouseLeave={e => { e.currentTarget.style.background="transparent"; }}
                   >
-                    <Star size={14} fill="#00B67A" color="#00B67A"/> Rate us on Trustpilot ⭐
+                    <Star size={14} fill="#00B67A" color="#00B67A" strokeWidth={2}/> Rate us on Trustpilot
                   </a>
                 </motion.div>
               )}
@@ -652,7 +652,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
                   textDecoration: "none",
                 }}
               >
-                <Star size={15} fill="#00B67A" color="#00B67A"/> Trustpilot ⭐
+                <Star size={15} fill="#00B67A" color="#00B67A" strokeWidth={2}/> Trustpilot
               </a>
             </div>
           </motion.div>
@@ -740,7 +740,7 @@ function SwUpdateToast() {
           width:        360,
         }}
       >
-        <span style={{ fontSize: 26 }}>✨</span>
+        <Sparkles size={22} strokeWidth={2} style={{ color:C.blue, flexShrink:0 }}/>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{
             fontFamily: "var(--font-display,'Nunito',sans-serif)",
@@ -1433,7 +1433,7 @@ export default function App() {
   const FULL_PAGES = {
     games:       <Games/>,
     wordsearch:  <WordSearch/>,
-    animals:     <PuzzleMaster/>,
+    animals:     <AnimalPuzzle/>,
     education:   <Education/>,
     legal:       <Legal/>,
     donate:      <Donation/>,
@@ -1488,7 +1488,7 @@ export default function App() {
           <p>Bilingual stories for families learning English together 🌍</p>
           <div className="flex justify-center gap-4 mt-2 flex-wrap">
             <button onClick={()=>handleNav("legal")}       className="hover:underline text-xs" style={{color:C.blue}}>Privacy & Terms</button>
-            <button onClick={()=>handleNav("donate")}      className="hover:underline text-xs" style={{color:C.yellow}}>Support us ☕</button>
+            <button onClick={()=>handleNav("donate")}      className="hover:underline text-xs" style={{color:C.yellow}}>Support us</button>
             <button onClick={()=>handleNav("collaborate")} className="hover:underline text-xs" style={{color:C.magenta}}>Collaborate</button>
           </div>
           <p className="mt-3 text-xs opacity-40">© {new Date().getFullYear()} Kiddsy · Free for every family</p>

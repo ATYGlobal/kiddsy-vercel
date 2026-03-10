@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
+  Star, PawPrint, Trophy, Target, CheckCircle,
 } from "lucide-react";
 
 // ── Paleta ────────────────────────────────────────────────────────────────
@@ -45,10 +46,10 @@ const LANGUAGES = [
 
 // ── Dificultades ──────────────────────────────────────────────────────────
 const DIFFICULTIES = [
-  { size:3, label:"3×3", stars:"⭐",        desc:"Easy"   },
-  { size:4, label:"4×4", stars:"⭐⭐",      desc:"Medium" },
-  { size:5, label:"5×5", stars:"⭐⭐⭐",    desc:"Hard"   },
-  { size:6, label:"6×6", stars:"⭐⭐⭐⭐",   desc:"Expert" },
+  { size:3, label:"3×3", starCount:1, desc:"Easy"   },
+  { size:4, label:"4×4", starCount:2, desc:"Medium" },
+  { size:5, label:"5×5", starCount:3, desc:"Hard"   },
+  { size:6, label:"6×6", starCount:4, desc:"Expert" },
 ];
 
 // ── URL helper ────────────────────────────────────────────────────────────
@@ -611,7 +612,7 @@ function Confetti({ active }) {
 }
 
 // ── Miniatura ─────────────────────────────────────────────────────────────
-function Thumb({ item, size = 28 }) {
+function Thumb({ item, size = 28, FallbackIcon = PawPrint }) {
   const [ok, setOk] = useState(false);
   return (
     <div style={{
@@ -620,7 +621,7 @@ function Thumb({ item, size = 28 }) {
       border:"1.5px solid rgba(0,0,0,0.1)",
       display:"flex", alignItems:"center", justifyContent:"center",
     }}>
-      {!ok && <span style={{ fontSize:size*0.58 }}>{item.emoji}</span>}
+      {!ok && <FallbackIcon size={Math.round(size*0.52)} strokeWidth={2} style={{ color:item.color||"#94A3B8" }}/>}
       <img src={item.img} alt={item.name} onLoad={()=>setOk(true)}
         style={{ width:"100%", height:"100%", objectFit:"cover", display:ok?"block":"none" }}
         loading="lazy"
@@ -794,17 +795,18 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="text-center pt-8 pb-3 px-4">
-        <motion.div initial={{ scale:0.8, opacity:0 }} animate={{ scale:1, opacity:1 }}
-          transition={{ type:"spring" }} className="text-5xl mb-2 inline-block">
-          🧩
-        </motion.div>
+        <motion.div initial={{ scale:0.8,opacity:0 }} animate={{ scale:1,opacity:1 }}
+          transition={{ type:"spring" }}
+          className="mb-2 inline-flex items-center justify-center w-16 h-16 rounded-2xl"
+          style={{ background:"#E8F5E9" }}
+        ><Puzzle size={36} strokeWidth={2} style={{ color:accent }}/></motion.div>
         <motion.h1 initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}
           className="font-display text-3xl md:text-4xl mb-1"
           style={{ color:accent }}>
           Puzzle Master
         </motion.h1>
         <p className="font-body text-slate-400 text-sm">
-          Tap two tiles to swap them — complete the picture! 🎨
+          Tap two tiles to swap — complete the picture!
         </p>
       </div>
 
@@ -813,19 +815,22 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
 
         {/* A: Categoría */}
         <DD minW={150} maxH={280} accent={accent}
-          trigger={
-            <>
-              {cat.emoji && <span style={{ fontSize:15 }}>{cat.emoji}</span>}
-              <span>{cat.label}</span>
-            </>
-          }
+          trigger={(() => {
+            const CatIcon = cat.icon;
+            return (
+              <>
+                <CatIcon size={15} strokeWidth={2}/>
+                <span>{cat.label}</span>
+              </>
+            );
+          })()}
         >
           {close=>[
             <DHeader key="hdr">Category</DHeader>,
             ...CATEGORIES.map(c=>(
               <DRow key={c.id} active={catId===c.id} accent={c.color}
                 onClick={()=>switchCat(c.id,close)}>
-                <span style={{ fontSize:18 }}>{c.emoji}</span>
+                {(() => { const CIcon = c.icon; return <CIcon size={16} strokeWidth={2} style={{ flexShrink:0, color:catId===c.id?c.color:"#64748B" }}/>; })()}
                 <span style={{ fontWeight:700 }}>{c.label}</span>
                 <span style={{ fontSize:10, color:"#94A3B8", marginLeft:"auto" }}>{c.items.length}</span>
               </DRow>
@@ -835,25 +840,27 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
 
         {/* B: Ítem (cambia según categoría) */}
         <DD minW={190} maxH={360} accent={accent}
-          trigger={
-            <>
-              <Thumb item={item} size={24}/>
-              <span style={{ fontSize:15 }}>{item.emoji}</span>
-              <span style={{ maxWidth:110, overflow:"hidden", textOverflow:"ellipsis" }}>
-                {item[lang]||item.name}
-              </span>
-            </>
-          }
+          trigger={(() => {
+            const CatIcon = cat.icon;
+            return (
+              <>
+                <Thumb item={item} size={24} FallbackIcon={CatIcon}/>
+                <span style={{ maxWidth:120, overflow:"hidden", textOverflow:"ellipsis" }}>
+                  {item[lang]||item.name}
+                </span>
+              </>
+            );
+          })()}
         >
           {close=>[
             <DHeader key="hdr">{cat.label} ({cat.items.length})</DHeader>,
             ...cat.items.map((it,i)=>(
               <DRow key={i} active={itemIdx===i} accent={accent}
                 onClick={()=>switchItem(i,close)}>
-                <Thumb item={it} size={28}/>
+                <Thumb item={it} size={28} FallbackIcon={cat.icon}/>
                 <div style={{ lineHeight:1.3, minWidth:0 }}>
                   <div style={{ fontWeight:700, fontSize:13, whiteSpace:"nowrap" }}>
-                    {it.emoji} {it[lang]||it.name}
+                    {it[lang]||it.name}
                   </div>
                   {it[lang]&&it[lang]!==it.name&&(
                     <div style={{ fontSize:10, color:"#94A3B8" }}>{it.name}</div>
@@ -868,9 +875,9 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
         <DD minW={140} accent={C.red}
           trigger={
             <>
-              <Grid size={13}/>
+              <Grid size={13} strokeWidth={2}/>
               <span>{diff.label}</span>
-              <span style={{ fontSize:11 }}>{diff.stars}</span>
+              <StarRow count={diff.starCount} size={10}/>
             </>
           }
         >
@@ -880,7 +887,7 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
               <DRow key={d.size} active={gridSize===d.size} accent={C.red}
                 onClick={()=>{ setGridSize(d.size); close(); }}>
                 <span style={{ fontWeight:800, minWidth:36, fontSize:14 }}>{d.label}</span>
-                <span style={{ fontSize:13 }}>{d.stars}</span>
+                <StarRow count={d.starCount} size={10} color={gridSize===d.size?"#E53935":"#F9A825"}/>
                 <span style={{ fontSize:11, color:"#94A3B8" }}>{d.desc}</span>
               </DRow>
             )),
@@ -934,17 +941,26 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
 
             {/* Stats */}
             <div style={{ display:"flex", gap:8, marginBottom:10, flexWrap:"wrap", justifyContent:"center" }}>
-              {[
-                { label:`🎯 ${moves} swaps`, col:accent },
-                { label:`${diff.stars} ${diff.label} · ${diff.desc}`, col:"#64748B" },
-              ].map((s,i)=>(
-                <div key={i} style={{
-                  padding:"5px 13px", borderRadius:999, background:"white",
-                  boxShadow:"0 2px 8px rgba(0,0,0,0.07)",
-                  fontFamily:"var(--font-display,'Nunito',sans-serif)",
-                  fontWeight:700, fontSize:12, color:s.col,
-                }}>{s.label}</div>
-              ))}
+              {/* Swaps chip */}
+              <div style={{
+                display:"flex", alignItems:"center", gap:5,
+                padding:"5px 13px", borderRadius:999, background:"white",
+                boxShadow:"0 2px 8px rgba(0,0,0,0.07)",
+                fontFamily:"var(--font-display,'Nunito',sans-serif)",
+                fontWeight:700, fontSize:12, color:accent,
+              }}>
+                <Target size={12} strokeWidth={2}/> {moves} swaps
+              </div>
+              {/* Difficulty chip */}
+              <div style={{
+                display:"flex", alignItems:"center", gap:5,
+                padding:"5px 13px", borderRadius:999, background:"white",
+                boxShadow:"0 2px 8px rgba(0,0,0,0.07)",
+                fontFamily:"var(--font-display,'Nunito',sans-serif)",
+                fontWeight:700, fontSize:12, color:"#64748B",
+              }}>
+                <StarRow count={diff.starCount} size={10}/> {diff.label} · {diff.desc}
+              </div>
               {won&&(
                 <motion.div initial={{ scale:0 }} animate={{ scale:1 }}
                   style={{
@@ -953,7 +969,7 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
                     fontFamily:"var(--font-display,'Nunito',sans-serif)",
                     fontWeight:700, fontSize:12,
                     boxShadow:`0 4px 14px ${accent}55`,
-                  }}>🏆 Solved!</motion.div>
+                  }}style={{ display:"flex", alignItems:"center", gap:5 }}><Trophy size={12} strokeWidth={2}/> Solved!</motion.div>
               )}
             </div>
 
@@ -971,8 +987,8 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
                     fontWeight:700, fontSize:17,
                     boxShadow:`0 6px 24px ${accent}55`,
                   }}
-                >
-                  🎉 You completed {item[lang]||item.name}! Amazing!
+                 style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+                  <CheckCircle size={18} strokeWidth={2}/> You completed {item[lang]||item.name}!
                 </motion.div>
               )}
             </AnimatePresence>
@@ -983,10 +999,15 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
               <img src={item.img} alt="" className="hidden" onLoad={()=>setImgLoaded(true)}/>
 
               {!imgLoaded&&(
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  <motion.div animate={{ rotate:360 }}
-                    transition={{ duration:1, repeat:Infinity, ease:"linear" }}
-                    style={{ fontSize:46 }}>{item.emoji}</motion.div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                  style={{ background:(item.color||"#eee")+"22" }}>
+                  {(() => { const CatIcon = cat.icon; return (
+                    <motion.div animate={{ scale:[1,1.15,1], opacity:[0.5,1,0.5] }}
+                      transition={{ duration:1.4, repeat:Infinity, ease:"easeInOut" }}
+                      style={{ color:item.color||accent }}>
+                      <CatIcon size={48} strokeWidth={1.5}/>
+                    </motion.div>
+                  ); })()}
                   <span style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
                     Loading photo…
                   </span>
@@ -1054,7 +1075,7 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
               }}>
                 {imgLoaded
                   ? <img src={item.img} alt={item.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                  : <span style={{ fontSize:28 }}>{item.emoji}</span>
+                  : (() => { const CatIcon = cat.icon; return <CatIcon size={26} strokeWidth={1.5} style={{ color:item.color||"#94A3B8" }}/>; })()
                 }
               </div>
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
@@ -1075,13 +1096,13 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
                 fontFamily:"var(--font-body,'Nunito',sans-serif)",
                 fontSize:11, fontWeight:600, color:accent,
               }}>
-                {cat.emoji} {cat.label}
+                {(() => { const CatIcon = cat.icon; return <CatIcon size={11} strokeWidth={2} style={{ display:"inline", verticalAlign:"middle", marginRight:3 }}/>; })()} {cat.label}
               </div>
               <h3 style={{
                 fontFamily:"var(--font-display,'Nunito',sans-serif)",
                 fontWeight:800, fontSize:26, color:accent, margin:0, lineHeight:1.2,
               }}>
-                {item.emoji} {item[lang]||item.name}
+                {item[lang]||item.name}
               </h3>
               {item[lang]&&item[lang]!==item.name&&(
                 <p style={{
@@ -1183,7 +1204,7 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
               </p>
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:12, color:"#64748B", margin:0, lineHeight:1.5 }}>
                 Tap a tile to select it (glows 🟡), then tap another to swap.
-                Numbers show each tile's correct position. Good luck! 🧩
+                Numbers show each tile's correct position. Good luck!
               </p>
             </div>
 
