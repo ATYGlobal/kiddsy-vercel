@@ -32,7 +32,7 @@ function useAuth() {
 // ── Páginas ────────────────────────────────────────────────────────────────
 import HeroScreen   from './pages/HeroScreen';
 import MyLibrary    from "./pages/MyLibrary.jsx";
-import Legal        from "./pages/Legal.jsx";
+import Legal        from "./pages/LegalPages.jsx";
 import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
