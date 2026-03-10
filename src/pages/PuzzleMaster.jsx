@@ -10,8 +10,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
-  Star, Loader, Trophy, Target, CheckCircle,
+  Star, Loader, Trophy, Target, CheckCircle, Lock,
 } from "lucide-react";
+import Pricing from "../components/Pricing.jsx";
 // ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
 // fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
 function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 42, className = "" }) {
@@ -614,11 +615,13 @@ const MONUMENTS = [
 ];
 
 // ── Mapa de categorías ────────────────────────────────────────────────────
+const PREMIUM_CATS = new Set(["cities", "nature", "monuments"]);
+
 const CATEGORIES = [
-  { id:"animals",   label:"Animals",   emoji:"🦁", color:C.green,  icon:Cat,       items:ANIMALS   },
-  { id:"cities",    label:"Cities",    emoji:"🏙️", color:C.blue,   icon:Building2, items:CITIES    },
-  { id:"nature",    label:"Nature",    emoji:"🌿", color:"#2E7D32",icon:Leaf,       items:NATURE    },
-  { id:"monuments", label:"Monuments", emoji:"🏛️", color:"#6D4C41",icon:Landmark,   items:MONUMENTS },
+  { id:"animals",   label:"Animals",   emoji:"🦁", color:C.green,  icon:Cat,       items:ANIMALS,   premium:false },
+  { id:"cities",    label:"Cities",    emoji:"🏙️", color:C.blue,   icon:Building2, items:CITIES,    premium:true  },
+  { id:"nature",    label:"Nature",    emoji:"🌿", color:"#2E7D32",icon:Leaf,       items:NATURE,    premium:true  },
+  { id:"monuments", label:"Monuments", emoji:"🏛️", color:"#6D4C41",icon:Landmark,   items:MONUMENTS, premium:true  },
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -628,11 +631,14 @@ const CATEGORIES = [
 // ── Puzzle helpers ────────────────────────────────────────────────────────
 function buildPuzzle(size) {
   const n = size * size;
-  const t = Array.from({ length: n }, (_, i) => i);
-  for (let i = n - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [t[i], t[j]] = [t[j], t[i]];
-  }
+  let t;
+  do {
+    t = Array.from({ length: n }, (_, i) => i);
+    for (let i = n - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [t[i], t[j]] = [t[j], t[i]];
+    }
+  } while (t.every((v, idx) => v === idx)); // nunca devuelve ya-resuelto
   return t;
 }
 const isSolved = t => t.every((v, i) => v === i);
@@ -669,7 +675,8 @@ function Confetti({ active }) {
 }
 
 // ── Miniatura ─────────────────────────────────────────────────────────────
-function Thumb({ item, size = 28, FallbackIcon = Loader }) {  const [ok, setOk] = useState(false);
+function Thumb({ item, size = 28, FallbackIcon = Loader }) {
+  const [ok, setOk] = useState(false);
   return (
     <div style={{
       width:size, height:size, borderRadius:"50%", overflow:"hidden", flexShrink:0,
@@ -788,7 +795,9 @@ function DHeader({ children }) {
 // COMPONENTE PRINCIPAL — PuzzleMaster
 // ════════════════════════════════════════════════════════════════════════════
 export default function PuzzleMaster({ lang:propLang, onLangChange }) {
-  const [catId,     setCatId]     = useState("animals");
+  const [catId,          setCatId]          = useState("animals");
+  const [showPricing,    setShowPricing]    = useState(false);
+  const [lockedCatLabel, setLockedCatLabel] = useState(null);
   const [itemIdx,   setItemIdx]   = useState(0);
   const [gridSize,  setGridSize]  = useState(3);
   const [tiles,     setTiles]     = useState(()=>buildPuzzle(3));
@@ -835,7 +844,14 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
     }
   };
 
-  const switchCat = (id, close) => {
+const switchCat = (id, close) => {
+    if (PREMIUM_CATS.has(id)) {
+      const cat = CATEGORIES.find(c => c.id === id);
+      setLockedCatLabel(cat?.label ?? id);
+      setShowPricing(true);
+      close();
+      return;
+    }
     setCatId(id); setItemIdx(0); setImgLoaded(false); close();
   };
   const switchItem = (idx, close) => {
@@ -845,11 +861,16 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const accent = cat.color;
 
   // ── RENDER ────────────────────────────────────────────────────────────
-  return (
-<div className="min-h-screen kiddsy-bg-drift" style={{
-      background: "linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 25%, #FFFDE7 50%, #E8F5E9 75%, #E0F2F1 100%)",
-    }}>      
-    <Confetti active={confetti}/>
+    return (
+    <div className="min-h-screen kiddsy-bg-drift" style={{ }}>
+      <Confetti active={confetti}/>
+      {showPricing && (
+        <Pricing
+          onClose={() => { setShowPricing(false); setLockedCatLabel(null); }}
+          lockedCategory={lockedCatLabel}
+        />
+      )}
+
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="text-center pt-8 pb-3 px-4">
@@ -891,7 +912,10 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
                 onClick={()=>switchCat(c.id,close)}>
                 {(() => { const CIcon = c.icon; return <CIcon size={16} strokeWidth={2} style={{ flexShrink:0, color:catId===c.id?c.color:"#64748B" }}/>; })()}
                 <span style={{ fontWeight:700 }}>{c.label}</span>
-                <span style={{ fontSize:10, color:"#94A3B8", marginLeft:"auto" }}>{c.items.length}</span>
+                {c.premium
+                  ? <Lock size={12} strokeWidth={2.5} style={{ marginLeft:"auto", color:"#94A3B8" }}/>
+                  : <span style={{ fontSize:10, color:"#94A3B8", marginLeft:"auto" }}>{c.items.length}</span>
+                }
               </DRow>
             )),
           ]}
