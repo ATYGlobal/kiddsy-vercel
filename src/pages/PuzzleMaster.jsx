@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
-  Star, PawPrint, Trophy, Target, CheckCircle,
+  Star, Library, Loader, Loader2 Trophy, Target, CheckCircle,
 } from "lucide-react";
 
 // ── Paleta ────────────────────────────────────────────────────────────────
@@ -612,7 +612,7 @@ function Confetti({ active }) {
 }
 
 // ── Miniatura ─────────────────────────────────────────────────────────────
-function Thumb({ item, size = 28, FallbackIcon = PawPrint }) {
+function Thumb({ item, size = 28, FallbackIcon = Library }) {
   const [ok, setOk] = useState(false);
   return (
     <div style={{
