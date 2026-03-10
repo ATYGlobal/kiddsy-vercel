@@ -32,7 +32,7 @@ function useAuth() {
 // ── Páginas ────────────────────────────────────────────────────────────────
 import HeroScreen   from './pages/HeroScreen';
 import MyLibrary    from "./pages/MyLibrary.jsx";
-import Legal        from "./pages/LegalPages.jsx";
+import { AvisoLegal, Privacidad } from "./pages/LegalPages.jsx";
 import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
@@ -976,7 +976,9 @@ export default function App() {
     wordsearch:  <WordSearch/>,
     animals:     <PuzzleMaster/>,
     education:   <Education/>,
-    legal:       <Legal/>,
+    "legal": <AvisoLegal onNav={handleNav}/>,
+    "aviso-legal": <AvisoLegal onNav={handleNav}/>,
+    "privacidad": <Privacidad onNav={handleNav}/>,
     donate:      <Donation/>,
     collaborate: <Collaborate/>,
     mylibrary:   <MyLibrary onCreateStory={()=>handleNav("generate")} onReadStory={handleSelectStory}/>,
