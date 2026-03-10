@@ -39,7 +39,7 @@ import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
-import PuzzleMaster from "./pages/PuzzleMaster.jsx";
+import AnimalPuzzle from "./pages/AnimalPuzzle.jsx";
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────
@@ -396,7 +396,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
           flex:           1,
           justifyContent: "center",
           flexWrap:       "nowrap",
-          overflow:       "visible",
+          overflow:       "hidden",
           minWidth:       0,
         }}
           className="desktop-nav"
@@ -1433,7 +1433,7 @@ export default function App() {
   const FULL_PAGES = {
     games:       <Games/>,
     wordsearch:  <WordSearch/>,
-    animals:     <PuzzleMaster/>,
+    animals:     <AnimalPuzzle/>,
     education:   <Education/>,
     legal:       <Legal/>,
     donate:      <Donation/>,

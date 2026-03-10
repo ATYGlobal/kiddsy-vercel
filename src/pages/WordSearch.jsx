@@ -5,7 +5,7 @@
  */
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Trophy, CheckCircle, Star, Search, Library, Users, BookOpen, Utensils } from "lucide-react";
+import { RotateCcw, Trophy, CheckCircle, Star, Search, PawPrint, Users, BookOpen, Utensils } from "lucide-react";
 
 const C = {
   blue:       "#1565C0",
@@ -37,7 +37,7 @@ const PACKS = [
   {
     name: "Animals",
     emoji: "🦁",
-    icon: Library,
+    icon: PawPrint,
     words: [
       { en: "CAT",      es: "Gato",     fr: "Chat",    ar: "قطة"  },
       { en: "DOG",      es: "Perro",    fr: "Chien",   ar: "كلب"  },
