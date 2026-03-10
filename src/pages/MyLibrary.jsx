@@ -13,7 +13,31 @@ import {
   BookOpen, Puzzle, Trash2, Plus, RefreshCw,
   RotateCcw, ChevronLeft,
 } from "lucide-react";
-
+// ── CartoonTitle ──────────────────────────────────────────────────────────
+function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 44 }) {
+  const text = String(children);
+  const estW = Math.max(200, text.length * size * 0.56 + 40);
+  const estH = size * 1.48;
+  return (
+    <span style={{ display:"inline-block", lineHeight:1 }} aria-label={text}>
+      <svg xmlns="http://www.w3.org/2000/svg" width={estW} height={estH}
+        viewBox={`0 0 ${estW} ${estH}`}
+        style={{ display:"block", maxWidth:"100%", overflow:"visible" }}
+      >
+        <text x="50%" y="75%" textAnchor="middle" dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800" fontSize={size}
+          fill="none" stroke={stroke} strokeWidth="6"
+          strokeLinejoin="round" strokeLinecap="round" paintOrder="stroke"
+        >{text}</text>
+        <text x="50%" y="75%" textAnchor="middle" dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800" fontSize={size} fill={fill} stroke="none"
+        >{text}</text>
+      </svg>
+    </span>
+  );
+}
 const C = {
   blue:       "#1565C0",
   blueSoft:   "#E3F2FD",
@@ -301,8 +325,10 @@ export default function MyLibrary({ onCreateStory, onReadStory }) {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="font-display text-4xl md:text-5xl" style={{ color: C.blue }}>
-            My Library 📚
+          <h1 style={{ lineHeight:1 }}>
+            <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={44}>
+              My Library
+            </CartoonTitle>
           </h1>
           <p className="font-body text-slate-500 mt-1">
             Your personal story collection — stored on this device.
@@ -332,7 +358,11 @@ export default function MyLibrary({ onCreateStory, onReadStory }) {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="text-center py-16 bg-white/80 rounded-3xl border-4 border-white shadow-md">
             <div className="text-7xl mb-4">📖</div>
-            <h2 className="font-display text-3xl mb-2" style={{ color: C.blue }}>No stories yet!</h2>
+            <h2 className="mb-2" style={{ lineHeight:1 }}>
+              <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={32}>
+                No stories yet!
+              </CartoonTitle>
+            </h2>
             <p className="font-body text-slate-500 mb-6 max-w-xs mx-auto">
               Generate your first personalized bilingual story and it will appear here.
             </p>
