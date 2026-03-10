@@ -21,7 +21,7 @@ import {
   BookOpen, Sparkles, ChevronLeft, ChevronRight, ArrowLeft,
   Wand2, Puzzle, Music, HelpCircle, Heart,
   Users, Menu, X, Library, ChevronDown,
-  Search, Globe, Star, RefreshCw,
+  Search, Cat, Globe, Star, RefreshCw,
 } from "lucide-react";
 
 // ── Auth — stub para modo invitado ─────────────────────────────────────────
@@ -39,7 +39,7 @@ import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
-import PuzzleMaster from "./pages/PuzzleMaster.jsx";
+import AnimalPuzzle from "./pages/AnimalPuzzle.jsx";
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────
@@ -316,7 +316,7 @@ const NAV_PRIMARY = [
   { id:"mylibrary",  label:"My Library",  icon:Library,  color:C.green   },
   { id:"games",      label:"Games",       icon:Puzzle,   color:C.red     },
   { id:"wordsearch", label:"Word Search", icon:Search,   color:C.cyan    },
-  { id:"puzzles",    label:"Puzzles",     icon:Puzzle,   color:C.green   },
+  { id:"animals",    label:"Animals",     icon:Cat,      color:C.green   },
   { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
 ];
 const NAV_SECONDARY = [
@@ -396,7 +396,7 @@ function Navbar({ view, onNav, lang, onLangChange }) {
           flex:           1,
           justifyContent: "center",
           flexWrap:       "nowrap",
-          overflow:       "visible",
+          overflow:       "hidden",
           minWidth:       0,
         }}
           className="desktop-nav"
@@ -787,13 +787,24 @@ function SwUpdateToast() {
 }
 
 
-function GeneratingLoader({ childName, theme, storyColor }) {
+function GeneratingLoader({ childName, theme, storyColor, streamText }) {
   const accent = getStoryAccent(storyColor);
   const emojis = ["✨","📖","🌟","🪄","💫","🌈","⭐","🎨"];
   const particles = Array.from({length:12},(_,i)=>({
     id:i, x:Math.random()*80+10, y:Math.random()*60+20,
     emoji:emojis[i%emojis.length], delay:Math.random()*1.5, duration:Math.random()*1.5+2,
   }));
+
+  // Extract a readable preview from the partial streaming JSON
+  const previewSentence = (() => {
+    if (!streamText) return "";
+    const m = streamText.match(/"en"\s*:\s*"([^"]{10,})"/);
+    if (m) return m[1];
+    const t = streamText.match(/"title"\s*:\s*"([^"]{4,})"/);
+    if (t) return "✨ " + t[1];
+    return "";
+  })();
+
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}}
       className="flex flex-col items-center justify-center min-h-[60vh] relative overflow-hidden rounded-4xl px-8 py-16"
@@ -813,20 +824,43 @@ function GeneratingLoader({ childName, theme, storyColor }) {
       >
         <span className="text-5xl">🪄</span>
       </motion.div>
-      <motion.h2 className="font-display text-3xl md:text-4xl text-center mb-3"
+      <motion.h2 className="font-display text-3xl md:text-4xl text-center mb-2"
         style={{color:accent.text}} animate={{opacity:[0.7,1,0.7]}} transition={{duration:1.5,repeat:Infinity}}
       >Writing {childName}'s story…</motion.h2>
-      <p className="font-body text-lg text-center mb-8" style={{color:`${accent.text}80`}}>
+      <p className="font-body text-lg text-center mb-5" style={{color:`${accent.text}80`}}>
         About <strong>{theme}</strong>
       </p>
+      <AnimatePresence>
+        {previewSentence && (
+          <motion.div
+            initial={{opacity:0,y:8,scale:0.97}}
+            animate={{opacity:1,y:0,scale:1}}
+            exit={{opacity:0}}
+            className="w-full max-w-sm rounded-2xl px-5 py-3 mb-5 text-center font-body text-sm"
+            style={{
+              background:`${accent.primary}14`,
+              border:`1.5px solid ${accent.primary}30`,
+              color:accent.text,
+            }}
+          >
+            <span className="opacity-50 text-xs block mb-1">✍️ Writing…</span>
+            {previewSentence}
+            <motion.span
+              animate={{opacity:[1,0,1]}}
+              transition={{duration:0.8,repeat:Infinity}}
+              style={{marginLeft:2,display:"inline-block"}}
+            >▍</motion.span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="w-64 h-3 rounded-full overflow-hidden" style={{background:`${accent.primary}20`}}>
         <motion.div className="h-full rounded-full"
           style={{background:`linear-gradient(90deg, ${accent.primary}, ${accent.primary}99)`}}
           animate={{x:["-100%","100%"]}} transition={{duration:1.4,repeat:Infinity,ease:"easeInOut"}}
         />
       </div>
-      <p className="font-body text-xs mt-4" style={{color:`${accent.text}60`}}>
-        Gemini AI is creating a bilingual story just for them ✨
+      <p className="font-body text-xs mt-4 text-center" style={{color:`${accent.text}60`}}>
+        Kiddsy AI is spinning a magical story for you… ✨
       </p>
     </motion.div>
   );
@@ -1002,6 +1036,7 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
   const [customTheme, setCustomTheme] = useState("");
   const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState("");
+  const [streamText, setStreamText] = useState(""); // live SSE preview
   const [selectedThemeLabel, setSelectedThemeLabel] = useState("");
 
   useEffect(()=>{ lsSet(LS_NAME, childName); },[childName]);
@@ -1020,29 +1055,77 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
 
   const handleGenerate = async () => {
     if (!childName.trim() || !activeTheme) return;
-    setLoading(true); setError("");
-    try {
-      const API_URL = window.location.hostname === "localhost"
-        ? "http://localhost:10000"
-        : "https://kiddsy-vercel.onrender.com";
+    setLoading(true); setError(""); setStreamText("");
 
+    const API_URL = window.location.hostname === "localhost"
+      ? "http://localhost:10000"
+      : "https://kiddsy-vercel.onrender.com";
+
+    try {
       const response = await fetch(`${API_URL}/api/generate-story`, {
         method:  "POST",
         headers: { "Content-Type":"application/json" },
         body:    JSON.stringify({ childName, theme: activeTheme, language: lang }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Generation failed");
 
-      // Save with Supabase (or localStorage fallback) using guest/user ID
-      const userId = getGuestId();
-      await saveStory(data, userId);
+      if (!response.ok) {
+        const errData = await response.json().catch(()=>({error:"Generation failed"}));
+        throw new Error(errData.error || "Generation failed");
+      }
 
-      onGenerated(data, lang);
+      // ── Read Groq SSE stream ─────────────────────────────────────
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let   buffer  = "";
+
+      const parseData = (line) => {
+        if (!line.startsWith("data:")) return null;
+        try { return JSON.parse(line.slice(5).trim()); } catch { return null; }
+      };
+
+      let currentEvent = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); // keep incomplete last line
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("event:")) {
+            currentEvent = trimmed.slice(6).trim();
+          } else if (trimmed.startsWith("data:")) {
+            const payload = parseData(trimmed);
+            if (!payload) continue;
+
+            if (currentEvent === "token" && payload.delta) {
+              setStreamText(prev => prev + payload.delta);
+
+            } else if (currentEvent === "complete") {
+              const userId = getGuestId();
+              await saveStory(payload, userId);
+              onGenerated(payload, lang);
+              return; // ← done, no need to setLoading(false)
+
+            } else if (currentEvent === "error") {
+              throw new Error(payload.error || "Kiddsy AI had a hiccup — please try again! 🪄");
+            }
+          }
+        }
+      }
+      // Stream ended without "complete" event
+      throw new Error("Story generation ended unexpectedly — please try again.");
+
     } catch(e) {
       console.error("Generation error:", e);
-      setError(e.message || "Something went wrong!");
+      const friendly = (e.message?.toLowerCase().includes("fetch") || e.message?.toLowerCase().includes("network"))
+        ? "Can't reach Kiddsy AI — check your connection and try again 🌐"
+        : e.message || "Something magical went wrong — please try again! 🌟";
+      setError(friendly);
       setLoading(false);
+      setStreamText("");
     }
   };
 
@@ -1056,7 +1139,7 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
   };
   const loaderColor = Object.entries(themeColorMap).find(([k])=>activeTheme.includes(k))?.[1] || "from-blue-400 to-cyan-300";
 
-  if (loading) return <GeneratingLoader childName={childName} theme={selectedThemeLabel||activeTheme} storyColor={loaderColor}/>;
+  if (loading) return <GeneratingLoader childName={childName} theme={selectedThemeLabel||activeTheme} storyColor={loaderColor} streamText={streamText}/>;
 
   const canGenerate = childName.trim() && activeTheme;
 
@@ -1350,7 +1433,7 @@ export default function App() {
   const FULL_PAGES = {
     games:       <Games/>,
     wordsearch:  <WordSearch/>,
-    puzzles:     <PuzzleMaster lang={lang} onLangChange={setLang}/>,
+    animals:     <AnimalPuzzle/>,
     education:   <Education/>,
     legal:       <Legal/>,
     donate:      <Donation/>,

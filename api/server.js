@@ -1,26 +1,23 @@
 /**
  * api/server.js — Kiddsy
  * ─────────────────────────────────────────────────────────────────────────
- * ✅ Gemini 2.0 Flash  (por defecto)
- * ✅ Groq llama-3.3-70b-versatile  (alternativa)
- *
- * Para cambiar el proveedor basta con una variable de entorno:
- *
- *   AI_PROVIDER=gemini   → usa Gemini 2.0 Flash  (requiere GOOGLE_GENAI_API_KEY)
- *   AI_PROVIDER=groq     → usa Groq Llama-3.3-70b (requiere GROQ_API_KEY)
- *
- * Si AI_PROVIDER no está definida, se usa Gemini por defecto.
+ * ✅ Groq LLaMA 3.3 70B — generación de cuentos con streaming real (SSE)
+ * ✅ 16 idiomas: ES, FR, AR, DE, IT, PT, RU, ZH, JA, KO, BN, HI, NL, PL, NO, SV
+ * ✅ System prompt educativo: vocabulario de Animals, Cities, Nature, Monuments
+ * ✅ Streaming SSE: event:token + event:complete + event:error
+ * ✅ Sin ninguna referencia a Vertex AI, Google Gemini ni cuotas de Gmail
  * ─────────────────────────────────────────────────────────────────────────
  */
 
-import express from "express";
-import cors    from "cors";
+import express from 'express';
+import cors    from 'cors';
+import Groq    from 'groq-sdk';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ─── Mapa de idiomas ──────────────────────────────────────────────────────
+// ─── Mapa de idiomas ───────────────────────────────────────────────────────
 const LANG_MAP = {
   es: "Spanish",
   fr: "French",
@@ -40,210 +37,221 @@ const LANG_MAP = {
   sv: "Swedish",
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PROVIDERS
-// ═══════════════════════════════════════════════════════════════════════════
+// RTL languages
+const RTL_LANGS = new Set(["ar"]);
 
-/**
- * generateWithGemini
- * Llama a Gemini 2.0 Flash con el prompt y devuelve el JSON parseado.
- */
-async function generateWithGemini(prompt) {
-  const apiKey = process.env.GOOGLE_GENAI_API_KEY;
-  if (!apiKey) throw new Error("GOOGLE_GENAI_API_KEY no configurada en .env");
+// ─── Vocabulario temático para enriquecer los cuentos ─────────────────────
+const THEME_VOCAB = {
+  animals:   ["lion", "elephant", "dolphin", "butterfly", "penguin", "giraffe", "eagle", "turtle"],
+  cities:    ["Paris", "Tokyo", "Sydney", "Cairo", "London", "Rio de Janeiro", "Amsterdam"],
+  nature:    ["Amazon rainforest", "Northern Lights", "Grand Canyon", "Niagara Falls", "coral reef"],
+  monuments: ["Eiffel Tower", "Great Wall", "Pyramids of Giza", "Taj Mahal", "Machu Picchu"],
+};
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-  const res = await fetch(url, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.8, maxOutputTokens: 1200 },
-    }),
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    if (res.status === 429) throw Object.assign(new Error("Gemini quota reached"), { status: 429 });
-    if (res.status === 400) throw Object.assign(new Error("Invalid Gemini API key"), { status: 400 });
-    throw new Error(`Gemini HTTP ${res.status}: ${txt.slice(0, 200)}`);
-  }
-
-  const data = await res.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-}
-
-/**
- * generateWithGroq
- * Llama a Groq con llama-3.3-70b-versatile y devuelve el texto crudo.
- * Usa la API REST de Groq (compatible con OpenAI Chat Completions).
- */
-async function generateWithGroq(prompt) {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY no configurada en .env");
-
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method:  "POST",
-    headers: {
-      "Content-Type":  "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model:       "llama-3.3-70b-versatile",
-      temperature: 0.8,
-      max_tokens:  1200,
-      messages: [
-        {
-          role:    "system",
-          content: "You are a bilingual children's story writer. Respond ONLY with valid JSON, no markdown, no backticks.",
-        },
-        { role: "user", content: prompt },
-      ],
-    }),
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    if (res.status === 429) throw Object.assign(new Error("Groq rate limit reached"), { status: 429 });
-    if (res.status === 401) throw Object.assign(new Error("Invalid Groq API key"), { status: 401 });
-    throw new Error(`Groq HTTP ${res.status}: ${txt.slice(0, 200)}`);
-  }
-
-  const data = await res.json();
-  return data?.choices?.[0]?.message?.content ?? "";
-}
-
-/**
- * generateStory — selecciona el proveedor según AI_PROVIDER
- * Devuelve el objeto story ya parseado.
- */
-async function generateStory(prompt) {
-  const provider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
-
-  let rawText;
-  if (provider === "groq") {
-    rawText = await generateWithGroq(prompt);
-  } else {
-    rawText = await generateWithGemini(prompt);
-  }
-
-  // Limpiar posibles markdown fences que algunos modelos incluyen
-  const cleaned = rawText
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-
-  let story;
-  try {
-    story = JSON.parse(cleaned);
-  } catch {
-    console.error("[Kiddsy] JSON parse error — raw output:", rawText.slice(0, 400));
-    throw new Error("AI returned unexpected format. Please try again.");
-  }
-
-  return story;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// RUTAS API
-// ═══════════════════════════════════════════════════════════════════════════
-
-// ── POST /api/generate-story ──────────────────────────────────────────────
-app.post("/api/generate-story", async (req, res) => {
-  const { childName, theme, language } = req.body;
-
-  if (!childName || !theme) {
-    return res.status(400).json({ error: "childName y theme son obligatorios." });
-  }
-
-  const langCode = language || "es";
+// ─── System prompt educativo ───────────────────────────────────────────────
+function buildSystemPrompt(langCode) {
   const langName = LANG_MAP[langCode] || "Spanish";
-  const isRTL    = ["ar"].includes(langCode);
-  const rtlNote  = isRTL ? "(This language reads right-to-left — keep the translation natural)" : "";
+  const isRTL    = RTL_LANGS.has(langCode);
+  const rtlNote  = isRTL ? " Note: this language reads right-to-left — keep translation natural." : "";
 
-  const prompt = `
-You are a bilingual children's story writer and SVG illustrator.
-Create a short, joyful story for a child named "${childName}" about: "${theme}".
+  // Combine all theme words for variety
+  const vocabPool = Object.values(THEME_VOCAB).flat();
+  const vocabSample = vocabPool.sort(()=>Math.random()-0.5).slice(0,6).join(", ");
 
-Rules:
-- Exactly 4 pages.
-- Each page must have:
-  1. One simple English sentence (key: "en").
-  2. One ${langName} translation ${rtlNote} (key: "${langCode}").
-  3. One "image_svg": A simple, colorful SVG illustration (viewBox="0 0 100 100").
-     Use basic shapes (rect, circle, path) and bright colors. Avoid complex details.
-- Use the child's name (${childName}) naturally.
-- Response must be ONLY a valid JSON object — no markdown, no backticks.
+  return `You are Kiddsy AI — a warm, playful children's story writer for ages 3–8.
 
-JSON Format:
+CORE RULES:
+1. Always write educational, age-appropriate content with simple, positive language.
+2. Every story must have EXACTLY 4 pages.
+3. Naturally include at least 2 words from this vocabulary: ${vocabSample}.
+4. Keep sentences short (max 12 words per sentence in English).
+5. The story must feel magical, fun, and encouraging for children.
+
+LANGUAGE RULES:
+- The "en" field is always clear, simple English.
+- The "${langCode}" field is the ${langName} translation.${rtlNote}
+- NEVER mix languages within the same field.
+
+SVG RULES:
+- Each "image_svg" must be a self-contained <svg viewBox="0 0 100 100"> element.
+- Use ONLY basic SVG shapes: rect, circle, ellipse, polygon, path, text.
+- Use bright, cheerful colors. No external images. No JavaScript.
+- Keep SVG compact — under 600 characters per illustration.
+
+OUTPUT FORMAT:
+- Respond with ONLY a valid JSON object. Zero markdown. Zero backticks. Zero preamble.
+- Any text outside the JSON object will break the app.
+
+JSON SCHEMA:
 {
-  "title": "Story Title in English",
+  "title": "Story title in English",
   "emoji": "🌟",
   "color": "from-blue-400 to-cyan-300",
   "pages": [
     {
-      "en": "...",
-      "${langCode}": "...",
-      "image_svg": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>...</svg>"
+      "en": "Simple English sentence.",
+      "${langCode}": "${langName} translation.",
+      "image_svg": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>…</svg>"
     }
   ]
 }
-`;
 
-  const provider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
-  console.log(`✨ [${provider.toUpperCase()}] Generating story for "${childName}" about "${theme}" in ${langName}…`);
+COLOR OPTIONS for "color" field (pick the most fitting):
+"from-blue-400 to-cyan-300" | "from-green-400 to-emerald-300" | "from-pink-400 to-rose-300"
+"from-orange-400 to-amber-300" | "from-purple-400 to-violet-300" | "from-yellow-400 to-amber-300"`;
+}
+
+// ─── Helper: limpia fences de markdown que el modelo pudiera añadir ────────
+function cleanJson(raw = "") {
+  return raw
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENDPOINT PRINCIPAL — SSE Streaming con Groq
+// ═══════════════════════════════════════════════════════════════════════════
+app.post("/api/generate-story", async (req, res) => {
+  const { childName, theme, language } = req.body;
+
+  // ── Validación ────────────────────────────────────────────────────────
+  if (!childName?.trim() || !theme?.trim()) {
+    return res.status(400).json({ error: "childName and theme are required." });
+  }
+
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) {
+    return res.status(500).json({
+      error: "GROQ_API_KEY is not set. Add it to your .env file.",
+    });
+  }
+
+  const langCode = language || "es";
+  const langName = LANG_MAP[langCode] || "Spanish";
+
+  // ── Cabeceras SSE ─────────────────────────────────────────────────────
+  res.setHeader("Content-Type",  "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection",    "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no"); // desactiva buffer en nginx/proxies
+
+  // Flush helper — asegura que cada evento se envía de inmediato
+  const send = (event, data) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    if (typeof res.flush === "function") res.flush();
+  };
+
+  console.log(`✨ [Groq Stream] "${childName}" · theme: "${theme}" · lang: ${langCode}`);
+
+  // ── Mensaje de usuario ────────────────────────────────────────────────
+  const userMessage = `Write a story for a child named "${childName}" about: "${theme}".
+Language for translations: ${langName} (code: "${langCode}").
+Remember: ONLY output the JSON object. No text before or after it.`;
 
   try {
-    const story = await generateStory(prompt);
+    const groq = new Groq({ apiKey: groqKey });
 
-    if (!story.title || !Array.isArray(story.pages) || story.pages.length === 0) {
-      return res.status(500).json({ error: "Incomplete story generated. Please try again." });
+    // ── Llamada a Groq con stream: true ───────────────────────────────
+    const stream = await groq.chat.completions.create({
+      model:       "llama-3.3-70b-versatile",
+      temperature: 0.82,
+      max_tokens:  1600,
+      stream:      true,
+      messages: [
+        { role: "system",  content: buildSystemPrompt(langCode) },
+        { role: "user",    content: userMessage },
+      ],
+    });
+
+    let fullText = "";
+
+    // ── Transmitir tokens al frontend ─────────────────────────────────
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content ?? "";
+      if (delta) {
+        fullText += delta;
+        send("token", { delta });
+      }
     }
 
-    story.id       = `generated-${Date.now()}`;
+    // ── Parsear el JSON completo ───────────────────────────────────────
+    let story;
+    try {
+      story = JSON.parse(cleanJson(fullText));
+    } catch (parseErr) {
+      console.error("[Groq] JSON parse failed:", fullText.slice(0, 300));
+      send("error", {
+        error: "The story came out a bit scrambled — please try again! 🪄",
+      });
+      return res.end();
+    }
+
+    // ── Validación mínima ─────────────────────────────────────────────
+    if (!story.title || !Array.isArray(story.pages) || story.pages.length === 0) {
+      send("error", {
+        error: "Kiddsy AI needs a moment — please try once more! ✨",
+      });
+      return res.end();
+    }
+
+    // ── Enriquecer y enviar historia completa ─────────────────────────
+    story.id       = `gen-${Date.now()}`;
     story.language = langCode;
 
-    console.log(`✅ Story generated: "${story.title}" (${langName}) via ${provider}`);
-    res.json(story);
+    console.log(`✅ [Groq] Story ready: "${story.title}" (${langName})`);
+    send("complete", story);
+    res.end();
 
   } catch (err) {
-    console.error(`[${provider.toUpperCase()}] Error:`, err.message);
-    const status = err.status ?? 500;
-    res.status(status).json({ error: err.message || "Could not reach AI. Check your connection." });
+    console.error("[Groq] Error:", err?.message || err);
+
+    // Manejar errores específicos de Groq con mensajes amables
+    let friendlyMsg = "Something magical went wrong — please try again! 🌟";
+
+    if (err?.status === 429 || err?.message?.includes("rate")) {
+      friendlyMsg = "Kiddsy AI is very busy right now — try again in a few seconds! ⏳";
+    } else if (err?.status === 401 || err?.message?.includes("auth")) {
+      friendlyMsg = "There's a configuration issue — please contact support.";
+    } else if (err?.message?.includes("network") || err?.code === "ECONNREFUSED") {
+      friendlyMsg = "Can't reach Kiddsy AI — check your connection and try again.";
+    }
+
+    // Si los headers SSE ya fueron enviados, usar SSE error; si no, JSON error
+    if (res.headersSent) {
+      send("error", { error: friendlyMsg });
+      res.end();
+    } else {
+      res.status(500).json({ error: friendlyMsg });
+    }
   }
 });
 
-// ── GET /api/health ────────────────────────────────────────────────────────
-app.get("/api/health", (_req, res) => {
-  const provider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
-  const keyOk =
-    provider === "groq"
-      ? !!process.env.GROQ_API_KEY
-      : !!process.env.GOOGLE_GENAI_API_KEY;
+// ── GET /api/stories — historias estáticas de demostración ────────────────
+app.get("/api/stories", (_req, res) => {
+  res.json([]); // Devuelve array vacío; las historias reales vienen de Supabase/localStorage
+});
 
+// ── Health check ──────────────────────────────────────────────────────────
+app.get("/api/health", (_req, res) => {
   res.json({
     status:        "ok",
     app:           "Kiddsy",
-    ai_provider:   provider,
-    ai_model:      provider === "groq" ? "llama-3.3-70b-versatile" : "gemini-2.0-flash",
+    ai:            "Groq LLaMA 3.3 70B (streaming)",
+    streaming:     true,
     languages:     Object.keys(LANG_MAP).length,
-    keyConfigured: keyOk,
+    keyConfigured: !!process.env.GROQ_API_KEY,
   });
 });
 
-// ── Start ──────────────────────────────────────────────────────────────────
-const PORT     = process.env.PORT || 10000;
-const PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
-const MODEL    = PROVIDER === "groq" ? "llama-3.3-70b-versatile" : "gemini-2.0-flash";
-
+// ── Start ─────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`✅ Kiddsy API → http://localhost:${PORT}`);
-  console.log(`🤖 AI provider : ${PROVIDER.toUpperCase()}`);
-  console.log(`🧠 AI model    : ${MODEL}`);
-  console.log(`🌍 Languages   : ${Object.values(LANG_MAP).join(", ")}`);
-  console.log(`💡 Switch AI   : AI_PROVIDER=groq | AI_PROVIDER=gemini`);
+  console.log(`✅  Kiddsy API → http://localhost:${PORT}`);
+  console.log(`🤖  AI: Groq LLaMA 3.3 70B (streaming SSE)`);
+  console.log(`🌍  Languages: ${Object.values(LANG_MAP).join(", ")}`);
+  console.log(`🔑  GROQ_API_KEY: ${process.env.GROQ_API_KEY ? "✓ set" : "✗ MISSING — add to .env"}`);
 });
 
 export default app;
