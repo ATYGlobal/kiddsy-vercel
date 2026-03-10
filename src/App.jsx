@@ -41,7 +41,63 @@ import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
 import PuzzleMaster from "./pages/PuzzleMaster.jsx";
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
+// ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
+// fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
+function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 42, className = "" }) {
+  const text  = String(children);
+  // Estimate SVG width: ~0.58em per char at given font size, with padding
+  const estW  = Math.max(200, text.length * size * 0.56 + 40);
+  const estH  = size * 1.48;
 
+  return (
+    <span
+      className={className}
+      style={{ display: "inline-block", lineHeight: 1 }}
+      aria-label={text}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={estW}
+        height={estH}
+        viewBox={`0 0 ${estW} ${estH}`}
+        style={{ display: "block", maxWidth: "100%", overflow: "visible" }}
+      >
+        {/* Stroke pass — slightly thicker, drawn first so fill sits on top */}
+        <text
+          x="50%"
+          y="75%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800"
+          fontSize={size}
+          fill="none"
+          stroke={stroke}
+          strokeWidth="6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          paintOrder="stroke"
+        >
+          {text}
+        </text>
+        {/* Fill pass */}
+        <text
+          x="50%"
+          y="75%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800"
+          fontSize={size}
+          fill={fill}
+          stroke="none"
+        >
+          {text}
+        </text>
+      </svg>
+    </span>
+  );
+}
 // ─── LocalStorage helpers ──────────────────────────────────────────────────
 const LS_NAME    = "kiddsy_childName";
 const LS_STORIES = "kiddsy_guestStories";
@@ -678,6 +734,29 @@ function Navbar({ view, onNav, lang, onLangChange }) {
     </header>
   );
 }
+// ── AnimatedBg CSS keyframes — inyectado una sola vez ─────────────────────
+function KiddsyBgStyles() {
+  return (
+    <style>{`
+      @keyframes bgDrift {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .kiddsy-bg-drift {
+        background-size: 300% 300%;
+        animation: bgDrift 18s ease infinite;
+      }
+      @keyframes bgPulse {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.82; }
+      }
+      .kiddsy-bg-pulse {
+        animation: bgPulse 8s ease-in-out infinite;
+      }
+    `}</style>
+  );
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── BACKGROUND STARS ─────────────────────────────────────────────────────
@@ -1150,7 +1229,11 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
           <motion.div animate={{rotate:[-8,8,-8]}} transition={{duration:2,repeat:Infinity,ease:"easeInOut"}}
             className="text-5xl mb-3 inline-block"
           >🪄</motion.div>
-          <h2 className="font-display text-3xl" style={{color:C.blue}}>Create a Magic Story</h2>
+           <h2 style={{ lineHeight:1 }}>
+            <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={34}>
+              Create a Magic Story
+            </CartoonTitle>
+          </h2>
           <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full font-body text-xs font-semibold"
             style={{background:"#FFF3E0",color:C.orange}}
           >📱 Saved locally on this device</div>
@@ -1240,7 +1323,11 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}}>
       <div className="text-center mb-10">
-        <h2 className="font-display text-4xl md:text-5xl mb-3" style={{color:C.blue}}>Story Library 📚</h2>
+        <h2 className="mb-3" style={{ lineHeight:1 }}>
+          <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={44}>
+            Story Library
+          </CartoonTitle>
+        </h2>
         <p className="font-body text-slate-500 text-lg">Pick a story or create your own! ✨</p>
       </div>
 
@@ -1442,7 +1529,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen relative" style={{background:"#FFFDE7"}}>
+    <div className="min-h-screen relative kiddsy-bg-drift" style={{
+      background: "linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 25%, #FFF3E0 50%, #FFFDE7 75%, #F3E5F5 100%)",
+    }}>
+      <KiddsyBgStyles/>
       <SwUpdateToast/>
       <StarField/>
       <div className="fixed inset-0 pointer-events-none z-0">
