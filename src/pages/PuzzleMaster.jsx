@@ -10,8 +10,65 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
-  Star, Loader, Trophy, Target, CheckCircle,
+  Star, PawPrint, Trophy, Target, CheckCircle,
 } from "lucide-react";
+// ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
+// fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
+function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 42, className = "" }) {
+  const text  = String(children);
+  // Estimate SVG width: ~0.58em per char at given font size, with padding
+  const estW  = Math.max(200, text.length * size * 0.56 + 40);
+  const estH  = size * 1.48;
+
+  return (
+    <span
+      className={className}
+      style={{ display: "inline-block", lineHeight: 1 }}
+      aria-label={text}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={estW}
+        height={estH}
+        viewBox={`0 0 ${estW} ${estH}`}
+        style={{ display: "block", maxWidth: "100%", overflow: "visible" }}
+      >
+        {/* Stroke pass — slightly thicker, drawn first so fill sits on top */}
+        <text
+          x="50%"
+          y="75%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800"
+          fontSize={size}
+          fill="none"
+          stroke={stroke}
+          strokeWidth="6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          paintOrder="stroke"
+        >
+          {text}
+        </text>
+        {/* Fill pass */}
+        <text
+          x="50%"
+          y="75%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800"
+          fontSize={size}
+          fill={fill}
+          stroke="none"
+        >
+          {text}
+        </text>
+      </svg>
+    </span>
+  );
+}
 
 // ── Paleta ────────────────────────────────────────────────────────────────
 const C = {
@@ -612,8 +669,7 @@ function Confetti({ active }) {
 }
 
 // ── Miniatura ─────────────────────────────────────────────────────────────
-function Thumb({ item, size = 28, FallbackIcon = Loader }) {
-  const [ok, setOk] = useState(false);
+function Thumb({ item, size = 28, FallbackIcon = PawPrint }) {  const [ok, setOk] = useState(false);
   return (
     <div style={{
       width:size, height:size, borderRadius:"50%", overflow:"hidden", flexShrink:0,
@@ -790,8 +846,10 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
 
   // ── RENDER ────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen" style={{ background:"linear-gradient(150deg,#E8F5E9 0%,#FFFDE7 50%,#E3F2FD 100%)" }}>
-      <Confetti active={confetti}/>
+<div className="min-h-screen kiddsy-bg-drift" style={{
+      background: "linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 25%, #FFFDE7 50%, #E8F5E9 75%, #E0F2F1 100%)",
+    }}>      
+    <Confetti active={confetti}/>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="text-center pt-8 pb-3 px-4">
@@ -801,9 +859,10 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
           style={{ background:"#E8F5E9" }}
         ><Puzzle size={36} strokeWidth={2} style={{ color:accent }}/></motion.div>
         <motion.h1 initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}
-          className="font-display text-3xl md:text-4xl mb-1"
-          style={{ color:accent }}>
-          Puzzle Master
+          className="mb-1" style={{ lineHeight:1 }}>
+          <CartoonTitle fill={accent} stroke={`${accent}44`} size={40}>
+            Puzzle Master
+          </CartoonTitle>
         </motion.h1>
         <p className="font-body text-slate-400 text-sm">
           Tap two tiles to swap — complete the picture!

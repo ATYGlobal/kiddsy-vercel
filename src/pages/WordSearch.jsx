@@ -5,7 +5,65 @@
  */
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils } from "lucide-react";
+import { RotateCcw, Trophy, CheckCircle, Star, Search, PawPrint, Users, BookOpen, Utensils } from "lucide-react";
+
+// ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
+// fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
+function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 42, className = "" }) {
+  const text  = String(children);
+  // Estimate SVG width: ~0.58em per char at given font size, with padding
+  const estW  = Math.max(200, text.length * size * 0.56 + 40);
+  const estH  = size * 1.48;
+
+  return (
+    <span
+      className={className}
+      style={{ display: "inline-block", lineHeight: 1 }}
+      aria-label={text}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={estW}
+        height={estH}
+        viewBox={`0 0 ${estW} ${estH}`}
+        style={{ display: "block", maxWidth: "100%", overflow: "visible" }}
+      >
+        {/* Stroke pass — slightly thicker, drawn first so fill sits on top */}
+        <text
+          x="50%"
+          y="75%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800"
+          fontSize={size}
+          fill="none"
+          stroke={stroke}
+          strokeWidth="6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          paintOrder="stroke"
+        >
+          {text}
+        </text>
+        {/* Fill pass */}
+        <text
+          x="50%"
+          y="75%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800"
+          fontSize={size}
+          fill={fill}
+          stroke="none"
+        >
+          {text}
+        </text>
+      </svg>
+    </span>
+  );
+}
 
 const C = {
   blue:       "#1565C0",
@@ -37,7 +95,7 @@ const PACKS = [
   {
     name: "Animals",
     emoji: "🦁",
-    icon: Loader,
+    icon: PawPrint,
     words: [
       { en: "CAT",      es: "Gato",     fr: "Chat",    ar: "قطة"  },
       { en: "DOG",      es: "Perro",    fr: "Chien",   ar: "كلب"  },
@@ -257,8 +315,9 @@ export default function WordSearch() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(150deg, #E3F2FD 0%, #FFFDE7 50%, #E8F5E9 100%)" }}>
-      <Confetti active={confetti} />
+    <div className="min-h-screen kiddsy-bg-drift" style={{
+      background: "linear-gradient(135deg, #E3F2FD 0%, #E0F7FA 25%, #FFFDE7 50%, #E3F2FD 75%, #EDE7F6 100%)",
+     }}>      <Confetti active={confetti} />
 
       {/* Header */}
       <div className="text-center py-10 px-4">
@@ -267,8 +326,11 @@ export default function WordSearch() {
           style={{ background:"#E3F2FD" }}
         ><Search size={44} strokeWidth={2} style={{ color:"#1565C0" }}/></motion.div>
         <motion.h1 initial={{ opacity:0,y:-12 }} animate={{ opacity:1,y:0 }}
-          className="font-display text-4xl md:text-5xl mb-2" style={{ color:C.blue }}
-        >Word Search</motion.h1>
+          className="mb-2" style={{ lineHeight:1 }}>
+          <CartoonTitle fill={C.cyan} stroke={C.cyanSoft} size={44}>
+            Word Search
+          </CartoonTitle>
+        </motion.h1>
         <p className="font-body text-slate-500 text-lg">Find all the hidden English words!</p>
       </div>
 
