@@ -93,7 +93,7 @@ const WORD_COLORS = [
 const PACKS = [
   // ────────────────── ANIMALS ───────────────────────────────────────────────
   {
-    name: "Animals", emoji: "🦁", icon: Cat,
+    name: "Animals", emoji:"1f981", icon: Cat,
     words: [
       { en:"CAT",      es:"Gato",        fr:"Chat",          ar:"قطة",      pt:"Gato",      de:"Katze",      it:"Gatto",       zh:"猫",    ja:"ねこ",      ko:"고양이",  ru:"Кошка",     hi:"बिल्ली",    tr:"Kedi",           nl:"Kat",         pl:"Kot",         sv:"Katt"      },
       { en:"DOG",      es:"Perro",       fr:"Chien",         ar:"كلب",      pt:"Cachorro",  de:"Hund",       it:"Cane",        zh:"狗",    ja:"いぬ",      ko:"개",      ru:"Собака",    hi:"कुत्ता",    tr:"Köpek",          nl:"Hond",        pl:"Pies",        sv:"Hund"      },
@@ -120,7 +120,7 @@ const PACKS = [
 
   // ────────────────── COLORS ────────────────────────────────────────────────
   {
-    name: "Colors", emoji: "🎨", icon: Palette,
+    name: "Colors", emoji:"1f3a8", icon: Palette,
     words: [
       { en:"RED",      es:"Rojo",        fr:"Rouge",         ar:"أحمر",     pt:"Vermelho",  de:"Rot",        it:"Rosso",       zh:"红色",  ja:"あか",      ko:"빨간색",  ru:"Красный",   hi:"लाल",       tr:"Kırmızı",        nl:"Rood",        pl:"Czerwony",    sv:"Röd"       },
       { en:"BLUE",     es:"Azul",        fr:"Bleu",          ar:"أزرق",     pt:"Azul",      de:"Blau",       it:"Blu",         zh:"蓝色",  ja:"あお",      ko:"파란색",  ru:"Синий",     hi:"नीला",      tr:"Mavi",           nl:"Blauw",       pl:"Niebieski",   sv:"Blå"       },
@@ -147,7 +147,7 @@ const PACKS = [
 
   // ────────────────── FRUITS ────────────────────────────────────────────────
   {
-    name: "Fruits", emoji: "🍎", icon: Apple,
+    name: "Fruits", emoji:"1f34e", icon: Apple,
     words: [
       { en:"APPLE",    es:"Manzana",     fr:"Pomme",         ar:"تفاحة",    pt:"Maçã",      de:"Apfel",      it:"Mela",        zh:"苹果",  ja:"りんご",    ko:"사과",    ru:"Яблоко",    hi:"सेब",       tr:"Elma",           nl:"Appel",       pl:"Jabłko",      sv:"Äpple"     },
       { en:"MANGO",    es:"Mango",       fr:"Mangue",        ar:"مانجو",    pt:"Manga",     de:"Mango",      it:"Mango",       zh:"芒果",  ja:"マンゴー",  ko:"망고",    ru:"Манго",     hi:"आम",        tr:"Mango",          nl:"Mango",       pl:"Mango",       sv:"Mango"     },
@@ -174,7 +174,7 @@ const PACKS = [
 
   // ────────────────── HOUSE ─────────────────────────────────────────────────
   {
-    name: "House", emoji: "🏠", icon: Home,
+    name: "House", emoji:"1f3e0", icon: Home,
     words: [
       { en:"BED",      es:"Cama",        fr:"Lit",           ar:"سرير",     pt:"Cama",      de:"Bett",       it:"Letto",       zh:"床",    ja:"ベッド",    ko:"침대",    ru:"Кровать",   hi:"बिस्तर",    tr:"Yatak",          nl:"Bed",         pl:"Łóżko",       sv:"Säng"      },
       { en:"SOFA",     es:"Sofá",        fr:"Canapé",        ar:"أريكة",    pt:"Sofá",      de:"Sofa",       it:"Divano",      zh:"沙发",  ja:"ソファ",    ko:"소파",    ru:"Диван",     hi:"सोफा",      tr:"Kanepe",         nl:"Sofa",        pl:"Sofa",        sv:"Soffa"     },
@@ -201,7 +201,7 @@ const PACKS = [
 
   // ────────────────── NATURE ────────────────────────────────────────────────
   {
-    name: "Nature", emoji: "🌿", icon: Leaf,
+    name: "Nature", emoji:"1f33f", icon: Leaf,
     words: [
       { en:"SUN",      es:"Sol",         fr:"Soleil",        ar:"شمس",      pt:"Sol",       de:"Sonne",      it:"Sole",        zh:"太阳",  ja:"たいよう",  ko:"태양",    ru:"Солнце",    hi:"सूरज",      tr:"Güneş",          nl:"Zon",         pl:"Słońce",      sv:"Sol"       },
       { en:"MOON",     es:"Luna",        fr:"Lune",          ar:"قمر",      pt:"Lua",       de:"Mond",       it:"Luna",        zh:"月亮",  ja:"つき",      ko:"달",      ru:"Луна",      hi:"चाँद",      tr:"Ay",             nl:"Maan",        pl:"Księżyc",     sv:"Måne"      },

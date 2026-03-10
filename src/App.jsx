@@ -1098,7 +1098,7 @@ export default function App() {
           </AnimatePresence>
         </main>
 
-        <Footer onNav={handleNav}/>
+        <Footer onNav={handleNav} lang={lang}/>
       </div>
     </div>
   );

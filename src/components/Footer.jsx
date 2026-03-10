@@ -44,9 +44,236 @@ function FloatingStar({ style }) {
     </motion.div>
   );
 }
+// ── Newsletter translations (16 langs + EN fallback) ─────────────────────
+const NEWSLETTER_I18N = {
+  en: {
+    badge:       "Kiddsy Club",
+    title:       "Join the adventure club! 🚀",
+    subtitle:    "New stories, activities and surprises straight to your inbox. Good stuff only — never spam. ✨",
+    placeholder: "your@email.com — we're waiting!",
+    cta:         "Sign me up!",
+    sending:     "Sending…",
+    finePrint:   "Kiddsy Club newsletter · Unsubscribe anytime with one click ·",
+    successTitle:"You're in the club! 🎉",
+    successSub:  "Check your inbox — and don't forget the spam folder.",
+    errEmpty:    "Enter your email first 📧",
+    errInvalid:  "That doesn't look like a valid email 🙈",
+  },
+  es: {
+    badge:       "Club Kiddsy",
+    title:       "¡Únete al club de las aventuras! 🚀",
+    subtitle:    "Nuevas historias, actividades y sorpresas directamente a tu correo. Solo cosas buenas — nunca spam. ✨",
+    placeholder: "tu@email.com — ¡te esperamos!",
+    cta:         "¡Apuntarme!",
+    sending:     "Enviando…",
+    finePrint:   "Newsletter Club Kiddsy · Puedes darte de baja en cada email con un clic ·",
+    successTitle:"¡Ya eres del club! 🎉",
+    successSub:  "Revisa tu bandeja de entrada — y no olvides la carpeta de spam.",
+    errEmpty:    "Introduce tu email primero 📧",
+    errInvalid:  "Ese email no parece válido 🙈",
+  },
+  fr: {
+    badge:       "Club Kiddsy",
+    title:       "Rejoins le club des aventures ! 🚀",
+    subtitle:    "Nouvelles histoires, activités et surprises dans ta boîte mail. Que des bonnes choses — jamais de spam. ✨",
+    placeholder: "ton@email.com — on t'attend !",
+    cta:         "Je m'inscris !",
+    sending:     "Envoi…",
+    finePrint:   "Newsletter Club Kiddsy · Tu peux te désabonner à tout moment ·",
+    successTitle:"Tu fais partie du club ! 🎉",
+    successSub:  "Vérifie ta boîte de réception — et n'oublie pas les spams.",
+    errEmpty:    "Entre ton email d'abord 📧",
+    errInvalid:  "Cet email ne semble pas valide 🙈",
+  },
+  ar: {
+    badge:       "نادي كيدزي",
+    title:       "انضم إلى نادي المغامرات! 🚀",
+    subtitle:    "قصص ونشاطات ومفاجآت جديدة مباشرة إلى بريدك. أشياء جيدة فقط — لا رسائل مزعجة. ✨",
+    placeholder: "بريدك@email.com — في انتظارك!",
+    cta:         "سجّلني!",
+    sending:     "جارٍ الإرسال…",
+    finePrint:   "نشرة نادي كيدزي · يمكنك إلغاء الاشتراك في أي وقت ·",
+    successTitle:"أنت الآن في النادي! 🎉",
+    successSub:  "تحقق من صندوق الوارد — ولا تنسَ مجلد الرسائل المزعجة.",
+    errEmpty:    "أدخل بريدك الإلكتروني أولاً 📧",
+    errInvalid:  "هذا البريد لا يبدو صحيحاً 🙈",
+  },
+  de: {
+    badge:       "Kiddsy Club",
+    title:       "Tritt dem Abenteuer-Club bei! 🚀",
+    subtitle:    "Neue Geschichten, Aktivitäten und Überraschungen direkt in dein Postfach. Nur Gutes — kein Spam. ✨",
+    placeholder: "deine@email.com — wir warten!",
+    cta:         "Ich bin dabei!",
+    sending:     "Senden…",
+    finePrint:   "Kiddsy Club Newsletter · Du kannst dich jederzeit abmelden ·",
+    successTitle:"Du bist im Club! 🎉",
+    successSub:  "Schau in deinen Posteingang — und vergiss den Spam-Ordner nicht.",
+    errEmpty:    "Bitte zuerst E-Mail eingeben 📧",
+    errInvalid:  "Diese E-Mail scheint ungültig zu sein 🙈",
+  },
+  it: {
+    badge:       "Club Kiddsy",
+    title:       "Unisciti al club delle avventure! 🚀",
+    subtitle:    "Nuove storie, attività e sorprese direttamente nella tua casella. Solo cose belle — mai spam. ✨",
+    placeholder: "la@tuaemail.com — ti aspettiamo!",
+    cta:         "Iscrivimi!",
+    sending:     "Invio…",
+    finePrint:   "Newsletter Club Kiddsy · Puoi disiscriverti in qualsiasi momento ·",
+    successTitle:"Sei nel club! 🎉",
+    successSub:  "Controlla la tua posta in arrivo — e non dimenticare la cartella spam.",
+    errEmpty:    "Inserisci prima la tua email 📧",
+    errInvalid:  "Questa email non sembra valida 🙈",
+  },
+  pt: {
+    badge:       "Clube Kiddsy",
+    title:       "Entra no clube das aventuras! 🚀",
+    subtitle:    "Novas histórias, atividades e surpresas direto no teu email. Só coisas boas — nunca spam. ✨",
+    placeholder: "teu@email.com — estamos à espera!",
+    cta:         "Quero entrar!",
+    sending:     "Enviando…",
+    finePrint:   "Newsletter Clube Kiddsy · Podes cancelar a inscrição a qualquer momento ·",
+    successTitle:"Já és do clube! 🎉",
+    successSub:  "Verifica a tua caixa de entrada — e não te esqueças da pasta de spam.",
+    errEmpty:    "Insere o teu email primeiro 📧",
+    errInvalid:  "Este email não parece válido 🙈",
+  },
+  ru: {
+    badge:       "Клуб Kiddsy",
+    title:       "Вступай в клуб приключений! 🚀",
+    subtitle:    "Новые истории, занятия и сюрпризы прямо на твою почту. Только хорошее — никакого спама. ✨",
+    placeholder: "твой@email.com — ждём тебя!",
+    cta:         "Записаться!",
+    sending:     "Отправка…",
+    finePrint:   "Рассылка клуба Kiddsy · Ты можешь отписаться в любое время ·",
+    successTitle:"Ты в клубе! 🎉",
+    successSub:  "Проверь входящие — и не забудь папку «Спам».",
+    errEmpty:    "Сначала введи email 📧",
+    errInvalid:  "Этот email не выглядит действительным 🙈",
+  },
+  zh: {
+    badge:       "Kiddsy 俱乐部",
+    title:       "加入冒险俱乐部！🚀",
+    subtitle:    "全新故事、活动和惊喜直接发到你的邮箱。只有好内容——从不发垃圾邮件。✨",
+    placeholder: "你的@email.com — 我们等你！",
+    cta:         "立即加入！",
+    sending:     "发送中…",
+    finePrint:   "Kiddsy 俱乐部通讯 · 随时可以一键退订 ·",
+    successTitle:"你已加入俱乐部！🎉",
+    successSub:  "请查看你的收件箱——别忘了垃圾邮件文件夹。",
+    errEmpty:    "请先输入你的邮箱 📧",
+    errInvalid:  "这个邮箱地址看起来无效 🙈",
+  },
+  ja: {
+    badge:       "Kiddsyクラブ",
+    title:       "冒険クラブに参加しよう！🚀",
+    subtitle:    "新しいお話・アクティビティ・サプライズをメールでお届け。良いものだけ——スパムなし。✨",
+    placeholder: "あなたの@email.com — お待ちしています！",
+    cta:         "参加する！",
+    sending:     "送信中…",
+    finePrint:   "Kiddsyクラブニュースレター · いつでも1クリックで退会できます ·",
+    successTitle:"クラブへようこそ！🎉",
+    successSub:  "受信トレイを確認してください——迷惑メールフォルダもご確認を。",
+    errEmpty:    "まずメールアドレスを入力してください 📧",
+    errInvalid:  "このメールアドレスは無効のようです 🙈",
+  },
+  ko: {
+    badge:       "Kiddsy 클럽",
+    title:       "모험 클럽에 가입하세요! 🚀",
+    subtitle:    "새로운 이야기, 활동, 깜짝 선물이 메일함으로 직접 배달됩니다. 좋은 것만——스팸 없음. ✨",
+    placeholder: "당신의@email.com — 기다리고 있어요!",
+    cta:         "가입하기!",
+    sending:     "전송 중…",
+    finePrint:   "Kiddsy 클럽 뉴스레터 · 언제든지 클릭 한 번으로 구독 취소 가능 ·",
+    successTitle:"클럽에 오신 것을 환영합니다! 🎉",
+    successSub:  "받은 편지함을 확인하세요——스팸 폴더도 잊지 마세요.",
+    errEmpty:    "먼저 이메일을 입력해 주세요 📧",
+    errInvalid:  "유효하지 않은 이메일 주소입니다 🙈",
+  },
+  bn: {
+    badge:       "Kiddsy ক্লাব",
+    title:       "অ্যাডভেঞ্চার ক্লাবে যোগ দাও! 🚀",
+    subtitle:    "নতুন গল্প, কার্যক্রম ও চমক সরাসরি তোমার ইনবক্সে। শুধু ভালো জিনিস — কখনো স্প্যাম নয়। ✨",
+    placeholder: "তোমার@email.com — অপেক্ষায় আছি!",
+    cta:         "যোগ দাও!",
+    sending:     "পাঠানো হচ্ছে…",
+    finePrint:   "Kiddsy ক্লাব নিউজলেটার · যেকোনো সময় এক ক্লিকে আনসাবস্ক্রাইব ·",
+    successTitle:"তুমি ক্লাবে আছ! 🎉",
+    successSub:  "তোমার ইনবক্স দেখো — স্প্যাম ফোল্ডারও দেখতে ভুলো না।",
+    errEmpty:    "আগে তোমার ইমেইল দাও 📧",
+    errInvalid:  "এই ইমেইলটি বৈধ মনে হচ্ছে না 🙈",
+  },
+  hi: {
+    badge:       "Kiddsy क्लब",
+    title:       "एडवेंचर क्लब में शामिल हों! 🚀",
+    subtitle:    "नई कहानियाँ, गतिविधियाँ और सरप्राइज़ सीधे आपके इनबॉक्स में। सिर्फ़ अच्छी चीज़ें — कभी स्पैम नहीं। ✨",
+    placeholder: "आपका@email.com — आपका इंतज़ार है!",
+    cta:         "जुड़ें!",
+    sending:     "भेजा जा रहा है…",
+    finePrint:   "Kiddsy क्लब न्यूज़लेटर · कभी भी एक क्लिक में अनसब्सक्राइब करें ·",
+    successTitle:"आप क्लब में हैं! 🎉",
+    successSub:  "अपना इनबॉक्स देखें — और स्पैम फ़ोल्डर भी चेक करें।",
+    errEmpty:    "पहले अपना ईमेल दर्ज करें 📧",
+    errInvalid:  "यह ईमेल पता मान्य नहीं लगता 🙈",
+  },
+  nl: {
+    badge:       "Kiddsy Club",
+    title:       "Word lid van de avonturenclub! 🚀",
+    subtitle:    "Nieuwe verhalen, activiteiten en verrassingen direct in je inbox. Alleen goede dingen — nooit spam. ✨",
+    placeholder: "jouw@email.com — we wachten op je!",
+    cta:         "Aanmelden!",
+    sending:     "Verzenden…",
+    finePrint:   "Kiddsy Club nieuwsbrief · Je kunt je altijd afmelden met één klik ·",
+    successTitle:"Je zit in de club! 🎉",
+    successSub:  "Controleer je inbox — en vergeet de spammap niet.",
+    errEmpty:    "Voer eerst je e-mail in 📧",
+    errInvalid:  "Dit e-mailadres lijkt ongeldig 🙈",
+  },
+  pl: {
+    badge:       "Klub Kiddsy",
+    title:       "Dołącz do klubu przygód! 🚀",
+    subtitle:    "Nowe historyjki, aktywności i niespodzianki prosto do Twojej skrzynki. Tylko dobre rzeczy — zero spamu. ✨",
+    placeholder: "twój@email.com — czekamy na Ciebie!",
+    cta:         "Zapisuję się!",
+    sending:     "Wysyłanie…",
+    finePrint:   "Newsletter Klubu Kiddsy · Możesz zrezygnować w dowolnym momencie jednym kliknięciem ·",
+    successTitle:"Jesteś w klubie! 🎉",
+    successSub:  "Sprawdź swoją skrzynkę — i nie zapomnij o folderze spam.",
+    errEmpty:    "Najpierw wpisz swój adres e-mail 📧",
+    errInvalid:  "Ten adres e-mail wydaje się nieprawidłowy 🙈",
+  },
+  no: {
+    badge:       "Kiddsy-klubben",
+    title:       "Bli med i eventyrklubben! 🚀",
+    subtitle:    "Nye historier, aktiviteter og overraskelser rett i innboksen din. Bare gode ting — aldri spam. ✨",
+    placeholder: "din@email.com — vi venter på deg!",
+    cta:         "Meld meg på!",
+    sending:     "Sender…",
+    finePrint:   "Kiddsy-klubben nyhetsbrev · Du kan melde deg av når som helst med ett klikk ·",
+    successTitle:"Du er i klubben! 🎉",
+    successSub:  "Sjekk innboksen din — og glem ikke søppelpostmappen.",
+    errEmpty:    "Skriv inn e-posten din først 📧",
+    errInvalid:  "Denne e-postadressen ser ikke gyldig ut 🙈",
+  },
+  sv: {
+    badge:       "Kiddsy-klubben",
+    title:       "Gå med i äventyrsklubb! 🚀",
+    subtitle:    "Nya berättelser, aktiviteter och överraskningar direkt till din inkorg. Bara bra saker — aldrig skräppost. ✨",
+    placeholder: "din@email.com — vi väntar!",
+    cta:         "Anmäl mig!",
+    sending:     "Skickar…",
+    finePrint:   "Kiddsy-klubbens nyhetsbrev · Du kan avprenumerera närsomhelst med ett klick ·",
+    successTitle:"Du är med i klubben! 🎉",
+    successSub:  "Kolla din inkorg — och glöm inte skräppostmappen.",
+    errEmpty:    "Ange din e-post först 📧",
+    errInvalid:  "Den här e-postadressen verkar ogiltig 🙈",
+  },
+};
 
-// ── Newsletter block ──────────────────────────────────────────────────────
-function NewsletterBlock() {
+function t(lang, key) {
+  return (NEWSLETTER_I18N[lang] ?? NEWSLETTER_I18N["en"])[key];
+}
+// ── NewsletterBlock completo (listo para copiar y pegar) ───────────────────
+function NewsletterBlock({ lang = "es" }) {
   const [email,   setEmail]   = useState("");
   const [success, setSuccess] = useState(false);
   const [error,   setError]   = useState("");
@@ -55,19 +282,24 @@ function NewsletterBlock() {
   const validateEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
   const handleSubmit = async () => {
-    if (!email.trim()) { setError("Enter your email first 📧"); return; }
-    if (!validateEmail(email)) { setError("That doesn't look like a valid email 🙈"); return; }
+    if (!email.trim()) { 
+      setError(t(lang, "errEmpty")); 
+      return; 
+    }
+    if (!validateEmail(email)) { 
+      setError(t(lang, "errInvalid")); 
+      return; 
+    }
     setError("");
     setLoading(true);
 
     // TODO: conectar a tu endpoint real, p.ej.:
-    // await fetch("/api/newsletter", { method:"POST", body: JSON.stringify({ email }) });
+    // await fetch("/api/newsletter", { method:"POST", body: JSON.stringify({ email, lang }) });
     await new Promise(r => setTimeout(r, 900)); // simula llamada API
 
     setLoading(false);
     setSuccess(true);
   };
-
   return (
     <div style={{
       position:     "relative",
@@ -342,7 +574,7 @@ function Divider() {
 // ═══════════════════════════════════════════════════════════════════════════
 // FOOTER
 // ═══════════════════════════════════════════════════════════════════════════
-export default function Footer({ onNav }) {
+export default function Footer({ onNav, lang = "es" }) {
   return (
     <footer style={{
       position:   "relative",
@@ -358,7 +590,7 @@ export default function Footer({ onNav }) {
       }}>
 
         {/* ── Newsletter ─────────────────────────────────────────────── */}
-        <NewsletterBlock/>
+        <NewsletterBlock lang={lang}/>
 
         {/* ── Logo + tagline ─────────────────────────────────────────── */}
         <div style={{ textAlign: "center", marginBottom: 20 }}>

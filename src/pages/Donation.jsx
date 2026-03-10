@@ -24,7 +24,10 @@ const PAYPAL_ME_CUSTOM = (amount) =>
 
 // ─── Floating confetti particles ──────────────────────────────────────────
 function FloatingEmojis() {
-  const items = ["☕","🍫","📚","🌟","❤️","🎈","✨","🌈","🎉","🍬"];
+  const items = [
+  "2615","1f36b","1f4da","1f31f",
+  "2764","1f388","2728","1f308","1f389","1f36c"
+  ];
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
       {items.map((emoji, i) => (
@@ -40,7 +43,7 @@ function FloatingEmojis() {
             ease: "easeInOut",
           }}
         >
-          {emoji}
+          <EmojiSvg code={emoji} size={28}/>
         </motion.span>
       ))}
     </div>
@@ -78,7 +81,7 @@ function DonationTier({ tier, onSelect, isSelected }) {
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm"
             style={{ background: tier.softBg }}
           >
-            {tier.emoji}
+            <EmojiSvg code={item.emoji} size={24}/>
           </div>
           <div>
             <div className="font-display text-3xl font-bold" style={{ color: tier.color }}>
@@ -239,7 +242,7 @@ export default function Donation() {
                 </motion.div>
               ) : (
                 <motion.button key="donate-btn" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={handleDonate} disabled={!finalAmount || Number(finalAmount) < 1} className="w-full py-5 rounded-3xl font-display text-xl flex items-center justify-center gap-3 shadow-lg transition-all font-bold" style={{ background: (!finalAmount || Number(finalAmount) < 1) ? "#E5E7EB" : `linear-gradient(135deg, ${C.yellow} 0%, #FF8F00 100%)`, color: (!finalAmount || Number(finalAmount) < 1) ? "#9CA3AF" : "white", cursor: (!finalAmount || Number(finalAmount) < 1) ? "not-allowed" : "pointer" }}>
-                  <span className="text-2xl">🧡</span> Donate with PayPal
+                  <EmojiSvg code="1f9e1" size={24}/> Donate with PayPal
                 </motion.button>
               )}
             </AnimatePresence>
@@ -249,7 +252,7 @@ export default function Donation() {
 
         {/* Thank-you wall */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-16 text-center">
-          <h2 className="font-display text-2xl mb-2 font-bold" style={{ color: C.blue }}>Thank you to our supporters 💛</h2>
+          <h2 className="font-display text-2xl mb-2 font-bold" style={{ color: C.blue }}>Thank you to our supporters <EmojiSvg code="1f49b" size={18} style={{ verticalAlign:"middle", marginLeft:4 }}/></h2>
           <p className="font-body text-slate-500 mb-6 text-sm">These wonderful people keep the magic alive.</p>
           <div className="flex flex-wrap justify-center gap-3">
             {["María G.", "Ahmed K.", "Famille Dumont", "Sofia R.", "Omar A.", "The Chen Family", "Yasmin B.", "Lucas F."].map((name, i) => (

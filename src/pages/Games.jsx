@@ -184,7 +184,7 @@ function SlidingPuzzle() {
         {won && (
           <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={SPRING}
             className="px-5 py-2 rounded-full font-display text-white shadow-lg" style={{ background:C.green }}
-          >🏆 Solved!</motion.div>
+          ><EmojiSvg code="1f3c6" size={20} style={{ marginRight:6, verticalAlign:"middle" }}/>Solved!</motion.div>
         )}
       </div>
 
@@ -316,7 +316,7 @@ function MemoryMatch() {
         {won && (
           <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={SPRING}
             className="px-5 py-2 rounded-full font-display text-white shadow-lg" style={{ background:C.green }}
-          >🏆 You win!</motion.div>
+          ><EmojiSvg code="1f3c6" size={20} style={{ marginRight:6, verticalAlign:"middle" }}/>You win!</motion.div>
         )}
       </div>
 
