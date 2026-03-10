@@ -571,6 +571,10 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
   const [error,     setError]     = useState("");
   const [streamText, setStreamText] = useState(""); // live SSE preview
   const [selectedThemeLabel, setSelectedThemeLabel] = useState("");
+  // ── TTS state ──────────────────────────────────────────────────────────
+  const [story,       setStory]       = useState(null);   // cuento completo al terminar stream
+  const [audioBlobUrl, setAudioBlobUrl] = useState(null); // cache: evita llamadas repetidas
+  const [audioLoading, setAudioLoading] = useState(false);
 
   useEffect(()=>{ lsSet(LS_NAME, childName); },[childName]);
 
@@ -589,6 +593,48 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
   const handleGenerate = async () => {
     if (!childName.trim() || !activeTheme) return;
     setLoading(true); setError(""); setStreamText("");
+    const handlePlayAudio = async () => {
+    // Si ya tenemos el audio cacheado, reproducirlo directamente
+    if (audioBlobUrl) {
+      new Audio(audioBlobUrl).play();
+      return;
+    }
+
+    if (!story) return;
+    setAudioLoading(true);
+
+    // Construye el texto a narrar: título + texto en inglés
+    const textToRead = [
+      story.title ? `${story.title}.` : "",
+      story.en || story.content || "",
+    ].filter(Boolean).join(" ").slice(0, 4000);
+
+    try {
+      const API_URL = window.location.hostname === "localhost"
+        ? "http://localhost:10000"
+        : "https://kiddsy-vercel.onrender.com";
+
+      const res = await fetch(`${API_URL}/api/tts`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ text: textToRead }),
+      });
+
+      if (!res.ok) throw new Error("TTS request failed");
+
+      // Convierte el stream MP3 a Blob URL — queda en memoria hasta que
+      // el componente se desmonte o se genere una nueva historia
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      setAudioBlobUrl(url);   // caché: próximo clic no llama a la API
+      new Audio(url).play();
+
+    } catch (e) {
+      console.error("[TTS]", e);
+    } finally {
+      setAudioLoading(false);
+    }
+  };
 
     const API_URL = window.location.hostname === "localhost"
       ? "http://localhost:10000"
@@ -636,11 +682,13 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
             if (currentEvent === "token" && payload.delta) {
               setStreamText(prev => prev + payload.delta);
 
-            } else if (currentEvent === "complete") {
+              } else if (currentEvent === "complete") {
               const userId = getGuestId();
               await saveStory(payload, userId);
+              setStory(payload);          // ← guarda para TTS
+              setAudioBlobUrl(null);      // ← limpia caché si hubo historia anterior
               onGenerated(payload, lang);
-              return; // ← done, no need to setLoading(false)
+              return;
 
             } else if (currentEvent === "error") {
               throw new Error(payload.error || "Kiddsy AI had a hiccup — please try again! 🪄");
@@ -675,6 +723,30 @@ function StoryGenerator({ onGenerated, lang, onLangChange }) {
   if (loading) return <GeneratingLoader childName={childName} theme={selectedThemeLabel||activeTheme} storyColor={loaderColor} streamText={streamText}/>;
 
   const canGenerate = childName.trim() && activeTheme;
+  {/* ── Botón Play TTS — solo visible tras el streaming ── */}
+      {story && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          onClick={handlePlayAudio}
+          disabled={audioLoading}
+          className="flex items-center gap-2 mx-auto mt-3 px-6 py-3 rounded-2xl font-display text-white shadow-lg"
+          style={{
+            background:  audioLoading ? "#94A3B8" : "linear-gradient(135deg,#00ACC1,#0288D1)",
+            cursor:      audioLoading ? "not-allowed" : "pointer",
+            fontSize:    15,
+          }}
+        >
+          {audioLoading
+            ? <><RefreshCw size={16} className="animate-spin"/> Generating audio…</>
+            : audioBlobUrl
+              ? <><Volume2 size={16}/> Play again</>
+              : <><Volume2 size={16}/> Listen to story</>
+          }
+        </motion.button>
+      )}
 
   return (
     <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="max-w-xl mx-auto">

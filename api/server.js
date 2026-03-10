@@ -244,7 +244,51 @@ app.get("/api/health", (_req, res) => {
     keyConfigured: !!process.env.GROQ_API_KEY,
   });
 });
+// ─── OpenAI TTS ────────────────────────────────────────────────────────────
+// Requiere: OPENAI_API_KEY en .env
+// Devuelve: audio/mpeg stream directo al cliente
+app.post("/api/tts", async (req, res) => {
+  const { text } = req.body;
+  if (!text || typeof text !== "string" || text.trim().length < 5) {
+    return res.status(400).json({ error: "text is required." });
+  }
 
+  try {
+    const response = await fetch("https://api.openai.com/v1/audio/speech", {
+      method:  "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type":  "application/json",
+      },
+      body: JSON.stringify({
+        model: "tts-1",
+        voice: "nova",
+        input: text.slice(0, 4096), // límite seguro OpenAI
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err?.error?.message || "TTS failed" });
+    }
+
+    // Pipe the audio stream directly to the client
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Cache-Control", "no-store");
+    const reader = response.body.getReader();
+    const pump = async () => {
+      const { done, value } = await reader.read();
+      if (done) { res.end(); return; }
+      res.write(Buffer.from(value));
+      return pump();
+    };
+    await pump();
+
+  } catch (e) {
+    console.error("[TTS] Error:", e.message);
+    if (!res.headersSent) res.status(500).json({ error: "TTS generation failed." });
+  }
+});
 // ── Start ─────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
