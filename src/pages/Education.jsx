@@ -11,6 +11,32 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, Globe, ChevronDown, Star, BookOpen, Hash, MessageCircle } from "lucide-react";
 
+// ── CartoonTitle ──────────────────────────────────────────────────────────
+function CartoonTitle({ children, fill = "#E65100", stroke = "#FFE0B2", size = 44 }) {
+  const text = String(children);
+  const estW = Math.max(200, text.length * size * 0.56 + 40);
+  const estH = size * 1.48;
+  return (
+    <span style={{ display:"inline-block", lineHeight:1 }} aria-label={text}>
+      <svg xmlns="http://www.w3.org/2000/svg" width={estW} height={estH}
+        viewBox={`0 0 ${estW} ${estH}`}
+        style={{ display:"block", maxWidth:"100%", overflow:"visible" }}
+      >
+        <text x="50%" y="75%" textAnchor="middle" dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800" fontSize={size}
+          fill="none" stroke={stroke} strokeWidth="6"
+          strokeLinejoin="round" strokeLinecap="round" paintOrder="stroke"
+        >{text}</text>
+        <text x="50%" y="75%" textAnchor="middle" dominantBaseline="middle"
+          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
+          fontWeight="800" fontSize={size} fill={fill} stroke="none"
+        >{text}</text>
+      </svg>
+    </span>
+  );
+}
+
 const C = {
   blue:"#1565C0", blueSoft:"#E3F2FD", red:"#E53935", redSoft:"#FFEBEE",
   yellow:"#F9A825", yellowSoft:"#FFFDE7",
@@ -409,10 +435,19 @@ export default function Education({ lang:propLang, onLangChange }){
 
       {/* Header */}
       <div className="text-center py-10 px-4">
-        <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring"}}
-          className="text-6xl mb-3 inline-block">📖</motion.div>
+        <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
+          transition={{type:"spring"}}
+          className="mb-3 inline-flex items-center justify-center w-20 h-20 rounded-3xl"
+          style={{background:C.orangeSoft}}
+        >
+          <BookOpen size={44} strokeWidth={2} style={{color:C.orange}}/>
+        </motion.div>
         <motion.h1 initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}}
-          className="font-display text-4xl md:text-5xl mb-2" style={{color:C.orange}}>Learn ABC</motion.h1>
+          className="mb-2" style={{lineHeight:1}}>
+          <CartoonTitle fill={C.orange} stroke="#FFE0B2" size={44}>
+            Learn ABC
+          </CartoonTitle>
+        </motion.h1>
         <p className="font-body text-slate-500 text-lg">
           Learn English with {langMeta.flag} {langMeta.label} translations! 🌍
         </p>
