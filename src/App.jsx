@@ -14,6 +14,7 @@
  *  • Guest mode banner en LibraryView
  * ─────────────────────────────────────────────────────────────────────────
  */
+import StoryGenerator from "./pages/StoryGenerator";
 import KiddsyTitle from './components/KiddsyTitle';
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -561,288 +562,6 @@ function StoryReader({ story, lang, onBack }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ─── STORY GENERATOR ──────────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
-function StoryGenerator({ onGenerated, lang, onLangChange }) {
-  const [childName, setChildName] = useState(()=>lsGet(LS_NAME,""));
-  const [theme,     setTheme]     = useState("");
-  const [customTheme, setCustomTheme] = useState("");
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState("");
-  const [streamText, setStreamText] = useState(""); // live SSE preview
-  const [selectedThemeLabel, setSelectedThemeLabel] = useState("");
-  // ── TTS state ──────────────────────────────────────────────────────────
-  const [story,       setStory]       = useState(null);   // cuento completo al terminar stream
-  const [audioBlobUrl, setAudioBlobUrl] = useState(null); // cache: evita llamadas repetidas
-  const [audioLoading, setAudioLoading] = useState(false);
-
-  useEffect(()=>{ lsSet(LS_NAME, childName); },[childName]);
-
-  const THEMES = [
-    { label:"🏫 Going to School",  value:"going to school for the first time" },
-    { label:"🌈 Making Friends",   value:"making new friends" },
-    { label:"🛒 Supermarket",      value:"shopping at the supermarket" },
-    { label:"🚌 Taking the Bus",   value:"taking the bus" },
-    { label:"🏥 Doctor Visit",     value:"visiting the doctor" },
-    { label:"🎉 Birthday Party",   value:"celebrating a birthday" },
-  ];
-
-  // Use custom theme if filled, otherwise preset
-  const activeTheme = customTheme.trim() || theme;
-
-  const handleGenerate = async () => {
-    if (!childName.trim() || !activeTheme) return;
-    setLoading(true); setError(""); setStreamText("");
-    const handlePlayAudio = async () => {
-    // Si ya tenemos el audio cacheado, reproducirlo directamente
-    if (audioBlobUrl) {
-      new Audio(audioBlobUrl).play();
-      return;
-    }
-
-    if (!story) return;
-    setAudioLoading(true);
-
-    // Construye el texto a narrar: título + texto en inglés
-    const textToRead = [
-      story.title ? `${story.title}.` : "",
-      story.en || story.content || "",
-    ].filter(Boolean).join(" ").slice(0, 4000);
-
-    try {
-      const API_URL = window.location.hostname === "localhost"
-        ? "http://localhost:10000"
-        : "https://kiddsy-vercel.onrender.com";
-
-      const res = await fetch(`${API_URL}/api/tts`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ text: textToRead }),
-      });
-
-      if (!res.ok) throw new Error("TTS request failed");
-
-      // Convierte el stream MP3 a Blob URL — queda en memoria hasta que
-      // el componente se desmonte o se genere una nueva historia
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      setAudioBlobUrl(url);   // caché: próximo clic no llama a la API
-      new Audio(url).play();
-
-    } catch (e) {
-      console.error("[TTS]", e);
-    } finally {
-      setAudioLoading(false);
-    }
-  };
-
-    const API_URL = window.location.hostname === "localhost"
-      ? "http://localhost:10000"
-      : "https://kiddsy-vercel.onrender.com";
-
-    try {
-      const response = await fetch(`${API_URL}/api/generate-story`, {
-        method:  "POST",
-        headers: { "Content-Type":"application/json" },
-        body:    JSON.stringify({ childName, theme: activeTheme, language: lang }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(()=>({error:"Generation failed"}));
-        throw new Error(errData.error || "Generation failed");
-      }
-
-      // ── Read Groq SSE stream ─────────────────────────────────────
-      const reader  = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let   buffer  = "";
-
-      const parseData = (line) => {
-        if (!line.startsWith("data:")) return null;
-        try { return JSON.parse(line.slice(5).trim()); } catch { return null; }
-      };
-
-      let currentEvent = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop(); // keep incomplete last line
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith("event:")) {
-            currentEvent = trimmed.slice(6).trim();
-          } else if (trimmed.startsWith("data:")) {
-            const payload = parseData(trimmed);
-            if (!payload) continue;
-
-            if (currentEvent === "token" && payload.delta) {
-              setStreamText(prev => prev + payload.delta);
-
-              } else if (currentEvent === "complete") {
-              const userId = getGuestId();
-              await saveStory(payload, userId);
-              setStory(payload);          // ← guarda para TTS
-              setAudioBlobUrl(null);      // ← limpia caché si hubo historia anterior
-              onGenerated(payload, lang);
-              return;
-
-            } else if (currentEvent === "error") {
-              throw new Error(payload.error || "Kiddsy AI had a hiccup — please try again! 🪄");
-            }
-          }
-        }
-      }
-      // Stream ended without "complete" event
-      throw new Error("Story generation ended unexpectedly — please try again.");
-
-    } catch(e) {
-      console.error("Generation error:", e);
-      const friendly = (e.message?.toLowerCase().includes("fetch") || e.message?.toLowerCase().includes("network"))
-        ? "Can't reach Kiddsy AI — check your connection and try again 🌐"
-        : e.message || "Something magical went wrong — please try again! 🌟";
-      setError(friendly);
-      setLoading(false);
-      setStreamText("");
-    }
-  };
-
-  const themeColorMap = {
-    "going to school":   "from-blue-400 to-cyan-300",
-    "making new friends":"from-green-400 to-emerald-300",
-    "shopping":          "from-orange-400 to-amber-300",
-    "taking the bus":    "from-yellow-400 to-amber-300",
-    "doctor":            "from-red-400 to-rose-300",
-    "birthday":          "from-pink-400 to-rose-300",
-  };
-  const loaderColor = Object.entries(themeColorMap).find(([k])=>activeTheme.includes(k))?.[1] || "from-blue-400 to-cyan-300";
-
-  if (loading) return <GeneratingLoader childName={childName} theme={selectedThemeLabel||activeTheme} storyColor={loaderColor} streamText={streamText}/>;
-
-  const canGenerate = childName.trim() && activeTheme;
-  {/* ── Botón Play TTS — solo visible tras el streaming ── */}
-      {story && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={handlePlayAudio}
-          disabled={audioLoading}
-          className="flex items-center gap-2 mx-auto mt-3 px-6 py-3 rounded-2xl font-display text-white shadow-lg"
-          style={{
-            background:  audioLoading ? "#94A3B8" : "linear-gradient(135deg,#00ACC1,#0288D1)",
-            cursor:      audioLoading ? "not-allowed" : "pointer",
-            fontSize:    15,
-          }}
-        >
-          {audioLoading
-            ? <><RefreshCw size={16} className="animate-spin"/> Generating audio…</>
-            : audioBlobUrl
-              ? <><Volume2 size={16}/> Play again</>
-              : <><Volume2 size={16}/> Listen to story</>
-          }
-        </motion.button>
-      )}
-
-  return (
-    <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="max-w-xl mx-auto">
-      <div className="bg-white/90 backdrop-blur-md rounded-4xl shadow-xl border-4 border-white p-8 md:p-10">
-        <div className="text-center mb-8">
-          <motion.div animate={{rotate:[-8,8,-8]}} transition={{duration:2,repeat:Infinity,ease:"easeInOut"}}
-            className="text-5xl mb-3 inline-block"
-          >🪄</motion.div>
-           <h2 style={{ lineHeight:1 }}>
-            <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={34}>
-              Create a Magic Story
-            </CartoonTitle>
-          </h2>
-          <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full font-body text-xs font-semibold"
-            style={{background:"#FFF3E0",color:C.orange}}
-          >📱 Saved locally on this device</div>
-        </div>
-
-        <div className="space-y-5">
-          {/* Child name */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">✏️ Child's name</label>
-            <input type="text" value={childName} onChange={e=>setChildName(e.target.value)}
-              placeholder="e.g. Sofia, Omar, Lucas…" maxLength={20}
-              className="w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 font-body text-lg focus:outline-none focus:border-blue-400 bg-amber-50 transition-colors placeholder-slate-300"
-            />
-          </div>
-
-          {/* Preset themes */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">🌟 Story theme</label>
-            <div className="grid grid-cols-2 gap-2">
-              {THEMES.map(t=>(
-                <button key={t.value}
-                  onClick={()=>{ setTheme(t.value); setCustomTheme(""); setSelectedThemeLabel(t.label); }}
-                  className="px-3 py-2.5 rounded-xl font-body text-sm text-left transition-all"
-                  style={{
-                    background: theme===t.value && !customTheme ? C.blue : "#F8FAFC",
-                    color:      theme===t.value && !customTheme ? "white" : "#4B5563",
-                    border:     `2px solid ${theme===t.value && !customTheme ? C.blue : "#E2E8F0"}`,
-                  }}
-                >{t.label}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom theme */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">✍️ Or write your own</label>
-            <input
-              type="text"
-              placeholder="e.g. A trip to the moon, a talking dog…"
-              className="w-full px-5 py-3.5 rounded-2xl border-2 border-dashed border-blue-200 focus:border-blue-400 focus:outline-none font-body text-base bg-blue-50/30 placeholder-slate-300"
-              value={customTheme}
-              onChange={e => { setCustomTheme(e.target.value); setTheme(""); }}
-            />
-          </div>
-
-          {/* Language picker (full width in form) */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
-            <div style={{ width:"100%" }}>
-              <LanguagePicker value={lang} onChange={onLangChange} fullWidth/>
-            </div>
-          </div>
-
-          {error && (
-            <motion.div initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}}
-              className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2"
-            ><span>⚠️</span><span>{error}</span></motion.div>
-          )}
-
-          {/* Generate button — KiddsyTitle preserved */}
-          <motion.button
-            whileHover={canGenerate ? { scale:1.02 } : {}}
-            whileTap={canGenerate ? { scale:0.98 } : {}}
-            onClick={handleGenerate}
-            disabled={!canGenerate}
-            className="w-full py-5 rounded-3xl font-display shadow-lg transition-all flex items-center justify-center gap-2 mt-2"
-            style={{
-              background:  canGenerate ? `linear-gradient(135deg,${C.blue},#42A5F5)` : "#E5E7EB",
-              color:       canGenerate ? "white" : "#9CA3AF",
-              cursor:      canGenerate ? "pointer" : "not-allowed",
-              boxShadow:   canGenerate ? "0 8px 24px rgba(21,101,192,0.35)" : "none",
-            }}
-          >
-            <span className="text-2xl">🪄</span>
-            <KiddsyTitle className="text-xl text-white">Generate Story</KiddsyTitle>
-          </motion.button>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // ─── LIBRARY VIEW ─────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
@@ -1063,43 +782,64 @@ export default function App() {
       <KiddsyBgStyles/>
       <SwUpdateToast/>
       <StarField/>
+      
+      {/* Fondo decorativo base de la App */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{background:`${C.blue}07`}}/>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{background:`${C.yellow}0F`}}/>
       </div>
 
+      {/* Contenedor principal de vistas */}
       <div className="relative z-10">
-        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang}/>
-
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
+            
+            {/* 1. Las páginas del menú principal (Home, Juegos, etc.) */}
             {FULL_PAGES[view] ? (
-              <motion.div key={view} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="-mx-4">
+              <motion.div key={view} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="-mx-4">
                 {FULL_PAGES[view]}
               </motion.div>
-            ) : view==="library" ? (
-              <motion.div key="library" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={()=>setView("generate")} isGuest={isGuest}/>
+            ) : 
+
+            /* 2. El NUEVO Generador de Cuentos Mágicos */
+            view === "generator" ? (
+              <motion.div key="generator" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <StoryGenerator 
+                  lang={lang} 
+                  onLangChange={setLang} 
+                  onBack={() => setView("home")} 
+                />
               </motion.div>
-            ) : view==="generate" ? (
-              <motion.div key="generate" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                <div className="mb-6">
-                  <button onClick={()=>setView("library")} className="flex items-center gap-2 font-display" style={{color:C.blue}}>
-                    <ArrowLeft size={18}/> Back to Library
-                  </button>
-                </div>
-                <StoryGenerator onGenerated={handleGenerated} lang={lang} onLangChange={setLang}/>
+            ) : 
+
+            /* 3. La Librería de Cuentos Guardados */
+            view === "library" ? (
+              <motion.div key="library" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <LibraryView 
+                  stories={stories} 
+                  onSelectStory={handleSelectStory} 
+                  onGenerate={() => setView("generator")} 
+                  isGuest={isGuest} 
+                />
               </motion.div>
-            ) : view==="reader" && activeStory ? (
-              <motion.div key="reader" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                <StoryReader story={activeStory} lang={lang} onBack={()=>setView("library")}/>
+            ) : 
+            
+            /* 4. El Lector de un Cuento Específico */
+            view === "reader" && activeStory ? (
+              <motion.div key="reader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <StoryReader 
+                  story={activeStory} 
+                  lang={lang} 
+                  onBack={() => setView("library")} 
+                />
               </motion.div>
             ) : null}
+
           </AnimatePresence>
         </main>
 
-        <Footer onNav={handleNav} lang={lang}/>
+        <Footer onNav={handleNav} lang={lang} />
       </div>
     </div>
   );
-}
+} // Fin del componente App

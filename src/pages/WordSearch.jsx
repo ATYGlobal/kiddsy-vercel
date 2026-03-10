@@ -15,7 +15,16 @@ function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 4
   // Estimate SVG width: ~0.58em per char at given font size, with padding
   const estW  = Math.max(200, text.length * size * 0.56 + 40);
   const estH  = size * 1.48;
-
+// ── Lógica de Reinicio ────────────────────────────────────────────────
+  const handleReset = () => {
+    // 1. Limpiamos las palabras encontradas
+    setFoundWords([]);
+    // 2. Quitamos el estado de victoria si existe
+    if (setGameWon) setGameWon(false);
+    // 3. Opcional: Si tienes una función para regenerar la rejilla, la llamas aquí:
+    // generateGrid(); 
+    console.log("Juego reiniciado");
+  };
   return (
     <span
       className={className}
