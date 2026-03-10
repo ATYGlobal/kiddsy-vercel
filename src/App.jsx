@@ -39,7 +39,7 @@ import Donation     from "./pages/Donation.jsx";
 import Games        from "./pages/Games.jsx";
 import Education    from "./pages/Education.jsx";
 import WordSearch   from "./pages/WordSearch.jsx";
-import AnimalPuzzle from "./pages/AnimalPuzzle.jsx";
+import PuzzleMaster from './pages/PuzzleMaster.jsx';
 import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────
@@ -1433,7 +1433,7 @@ export default function App() {
   const FULL_PAGES = {
     games:       <Games/>,
     wordsearch:  <WordSearch/>,
-    animals:     <AnimalPuzzle/>,
+    animals:     <PuzzleMaster/>,
     education:   <Education/>,
     legal:       <Legal/>,
     donate:      <Donation/>,
