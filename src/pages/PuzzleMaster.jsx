@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
-  Star, Library, Loader, Loader2 Trophy, Target, CheckCircle,
+  Star, Library, Loader, Loader2, Trophy, Target, CheckCircle,
 } from "lucide-react";
 
 // ── Paleta ────────────────────────────────────────────────────────────────
