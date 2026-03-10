@@ -884,19 +884,35 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const accent = cat.color;
 
   // ── RENDER ────────────────────────────────────────────────────────────
-  return (
-    <div className="min-h-screen kiddsy-bg-drift" style={{
-      background: "linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 25%, #FFFDE7 50%, #E8F5E9 75%, #E0F2F1 100%)",
-    }}>
-      <Confetti active={confetti}/>
+return (
+  <div className="relative min-h-screen overflow-hidden">
+    {/* Fondo temático Safari (Jirafa, Elefante, Palmeras) */}
+    <PuzzleBg />
 
-      {/* Pricing modal — se monta cuando el usuario toca una categoría premium */}
-      {showPricing && (
-        <Pricing
-          onClose={() => { setShowPricing(false); setLockedCatLabel(null); }}
-          lockedCategory={lockedCatLabel}
-        />
-      )}
+    <Confetti active={confetti}/>
+
+    {/* Pricing modal */}
+    {showPricing && (
+      <Pricing
+        onClose={() => { setShowPricing(false); setLockedCatLabel(null); }}
+        lockedCategory={lockedCatLabel}
+      />
+    )}
+
+    {/* Contenido (z-10 para flotar sobre el safari) */}
+    <div className="relative z-10">
+      
+      {/* Header opcional si quieres que el título aparezca arriba del todo */}
+      <div className="text-center py-8 px-4">
+        <h1 style={{ lineHeight: 1.2 }}>
+          <BubbleTitle color="#059669" size={54}>
+            Picture Puzzle
+          </BubbleTitle>
+        </h1>
+        <p className="font-display text-slate-700 mt-2 font-medium bg-white/30 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
+          Solve the mystery of the pieces!
+        </p>
+      </div>
 
       {/* ── Header ────────────────────────────────────────────────────── */}
       <div className="text-center pt-8 pb-3 px-4">
@@ -1306,5 +1322,6 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

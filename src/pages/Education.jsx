@@ -429,30 +429,37 @@ export default function Education({ lang:propLang, onLangChange }){
   const totalLearned = learned[tab].size;
   const totalItems   = dataset.length;
 
-  return (
-    <div className="min-h-screen" style={{background:"linear-gradient(150deg,#FFF3E0 0%,#FFFDE7 50%,#E8F5E9 100%)"}}>
-      <Confetti active={confetti}/>
+// ── RENDER ────────────────────────────────────────────────────────────
+return (
+  <div className="relative min-h-screen overflow-hidden">
+    {/* Fondo temático de Pizarra y Lápices animados */}
+    <LearnBg />
 
+    <Confetti active={confetti}/>
+
+    {/* Contenido (z-10) */}
+    <div className="relative z-10">
+      
       {/* Header */}
       <div className="text-center py-10 px-4">
-        <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
-          transition={{type:"spring"}}
-          className="mb-3 inline-flex items-center justify-center w-20 h-20 rounded-3xl"
-          style={{background:C.orangeSoft}}
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }} 
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring" }}
+          className="mb-6"
         >
-          <BookOpen size={44} strokeWidth={2} style={{color:C.orange}}/>
+          {/* Título Arcoiris con el nuevo nombre: ABC Explorer */}
+          <h1 style={{ lineHeight: 1.2 }}>
+            <RainbowTitle size={56}>
+              ABC Explorer
+            </RainbowTitle>
+          </h1>
         </motion.div>
-        <motion.h1 initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}}
-          className="mb-2" style={{lineHeight:1}}>
-          <CartoonTitle fill={C.orange} stroke="#FFE0B2" size={44}>
-            Learn ABC
-          </CartoonTitle>
-        </motion.h1>
-        <p className="font-body text-slate-500 text-lg">
+
+        <p className="font-display text-slate-700 text-lg font-medium bg-white/50 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
           Learn English with {langMeta.flag} {langMeta.label} translations! 🌍
         </p>
       </div>
-
       {/* Top controls */}
       <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:10,padding:"0 16px 20px"}}>
         {/* Tabs */}
@@ -549,5 +556,6 @@ export default function Education({ lang:propLang, onLangChange }){
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

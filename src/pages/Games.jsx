@@ -371,29 +371,47 @@ export default function Games() {
   const [activeGame, setActiveGame] = useState("puzzle");
   const active = GAME_TABS.find(g=>g.id===activeGame);
 
+  // ── RENDER ────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen" style={{ background:"linear-gradient(150deg,#E3F2FD 0%,#FCE4EC 50%,#E8F5E9 100%)" }}>
+  <div className="relative min-h-screen overflow-hidden">
+    {/* Fondo temático de Juegos (Dados, Joystick, Trofeos) */}
+    <GamesBg />
 
+    {/* Contenido (z-10 para flotar sobre las animaciones) */}
+    <div className="relative z-10">
+      
       {/* Header */}
       <div className="text-center py-12 px-4">
         <motion.div
-          initial={{ scale:0.7, opacity:0 }} animate={{ scale:1, opacity:1 }} transition={{ type:"spring", stiffness:220 }}
+          initial={{ scale: 0.7, opacity: 0 }} 
+          animate={{ scale: 1, opacity: 1 }} 
+          transition={{ type: "spring", stiffness: 220 }}
           className="inline-block mb-4"
         >
+          {/* Mantenemos tu StickerBadge porque encaja con la estética */}
           <StickerBadge icon={active.Icon} color={active.color} size={68} noHover/>
         </motion.div>
-        <motion.h1 initial={{ opacity:0,y:-14 }} animate={{ opacity:1,y:0 }}
-          className="mb-3" style={{ lineHeight:1 }}>
-          <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={44}>
-            Play & Learn
-          </CartoonTitle>
+
+        <motion.h1 
+          initial={{ opacity: 0, y: -14 }} 
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-3" 
+          style={{ lineHeight: 1.2 }}
+        >
+          {/* Título nuevo: Game Zone */}
+          <BubbleTitle color="#1E88E5" size={54}>
+            Game Zone
+          </BubbleTitle>
         </motion.h1>
-        <p className="font-body text-slate-500 text-lg max-w-md mx-auto">
-          Fun games that make learning English feel like playtime! 🌟
-        </p>
-        <p className="font-body text-slate-400 text-sm mt-1">
-          4 categories · 25 icon variants · Fresh content every round
-        </p>
+
+        <div className="bg-white/40 backdrop-blur-md rounded-3xl p-4 max-w-md mx-auto shadow-sm border border-white/50">
+          <p className="font-display text-slate-700 text-lg font-medium">
+            Fun games that make learning English feel like playtime! 🌟
+          </p>
+          <p className="font-display text-slate-500 text-sm mt-1 font-semibold uppercase tracking-wider">
+            4 categories · 25 icon variants
+          </p>
+        </div>
       </div>
 
       {/* Game selector */}
@@ -442,7 +460,8 @@ export default function Games() {
             {activeGame==="memory" && <MemoryMatch/>}
           </motion.div>
         </AnimatePresence>
+       </div>
       </div>
-    </div>
+     </div>
   );
 }

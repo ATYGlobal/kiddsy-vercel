@@ -7,6 +7,8 @@
  * ✅ Estilo Burbuja, lógica de puzzle intactos
  * ─────────────────────────────────────────────────────────────────────────
  */
+import { LibraryBg, StoryBg } from "../components/PageBg";
+import { BubbleTitle } from "../components/KiddsyFont";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -313,9 +315,13 @@ export default function MyLibrary({ onCreateStory, onReadStory }) {
     setStories((prev) => prev.filter((s) => s.id !== storyId));
   };
 
-  // ── UI ─────────────────────────────────────────────────────────────────
-  return (
-    <>
+return (
+  <div className="relative min-h-screen overflow-hidden bg-amber-50/30"> 
+    {/* Fondo temático de la biblioteca */}
+    <LibraryBg />
+
+    {/* Contenido (z-10 para que flote sobre el fondo) */}
+    <div className="relative z-10">
       <AnimatePresence>
         {puzzleStory && (
           <StoryPuzzle key="puzzle" story={puzzleStory} onClose={() => setPuzzleStory(null)} />
@@ -325,12 +331,13 @@ export default function MyLibrary({ onCreateStory, onReadStory }) {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 style={{ lineHeight:1 }}>
-            <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={44}>
-              My Library
-            </CartoonTitle>
+          <h1 style={{ lineHeight: 1.2 }}>
+            {/* Usamos el nuevo BubbleTitle */}
+            <BubbleTitle color="#D97706" size={48}>
+              My Story Collection
+            </BubbleTitle>
           </h1>
-          <p className="font-body text-slate-500 mt-1">
+          <p className="font-display text-slate-600 mt-2 font-medium">
             Your personal story collection — stored on this device.
           </p>
         </motion.div>
@@ -406,6 +413,7 @@ export default function MyLibrary({ onCreateStory, onReadStory }) {
           </motion.div>
         )}
       </div>
-    </>
+    </div>
+  </div>
   );
 }

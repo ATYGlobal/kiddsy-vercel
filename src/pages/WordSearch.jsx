@@ -3,6 +3,8 @@
  * Bilingual word search: find English words hidden in a grid
  * Words come from the story vocabulary + alphabet module
  */
+import { LibraryBg } from "../components/PageBg";
+import { BubbleTitle } from "../components/KiddsyFont";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils, Cat, Palette, Apple, Home, Leaf } from "lucide-react";
@@ -477,31 +479,43 @@ export default function WordSearch() {
     setSelection(newSel);
   };
 
-  const handleCellEnd = () => {
-    if (!selecting) return;
-    setSelecting(false);
-    checkSelection(selection);
-    setSelection([]);
-  };
+const handleCellEnd = () => {
+  if (!selecting) return;
+  setSelecting(false);
+  checkSelection(selection);
+  setSelection([]);
+};
 
-  return (
-    <div className="min-h-screen kiddsy-bg-drift" style={{
-      background: "linear-gradient(135deg, #E3F2FD 0%, #E0F7FA 25%, #FFFDE7 50%, #E3F2FD 75%, #EDE7F6 100%)",
-     }}>      <Confetti active={confetti} />
+// ── UI ─────────────────────────────────────────────────────────────────
+return (
+  <div className="relative min-h-screen overflow-hidden">
+    {/* Fondo temático de sopa de letras / Ramen */}
+    <WordSearchBg />
 
+    <Confetti active={confetti} />
+
+    {/* Contenido sobre el fondo */}
+    <div className="relative z-10">
+      
       {/* Header */}
       <div className="text-center py-10 px-4">
-        <motion.div initial={{ scale:0.8,opacity:0 }} animate={{ scale:1,opacity:1 }} transition={{ type:"spring" }}
-          className="mb-3 inline-flex items-center justify-center w-20 h-20 rounded-3xl"
-          style={{ background:"#E3F2FD" }}
-        ><Search size={44} strokeWidth={2} style={{ color:"#1565C0" }}/></motion.div>
-        <motion.h1 initial={{ opacity:0,y:-12 }} animate={{ opacity:1,y:0 }}
-          className="mb-2" style={{ lineHeight:1 }}>
-          <CartoonTitle fill={C.cyan} stroke={C.cyanSoft} size={44}>
-            Word Search
-          </CartoonTitle>
-        </motion.h1>
-        <p className="font-body text-slate-500 text-lg">Find all the hidden English words!</p>
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }} 
+          animate={{ scale: 1, opacity: 1 }} 
+          transition={{ type: "spring" }}
+          className="mb-4"
+        >
+          {/* Título con estilo Bubble y el nuevo nombre sugerido */}
+          <h1 style={{ lineHeight: 1.2 }}>
+            <BubbleTitle color="#E11D48" size={54}>
+              Word Hunt
+            </BubbleTitle>
+          </h1>
+        </motion.div>
+        
+        <p className="font-display text-slate-700 text-lg font-medium bg-white/40 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
+          Find all the hidden English words!
+        </p>
       </div>
 
       {/* Controls */}
@@ -636,5 +650,6 @@ export default function WordSearch() {
         </div>
       </div>
     </div>
+  </div>
   );
 }
