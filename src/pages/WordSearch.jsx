@@ -303,13 +303,22 @@ export default function WordSearch() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 pb-20">
-        {won && (
-          <motion.div initial={{ scale:0.8,opacity:0 }} animate={{ scale:1,opacity:1 }}
-            className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
-            style={{ background:`linear-gradient(135deg,${C.green},#2E7D32)` }}
-           style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}><Trophy size={22} strokeWidth={2}/> You found all the words! Amazing!</motion.div>
-        )}
-
+      {won && (
+      <motion.div 
+        initial={{ scale: 0.8, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }}
+        className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
+        style={{ 
+          background: `linear-gradient(135deg, ${C.green}, #2E7D32)`,
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          gap: 8 
+        }}
+      >
+        <Trophy size={22} strokeWidth={2}/> You found all the words! Amazing!
+      </motion.div>
+    )}
         <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Grid */}
           <div>
