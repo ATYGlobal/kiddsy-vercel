@@ -49,84 +49,154 @@ const THEME_VOCAB = {
 };
 
 // ─── System prompt educativo ───────────────────────────────────────────────
-function buildSystemPrompt(langCode) {
+function buildSystemPrompt(langCode, childName = "the child") {
   const langName = LANG_MAP[langCode] || "Spanish";
   const isRTL    = RTL_LANGS.has(langCode);
   const rtlNote  = isRTL ? " Note: this language reads right-to-left — keep translation natural." : "";
 
   // Combine all theme words for variety
   const vocabPool = Object.values(THEME_VOCAB).flat();
-  const vocabSample = vocabPool.sort(()=>Math.random()-0.5).slice(0,6).join(", ");
+  const vocabSample = vocabPool.sort(() => Math.random() - 0.5).slice(0, 6).join(", ");
 
   return `You are Kiddsy AI — a warm, playful children's story writer for ages 3–8.
 
 CORE RULES:
 1. Always write educational, age-appropriate content with simple, positive language.
-2. Every story must have EXACTLY 4 pages.
-3. Naturally include at least 2 words from this vocabulary: ${vocabSample}.
-4. Keep sentences short (max 12 words per sentence in English).
-5. The story must feel magical, fun, and encouraging for children.
+2. Every story must have EXACTLY 8 pages for a premium experience.
+3. Total word count must be between 200 and 300 words.
+4. Naturally include at least 2 words from this vocabulary: ${vocabSample}.
+5. Keep sentences short (max 12 words per sentence in English).
+6. NARRATIVE STRUCTURE:
+   - Pages 1-2: Beginning (Introduce ${childName} and a magical setting).
+   - Pages 3-6: Middle/Conflict (A challenge requiring courage or curiosity).
+   - Pages 7-8: Ending & Emotional Closure (Problem solved, returning to safety with a heartwarming final sentence).
 
 LANGUAGE RULES:
-- The "en" field is always clear, simple English.
+- The "en" field is clear, simple English.
 - The "${langCode}" field is the ${langName} translation.${rtlNote}
 - NEVER mix languages within the same field.
 
 SVG RULES:
-- Each "image_svg" must be a self-contained <svg viewBox="0 0 100 100"> element.
-- Use ONLY basic SVG shapes: rect, circle, ellipse, polygon, path, text.
-- Use bright, cheerful colors. No external images. No JavaScript.
-- Keep SVG compact — under 600 characters per illustration.
+- Each "image_svg" must be a self-contained <svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'> element.
+- Use ONLY basic SVG shapes: rect, circle, ellipse, polygon, path.
+- CRITICAL: Use ONLY single quotes (') for SVG attributes (e.g., fill='red') to avoid breaking the JSON.
+- Keep SVG under 600 characters.
+
+IMAGE PROMPT RULE:
+- "dalle_prompt": Whimsical, soft watercolor children's book illustration, magical lighting, no text, featuring ${childName}.
 
 OUTPUT FORMAT:
-- Respond with ONLY a valid JSON object. Zero markdown. Zero backticks. Zero preamble.
-- Any text outside the JSON object will break the app.
+- Respond ONLY with a valid JSON object. No markdown, no backticks, no preamble.
 
 JSON SCHEMA:
 {
-  "title": "Story title in English",
+  "title": "Story title",
   "emoji": "🌟",
   "color": "from-blue-400 to-cyan-300",
+  "dalle_prompt": "Prompt for DALL-E",
   "pages": [
     {
-      "en": "Simple English sentence.",
-      "${langCode}": "${langName} translation.",
-      "image_svg": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>…</svg>"
+      "en": "English text (approx 30-35 words).",
+      "${langCode}": "${langName} text.",
+      "image_svg": "<svg>...</svg>"
     }
   ]
 }
 
-COLOR OPTIONS for "color" field (pick the most fitting):
-"from-blue-400 to-cyan-300" | "from-green-400 to-emerald-300" | "from-pink-400 to-rose-300"
-"from-orange-400 to-amber-300" | "from-purple-400 to-violet-300" | "from-yellow-400 to-amber-300"`;
+COLOR OPTIONS: "from-blue-400 to-cyan-300" | "from-green-400 to-emerald-300" | "from-pink-400 to-rose-300" | "from-orange-400 to-amber-300" | "from-purple-400 to-violet-300" | "from-yellow-400 to-amber-300"`;
 }
 
-// ─── Helper: limpia fences de markdown que el modelo pudiera añadir ────────
+// ─── Helper: limpia el JSON de la respuesta de la IA ──────────────────────
+/**
+ * Extrae y limpia el JSON de la respuesta de la IA.
+ * Busca el bloque entre las primeras y últimas llaves para evitar errores de parseo.
+ */
 function cleanJson(raw = "") {
-  return raw
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
+  if (!raw) return "";
+  
+  try {
+    // 1. Buscamos la posición del primer '{' y el último '}'
+    const firstBracket = raw.indexOf("{");
+    const lastBracket = raw.lastIndexOf("}");
+
+    if (firstBracket === -1 || lastBracket === -1) {
+      // Si no hay llaves, intentamos limpiar markdown básico por si acaso
+      return raw.replace(/```json|```/gi, "").trim();
+    }
+
+    // 2. Extraemos solo la parte del objeto
+    const jsonString = raw.substring(firstBracket, lastBracket + 1);
+
+    return jsonString.trim();
+  } catch (e) {
+    console.error("Error crítico limpiando JSON:", e);
+    return "";
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ENDPOINT PRINCIPAL — SSE Streaming con Groq
+// ENDPOINT PRINCIPAL — Generación de Cuentos Premium
 // ═══════════════════════════════════════════════════════════════════════════
 app.post("/api/generate-story", async (req, res) => {
-  const { childName, theme, language } = req.body;
+  const { childName, theme, language = "es" } = req.body;
 
-  // ── Validación ────────────────────────────────────────────────────────
+  // 1. Validación (Mantenemos tu lógica inicial)
   if (!childName?.trim() || !theme?.trim()) {
     return res.status(400).json({ error: "childName and theme are required." });
   }
 
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) {
-    return res.status(500).json({
-      error: "GROQ_API_KEY is not set. Add it to your .env file.",
+    return res.status(500).json({ error: "GROQ_API_KEY is not set in .env" });
+  }
+
+  try {
+    // 2. Construimos el nuevo System Prompt de 8 páginas
+    // Nota: Asegúrate de que buildSystemPrompt esté definida en este mismo archivo
+    const systemPrompt = buildSystemPrompt(language, childName);
+    const userPrompt = `Write a magical, 8-page story about ${theme} where ${childName} is the main hero.`;
+
+    // 3. Llamada a Groq (Usando JSON Mode para evitar errores de formato)
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${groqKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "mixtral-8x7b-32768", // El modelo más rápido y capaz para esto
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+        response_format: { type: "json_object" } // Forzamos a Groq a responder con JSON puro
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) throw new Error(data.error.message);
+
+    const rawContent = data.choices[0]?.message?.content;
+
+    // 4. Limpieza y Validación del JSON generado
+    const sanitizedJson = cleanJson(rawContent);
+    const finalStory = JSON.parse(sanitizedJson);
+
+    // 5. Respuesta final al Frontend
+    console.log(`✅ Cuento generado con éxito para ${childName}`);
+    res.json(finalStory);
+
+  } catch (error) {
+    console.error("❌ Error en la generación:", error);
+    res.status(500).json({ 
+      error: "No pudimos crear la magia en este momento.",
+      details: error.message 
     });
   }
+});
+  
 
   const langCode = language || "es";
   const langName = LANG_MAP[langCode] || "Spanish";
@@ -226,7 +296,6 @@ Remember: ONLY output the JSON object. No text before or after it.`;
       res.status(500).json({ error: friendlyMsg });
     }
   }
-});
 
 // ── GET /api/stories — historias estáticas de demostración ────────────────
 app.get("/api/stories", (_req, res) => {
