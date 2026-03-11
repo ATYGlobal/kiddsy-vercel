@@ -294,33 +294,6 @@ const UI_STRINGS = {
   },
 };
 
-<>
-  {/* Botón de reinicio */}
-  <motion.button 
-    whileTap={{ scale: 0.95 }}
-    onClick={handleReset} // Asegúrate de que esta función existe
-    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm"
-  >
-    <RotateCcw size={16}/> 
-    {getTranslation("newPuzzle", lang)}
-  </motion.button>
-
-  {/* Contador de progreso */}
-  <div className="my-4 font-display text-slate-600">
-    {getTranslation("findWords", lang)} ({found?.length || 0}/{pack?.words?.length || 0})
-  </div>
-
-  {/* Mensaje de éxito */}
-  <div className="flex items-center gap-2 text-green-600 font-bold">
-    <Trophy size={22} strokeWidth={2}/> 
-    {getTranslation("wellDone", lang)}
-  </div>
-
-  {/* Instrucciones */}
-  <p className="font-display text-sm mb-1" style={{ color: C.yellow }}>
-    {getTranslation("howToPlay", lang)}
-  </p>
-</>
 // ─── Grid builder ──────────────────────────────────────────────────────────
 function buildGrid(words) {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
