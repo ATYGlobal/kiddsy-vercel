@@ -6,31 +6,31 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wand2, Sparkles } from "lucide-react";
 
-// ── Páginas ────────────────────────────────────────────────────────────────
-import HeroScreen    from "./pages/HeroScreen";
-import MyLibrary     from "./pages/MyLibrary.jsx";
+// ── Páginas (Asegúrate de que TODOS estén en src/pages/) ──────────────────
+import HeroScreen     from "./pages/HeroScreen";
+import MyLibrary      from "./pages/MyLibrary";
 import StoryGenerator from "./pages/StoryGenerator";
-import StoryReader, { StoryCoverCard } from "./pages/StoryReader.jsx";
-import { AvisoLegal, Privacidad } from "./pages/LegalPages.jsx";
-import Donation      from "./pages/Donation.jsx";
-import Games         from "./pages/Games.jsx";
-import Education     from "./pages/Education.jsx";
-import WordSearch    from "./pages/WordSearch.jsx";
-import PuzzleMaster  from "./pages/PuzzleMaster.jsx";
+import StoryReader, { StoryCoverCard } from "./pages/StoryReader";
+import { AvisoLegal, Privacidad } from "./pages/LegalPages";
+import Donation       from "./pages/Donation";
+import Games          from "./pages/Games";
+import Education      from "./pages/Education";
+import WordSearch     from "./pages/WordSearch";
+import PuzzleMaster   from "./pages/PuzzleMaster";
 
-// ── Componentes ────────────────────────────────────────────────────────────
-import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar.jsx";
-import Footer        from "./components/Footer.jsx";
-import SwUpdateToast from "./components/SwUpdateToast.jsx";
-import KiddsyTitle   from "./components/KiddsyTitle";
-import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
+// ── Componentes (Asegúrate de que TODOS estén en src/components/) ──────────
+import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar";
+import Footer         from "./components/Footer";
+import SwUpdateToast  from "./components/SwUpdateToast";
+import KiddsyTitle    from "./components/KiddsyTitle";
+import { StoryCoverIcon } from "./components/KiddsyIcons";
 
-// ── Utils ──────────────────────────────────────────────────────────────────
+// ── Utils (Asegúrate de que esté en src/utils/) ────────────────────────────
 import {
   LS_LANG, LS_STORIES,
   lsGet, lsSet,
   getGuestId, fetchUserStories, saveStory,
-} from "./utils/storage.js";
+} from "./utils/storage";
 
 // ── Auth stub (reemplaza con AuthContext cuando actives login) ─────────────
 function useAuth() {
@@ -284,7 +284,11 @@ export default function App() {
 
             view === "generator" ? (
               <motion.div key="generator" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <StoryGenerator lang={lang} onLangChange={setLang} onBack={() => setView("home")}/>
+                <StoryGenerator 
+                  lang={lang} 
+                  onLangChange={setLang}
+                  onGenerated={handleGenerated}  // ← CORREGIDO
+                />
               </motion.div>
             ) :
 
@@ -299,7 +303,7 @@ export default function App() {
                 <StoryReader story={activeStory} lang={lang} onBack={() => setView("library")}/>
               </motion.div>
             ) : null}
-
+            
           </AnimatePresence>
         </main>
         <Footer onNav={handleNav} lang={lang}/>

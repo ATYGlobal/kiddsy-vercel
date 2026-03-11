@@ -1,32 +1,18 @@
 /**
  * src/pages/StoryGenerator.jsx — Kiddsy
  * ─────────────────────────────────────────────────────────────────────────
- * Página completa de generación de cuentos:
- *   • Formulario de generación (nombre, tema, idioma)
- *   • Streaming SSE desde /api/generate-story (Groq)
- *   • Loader animado con preview en tiempo real
- *   • Lector de cuento página a página con SVG inline
- *   • TTS vía /api/tts (OpenAI nova)
- *   • Guardado automático en localStorage (y Supabase si está activo)
- *
- * PROPS:
- *   lang         {string}   — código ISO del idioma activo (desde Navbar)
- *   onLangChange {fn}       — callback al cambiar idioma dentro del form
- *   onGenerated  {fn}       — callback(story, lang) al finalizar generación
- *   onBack       {fn}       — callback para volver a la Library / Hero
- *
- * USO en App.jsx:
- *   import StoryGenerator from "./pages/StoryGenerator";
- *   <StoryGenerator lang={lang} onLangChange={setLang}
- *                   onGenerated={handleGenerated} onBack={()=>setView("home")}/>
+ * • Groq LLAMA  → streaming SSE story + dalle_prompt per page
+ * • DALL·E 3    → illustration per page (server handles it)
+ * • OpenAI TTS  → selected voice per story
+ * • 6 illustration styles · 4 voice options · 16 translation languages
  * ─────────────────────────────────────────────────────────────────────────
  */
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence }     from "framer-motion";
 import {
   BookOpen, Wand2, Sparkles, Volume2,
   RefreshCw, ArrowLeft, ChevronLeft, ChevronRight,
+  Play, Loader,
 } from "lucide-react";
 
 import { getLang, LanguagePicker }   from "../components/Navbar.jsx";
@@ -35,21 +21,20 @@ import { StoryBg }                    from "../components/PageBg.jsx";
 import { BubbleTitle }                from "../components/KiddsyFont.jsx";
 import KiddsyTitle                    from "../components/KiddsyTitle";
 
-// ── Brand colours ────────────────────────────────────────────────────────
+// ── Brand colours ─────────────────────────────────────────────────────────
 const C = {
-  blue:    "#1565C0",
+  blue:    "#1565C0", blueSoft:  "#E3F2FD",
   red:     "#E53935",
-  yellow:  "#F9A825",
-  green:   "#43A047",
+  yellow:  "#F9A825", yellowSoft:"#FFFDE7",
+  green:   "#43A047", greenSoft: "#E8F5E9",
   magenta: "#D81B60",
   cyan:    "#00ACC1",
   orange:  "#E65100",
 };
 
-// ── LocalStorage helpers ─────────────────────────────────────────────────
+// ── LocalStorage helpers ──────────────────────────────────────────────────
 const LS_NAME    = "kiddsy_childName";
 const LS_STORIES = "kiddsy_guestStories";
-
 function lsGet(key, fallback = null) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch { return fallback; }
@@ -58,14 +43,14 @@ function lsSet(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
 
-// ── Guest ID ─────────────────────────────────────────────────────────────
+// ── Guest ID ──────────────────────────────────────────────────────────────
 const getGuestId = () => {
   let gid = localStorage.getItem("kiddsy_guest_id");
   if (!gid) { gid = crypto.randomUUID(); localStorage.setItem("kiddsy_guest_id", gid); }
   return gid;
 };
 
-// ── Supabase stub (activa cuando configures las vars de entorno) ──────────
+// ── Supabase stub ─────────────────────────────────────────────────────────
 let _supabase = null;
 function getSupabase() {
   if (_supabase) return _supabase;
@@ -73,13 +58,9 @@ function getSupabase() {
     const url = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
     if (!url || !key) return null;
-    // Descomenta cuando tengas @supabase/supabase-js instalado:
-    // const { createClient } = await import("@supabase/supabase-js");
-    // _supabase = createClient(url, key);
-    return null;
+    return null; // placeholder
   } catch { return null; }
 }
-
 async function saveStory(storyData, userId) {
   const sb = getSupabase();
   if (sb) {
@@ -90,13 +71,13 @@ async function saveStory(storyData, userId) {
   lsSet(LS_STORIES, [storyData, ...existing].slice(0, 20));
 }
 
-// ── API URL dinámico ─────────────────────────────────────────────────────
+// ── API URL ───────────────────────────────────────────────────────────────
 const API_URL = () =>
   window.location.hostname === "localhost"
     ? "http://localhost:10000"
     : "https://kiddsy-vercel.onrender.com";
 
-// ── Story accent colours (derived from Tailwind gradient class) ───────────
+// ── Story accent colours ──────────────────────────────────────────────────
 function getStoryAccent(colorClass = "") {
   if (colorClass.includes("blue"))    return { primary: C.blue,    soft: "#E3F2FD", text: C.blue    };
   if (colorClass.includes("green"))   return { primary: C.green,   soft: "#E8F5E9", text: "#2E7D32" };
@@ -109,22 +90,43 @@ function getStoryAccent(colorClass = "") {
   return { primary: C.blue, soft: "#E3F2FD", text: C.blue };
 }
 
+// ── Illustration styles ───────────────────────────────────────────────────
+const STYLES = [
+  { id:"watercolor", label:"Watercolour", icon:"💧",
+    prompt:"watercolor illustration, soft pastel colors, gentle washes, children's book style" },
+  { id:"realistic",  label:"Realistic",   icon:"🖼️",
+    prompt:"realistic digital art, detailed, lifelike, children's book illustration" },
+  { id:"pencil",     label:"Pencil",      icon:"✏️",
+    prompt:"pencil sketch style, hand-drawn, textured, children's book" },
+  { id:"cartoon",    label:"Cartoon",     icon:"😊",
+    prompt:"cartoon style, bright colors, rounded shapes, friendly characters, Pixar-like" },
+  { id:"vintage",    label:"Vintage",     icon:"🎨",
+    prompt:"vintage storybook illustration, 1950s style, warm colors, classic" },
+  { id:"fantasy",    label:"Fantasy",     icon:"🌟",
+    prompt:"fantasy art, magical, glowing, fairy tale style, ethereal" },
+];
+
+// ── Voice options ─────────────────────────────────────────────────────────
+const VOICES = [
+  { id:"nova",    label:"Woman",  icon:"👩", desc:"Warm, expressive" },
+  { id:"onyx",    label:"Man",    icon:"👨", desc:"Deep, calm"       },
+  { id:"fable",   label:"Child",  icon:"🧒", desc:"Playful, friendly"},
+  { id:"shimmer", label:"Auto",   icon:"🤖", desc:"Smart selection"  },
+];
+
 // ════════════════════════════════════════════════════════════════════════════
-// GeneratingLoader — pantalla mientras hace streaming
+// GeneratingLoader
 // ════════════════════════════════════════════════════════════════════════════
-function GeneratingLoader({ childName, theme, storyColor, streamText }) {
+function GeneratingLoader({ childName, theme, storyColor, streamText, style }) {
   const accent  = getStoryAccent(storyColor);
+  const styleObj = STYLES.find(s => s.id === style) || STYLES[0];
   const emojis  = ["✨","📖","🌟","🪄","💫","🌈","⭐","🎨"];
   const particles = Array.from({ length: 12 }, (_, i) => ({
-    id:       i,
-    x:        Math.random() * 80 + 10,
-    y:        Math.random() * 60 + 20,
-    emoji:    emojis[i % emojis.length],
-    delay:    Math.random() * 1.5,
-    duration: Math.random() * 1.5 + 2,
+    id: i, x: Math.random()*80+10, y: Math.random()*60+20,
+    emoji: emojis[i % emojis.length], delay: Math.random()*1.5,
+    duration: Math.random()*1.5+2,
   }));
 
-  // Extract readable preview from partial streaming JSON
   const preview = (() => {
     if (!streamText) return "";
     const m = streamText.match(/"en"\s*:\s*"([^"]{10,})"/);
@@ -140,96 +142,89 @@ function GeneratingLoader({ childName, theme, storyColor, streamText }) {
       className="fixed inset-0 flex flex-col items-center justify-center z-50"
       style={{ background: `linear-gradient(145deg, ${accent.soft}, white)` }}
     >
-      {/* Floating emoji particles */}
       {particles.map(p => (
         <motion.span key={p.id} className="absolute text-2xl select-none pointer-events-none"
           style={{ left: `${p.x}%`, top: `${p.y}%` }}
-          animate={{ y: [0, -30, 0], opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.2, 0.9] }}
+          animate={{ y:[0,-30,0], opacity:[0.4,0.9,0.4], scale:[0.9,1.2,0.9] }}
           transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
         >{p.emoji}</motion.span>
       ))}
 
-      {/* Book icon */}
       <motion.div
-        className={`w-28 h-28 rounded-4xl bg-gradient-to-br ${storyColor || "from-blue-400 to-cyan-300"} flex items-center justify-center shadow-2xl mb-8 border-4 border-white`}
-        animate={{ scale: [1, 1.06, 1], rotate: [-3, 3, -3] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className={`w-28 h-28 rounded-4xl bg-gradient-to-br ${storyColor || "from-blue-400 to-cyan-300"} flex items-center justify-center shadow-2xl mb-6 border-4 border-white`}
+        animate={{ scale:[1,1.06,1], rotate:[-3,3,-3] }}
+        transition={{ duration:2, repeat:Infinity, ease:"easeInOut" }}
       >
         <BookOpen size={52} strokeWidth={1.5} className="text-white"/>
       </motion.div>
 
       <motion.h2
-        className="font-display text-3xl font-bold mb-3 text-center px-6"
+        className="font-display text-3xl font-bold mb-2 text-center px-6"
         style={{ color: accent.text }}
-        animate={{ opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
+        animate={{ opacity:[0.7,1,0.7] }} transition={{ duration:1.5, repeat:Infinity }}
       >Writing {childName}'s story…</motion.h2>
 
-      <p className="font-body text-lg text-center mb-5" style={{ color: `${accent.text}80` }}>
+      <p className="font-body text-base text-center mb-1" style={{ color:`${accent.text}80` }}>
         {theme && `About: ${theme}`}
       </p>
 
-      {/* Live streaming preview */}
+      {/* Style badge */}
+      <div className="flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-display"
+        style={{ background:`${accent.primary}18`, color:accent.text }}>
+        <span>{styleObj.icon}</span> {styleObj.label} illustrations
+        <span className="text-xs opacity-60">+ DALL·E 3</span>
+      </div>
+
       <AnimatePresence>
         {preview && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+          <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
             className="max-w-md mx-4 px-5 py-3 rounded-2xl font-body text-sm text-center leading-relaxed"
-            style={{
-              background: `${accent.primary}14`,
-              border: `1.5px solid ${accent.primary}30`,
-              color: accent.text,
-            }}
+            style={{ background:`${accent.primary}14`, border:`1.5px solid ${accent.primary}30`, color:accent.text }}
           >{preview}</motion.div>
         )}
       </AnimatePresence>
 
-      {/* Progress bar */}
-      <div className="w-64 h-3 rounded-full overflow-hidden mt-8" style={{ background: `${accent.primary}20` }}>
+      <div className="w-64 h-3 rounded-full overflow-hidden mt-8" style={{ background:`${accent.primary}20` }}>
         <motion.div className="h-full rounded-full"
-          style={{ background: `linear-gradient(90deg, ${accent.primary}, ${accent.primary}99)` }}
-          animate={{ width: ["0%", "90%"] }}
-          transition={{ duration: 18, ease: "easeOut" }}
+          style={{ background:`linear-gradient(90deg,${accent.primary},${accent.primary}99)` }}
+          animate={{ width:["0%","90%"] }} transition={{ duration:20, ease:"easeOut" }}
         />
       </div>
-      <p className="font-body text-xs mt-4 text-center" style={{ color: `${accent.text}60` }}>
-        Kiddsy AI is spinning a magical story for you… ✨
+      <p className="font-body text-xs mt-4 text-center" style={{ color:`${accent.text}60` }}>
+        Groq LLAMA + DALL·E 3 creating your story… ✨
       </p>
     </motion.div>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// StoryCoverCard — tarjeta de cuento en la mini-biblioteca
+// StoryCoverCard
 // ════════════════════════════════════════════════════════════════════════════
 function StoryCoverCard({ story, onClick, index }) {
   return (
     <motion.button onClick={onClick}
-      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, type: "spring", stiffness: 200 }}
-      whileHover={{ scale: 1.04, y: -4 }} whileTap={{ scale: 0.97 }}
+      initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }}
+      transition={{ delay:index*0.06, type:"spring", stiffness:200 }}
+      whileHover={{ scale:1.04, y:-4 }} whileTap={{ scale:0.97 }}
       className="group relative w-full text-left"
     >
       <div className="absolute left-0 top-2 bottom-2 w-3 rounded-l-xl bg-black/20 blur-sm"/>
-      <div
-        className={`relative bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} rounded-3xl overflow-hidden border-4 border-white min-h-[180px]`}
-        style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.1)" }}
-      >
+      <div className={`relative bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} rounded-3xl overflow-hidden border-4 border-white min-h-[180px]`}
+        style={{ boxShadow:"0 12px 40px rgba(0,0,0,0.18),0 4px 12px rgba(0,0,0,0.1)" }}>
         <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%)", backgroundSize: "8px 8px" }}/>
+          style={{ backgroundImage:"repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%)", backgroundSize:"8px 8px" }}/>
         <div className="relative p-5 flex flex-col h-full min-h-[180px]">
           <StoryCoverIcon emoji={story.emoji} size={56}/>
           <h3 className="font-display text-white text-lg leading-tight flex-1 drop-shadow mt-3">{story.title}</h3>
           <div className="flex items-center gap-1.5 text-white/75 font-body text-xs mt-2">
             <BookOpen size={12}/> {story.pages?.length ?? 0} pages
+            {story.style && <span className="ml-1 opacity-70">· {STYLES.find(s=>s.id===story.style)?.icon || "💧"}</span>}
           </div>
         </div>
         <div className="absolute inset-0 rounded-3xl bg-white/0 group-hover:bg-white/15 transition-all flex items-center justify-center">
-          <motion.div initial={{ scale: 0.8, opacity: 0 }} whileHover={{ scale: 1, opacity: 1 }}
+          <motion.div initial={{ scale:0.8, opacity:0 }} whileHover={{ scale:1, opacity:1 }}
             className="font-display text-sm px-4 py-2 bg-white rounded-full shadow-lg"
-            style={{ color: C.blue }}
-          >Read ✨</motion.div>
+            style={{ color:C.blue }}>Read ✨</motion.div>
         </div>
       </div>
     </motion.button>
@@ -237,7 +232,7 @@ function StoryCoverCard({ story, onClick, index }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// StoryReader — lector página a página con TTS
+// StoryReader — page-by-page reader with DALL·E images + TTS
 // ════════════════════════════════════════════════════════════════════════════
 function StoryReader({ story, lang, onBack }) {
   const [pageIdx,      setPageIdx]      = useState(0);
@@ -249,30 +244,32 @@ function StoryReader({ story, lang, onBack }) {
   const total    = story.pages.length;
   const accent   = getStoryAccent(story.color);
   const langMeta = getLang(lang);
+  const ttsVoice = story.voice || "nova";
 
-  // Keyboard navigation
   useEffect(() => {
     const onKey = e => {
-      if (e.key === "ArrowRight" && pageIdx < total - 1) { setDirection(1);  setPageIdx(p => p + 1); }
-      if (e.key === "ArrowLeft"  && pageIdx > 0)         { setDirection(-1); setPageIdx(p => p - 1); }
+      if (e.key === "ArrowRight" && pageIdx < total-1) { setDirection(1);  setPageIdx(p=>p+1); }
+      if (e.key === "ArrowLeft"  && pageIdx > 0)       { setDirection(-1); setPageIdx(p=>p-1); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [pageIdx, total]);
 
-  // TTS
+  // Reset audio when page changes
+  useEffect(() => { setAudioBlobUrl(null); }, [pageIdx]);
+
   const handlePlayAudio = async () => {
     if (audioBlobUrl) { new Audio(audioBlobUrl).play(); return; }
     setAudioLoading(true);
     const textToRead = [
-      story.title ? `${story.title}.` : "",
-      story.en || story.content || "",
-    ].filter(Boolean).join(" ").slice(0, 4000);
+      page?.en || "",
+      page?.[lang] || "",
+    ].filter(Boolean).join("  ").slice(0, 4000);
     try {
       const res = await fetch(`${API_URL()}/api/tts`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ text: textToRead }),
+        body:    JSON.stringify({ text: textToRead, voice: ttsVoice }),
       });
       if (!res.ok) throw new Error("TTS failed");
       const blob = await res.blob();
@@ -287,86 +284,92 @@ function StoryReader({ story, lang, onBack }) {
   };
 
   const pageVariants = {
-    enter:  d => ({ x: d > 0 ? "60%" : "-60%", opacity: 0, rotateY: d > 0 ? 15 : -15, scale: 0.92 }),
-    center: { x: "0%", opacity: 1, rotateY: 0, scale: 1 },
-    exit:   d => ({ x: d > 0 ? "-60%" : "60%", opacity: 0, rotateY: d > 0 ? -15 : 15, scale: 0.92 }),
+    enter:  d => ({ x:d>0?"60%":"-60%", opacity:0, rotateY:d>0?15:-15, scale:0.92 }),
+    center: { x:"0%", opacity:1, rotateY:0, scale:1 },
+    exit:   d => ({ x:d>0?"-60%":"60%", opacity:0, rotateY:d>0?-15:15, scale:0.92 }),
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto">
+    <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} className="max-w-3xl mx-auto">
       {/* Header bar */}
       <div className="flex items-center justify-between mb-6 px-1">
-        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onBack}
+        <motion.button whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }} onClick={onBack}
           className="flex items-center gap-2 px-4 py-2 rounded-2xl font-display text-sm bg-white/80 shadow-sm border border-white"
-          style={{ color: C.blue }}
-        ><ArrowLeft size={18}/> Back</motion.button>
+          style={{ color:C.blue }}>
+          <ArrowLeft size={18}/> Back
+        </motion.button>
 
         <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full px-4 py-2 shadow-sm border border-white overflow-hidden max-w-[200px]">
           <StoryCoverIcon emoji={story.emoji} size={28}/>
-          <span className="font-display text-sm truncate" style={{ color: C.blue }}>{story.title}</span>
+          <span className="font-display text-sm truncate" style={{ color:C.blue }}>{story.title}</span>
         </div>
 
-        <div className="font-display text-sm px-4 py-2 rounded-2xl bg-white/80 shadow-sm border border-white" style={{ color: accent.text }}>
-          {pageIdx + 1} / {total}
+        <div className="font-display text-sm px-4 py-2 rounded-2xl bg-white/80 shadow-sm border border-white" style={{ color:accent.text }}>
+          {pageIdx+1} / {total}
         </div>
       </div>
 
       {/* TTS button */}
-      <div className="flex justify-center mb-4">
-        <motion.button
-          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+      <div className="flex justify-center mb-4 gap-3">
+        <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
           onClick={handlePlayAudio} disabled={audioLoading}
           className="flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-lg"
           style={{
             background: audioLoading ? "#94A3B8" : "linear-gradient(135deg,#00ACC1,#0288D1)",
-            cursor:     audioLoading ? "not-allowed" : "pointer",
-            fontSize:   15,
+            cursor: audioLoading ? "not-allowed" : "pointer", fontSize:15,
           }}
         >
           {audioLoading
             ? <><RefreshCw size={16} className="animate-spin"/> Generating audio…</>
             : audioBlobUrl
               ? <><Volume2 size={16}/> Play again</>
-              : <><Volume2 size={16}/> Listen to story</>
+              : <><Volume2 size={16}/> Listen {VOICES.find(v=>v.id===ttsVoice)?.icon || "🔊"}</>
           }
         </motion.button>
       </div>
 
-      {/* Page card with 3D flip */}
-      <div className="relative" style={{ perspective: "1200px" }}>
-        <div className="absolute -bottom-4 left-4 right-4 h-8 rounded-full blur-2xl opacity-30" style={{ background: accent.primary }}/>
+      {/* Page card */}
+      <div className="relative" style={{ perspective:"1200px" }}>
+        <div className="absolute -bottom-4 left-4 right-4 h-8 rounded-full blur-2xl opacity-30" style={{ background:accent.primary }}/>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div key={pageIdx} custom={direction} variants={pageVariants}
             initial="enter" animate="center" exit="exit"
-            transition={{ type: "spring", stiffness: 240, damping: 28 }}
-            style={{ transformStyle: "preserve-3d" }}
+            transition={{ type:"spring", stiffness:240, damping:28 }}
+            style={{ transformStyle:"preserve-3d" }}
           >
-            <div
-              className={`bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} p-[5px] rounded-4xl`}
-              style={{ boxShadow: `0 24px 60px ${accent.primary}40, 0 8px 20px rgba(0,0,0,0.15)` }}
-            >
+            <div className={`bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} p-[5px] rounded-4xl`}
+              style={{ boxShadow:`0 24px 60px ${accent.primary}40,0 8px 20px rgba(0,0,0,0.15)` }}>
               <div className="relative bg-gradient-to-b from-amber-50 to-orange-50 rounded-4xl overflow-hidden min-h-[400px] md:min-h-[460px]">
-                {/* Binding line */}
                 <div className="absolute left-0 inset-y-0 w-6 opacity-10"
-                  style={{ background: `linear-gradient(90deg, ${accent.primary}60, transparent)` }}/>
-
+                  style={{ background:`linear-gradient(90deg,${accent.primary}60,transparent)` }}/>
                 <div className="p-8 md:p-10 flex flex-col h-full min-h-[400px]">
-                  {/* Page header */}
                   <div className="flex justify-between items-start mb-6">
                     <div className="font-display text-xs px-3 py-1 rounded-full"
-                      style={{ background: accent.soft, color: accent.text }}>
-                      Page {pageIdx + 1}
+                      style={{ background:accent.soft, color:accent.text }}>
+                      Page {pageIdx+1}
                     </div>
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-display"
-                      style={{ background: accent.soft, color: accent.text }}>
+                      style={{ background:accent.soft, color:accent.text }}>
                       <span>{langMeta.flag}</span> {langMeta.name}
                     </div>
                   </div>
 
                   {page && (
                     <>
-                      {/* SVG illustration (dangerouslySetInnerHTML preservado) */}
-                      {page.image_svg && (
+                      {/* DALL·E 3 image */}
+                      {page.dalle_url && (
+                        <div className="w-full mb-6 rounded-3xl overflow-hidden shadow-inner border-2 border-white/50">
+                          <img
+                            src={page.dalle_url}
+                            alt={`Illustration page ${pageIdx+1}`}
+                            className="w-full object-cover max-h-56"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {/* SVG fallback (inline SVG from Groq) */}
+                      {!page.dalle_url && page.image_svg && (
                         <div
                           className="w-full aspect-square max-h-48 mb-6 flex items-center justify-center bg-white/50 rounded-3xl p-4 shadow-inner"
                           dangerouslySetInnerHTML={{ __html: page.image_svg }}
@@ -375,19 +378,16 @@ function StoryReader({ story, lang, onBack }) {
 
                       {/* English text */}
                       <p className="text-2xl text-gray-800 leading-relaxed mb-6"
-                        style={{ fontFamily: '"Comic Neue","Nunito",cursive' }}>
+                        style={{ fontFamily:'"Comic Neue","Nunito",cursive' }}>
                         {page.en}
                       </p>
 
                       {/* Translation */}
-                      <div className="border-t-2 pt-5" style={{ borderColor: `${accent.primary}25` }}>
-                        <div
-                          dir={langMeta.dir}
-                          className="flex items-start gap-3 p-4 rounded-2xl"
-                          style={{ background: accent.soft }}
-                        >
+                      <div className="border-t-2 pt-5" style={{ borderColor:`${accent.primary}25` }}>
+                        <div dir={langMeta.dir} className="flex items-start gap-3 p-4 rounded-2xl"
+                          style={{ background:accent.soft }}>
                           <span className="text-xl flex-shrink-0">{langMeta.flag}</span>
-                          <p className="font-body text-base leading-relaxed" style={{ color: accent.text }}>
+                          <p className="font-body text-base leading-relaxed" style={{ color:accent.text }}>
                             {page[lang] || "Translation not available"}
                           </p>
                         </div>
@@ -401,21 +401,20 @@ function StoryReader({ story, lang, onBack }) {
         </AnimatePresence>
       </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation */}
       <div className="flex items-center justify-between mt-8 px-2">
         {pageIdx > 0 ? (
-          <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-            onClick={() => { setDirection(-1); setPageIdx(p => p - 1); }}
+          <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
+            onClick={() => { setDirection(-1); setPageIdx(p=>p-1); }}
             className="flex items-center gap-2 px-7 py-3.5 rounded-2xl font-display text-base text-white shadow-xl"
-            style={{ background: `linear-gradient(135deg,${accent.primary},${accent.primary}CC)`, boxShadow: `0 8px 24px ${accent.primary}40` }}
+            style={{ background:`linear-gradient(135deg,${accent.primary},${accent.primary}CC)`, boxShadow:`0 8px 24px ${accent.primary}40` }}
           ><ChevronLeft size={20}/> Previous</motion.button>
         ) : <div/>}
-
-        {pageIdx < total - 1 && (
-          <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-            onClick={() => { setDirection(1); setPageIdx(p => p + 1); }}
+        {pageIdx < total-1 && (
+          <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
+            onClick={() => { setDirection(1); setPageIdx(p=>p+1); }}
             className="flex items-center gap-2 px-7 py-3.5 rounded-2xl font-display text-base text-white shadow-xl"
-            style={{ background: `linear-gradient(135deg,${accent.primary},${accent.primary}CC)`, boxShadow: `0 8px 24px ${accent.primary}40` }}
+            style={{ background:`linear-gradient(135deg,${accent.primary},${accent.primary}CC)`, boxShadow:`0 8px 24px ${accent.primary}40` }}
           >Next <ChevronRight size={20}/></motion.button>
         )}
       </div>
@@ -424,30 +423,35 @@ function StoryReader({ story, lang, onBack }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// StoryForm — formulario de generación
+// StoryForm — full form with style + voice picker
 // ════════════════════════════════════════════════════════════════════════════
 function StoryForm({ lang, onLangChange, onGenerated }) {
-  const [childName,   setChildName]   = useState(() => lsGet(LS_NAME, ""));
-  const [theme,       setTheme]       = useState("");
-  const [customTheme, setCustomTheme] = useState("");
-  const [loading,     setLoading]     = useState(false);
-  const [error,       setError]       = useState("");
-  const [streamText,  setStreamText]  = useState("");
+  const [childName,          setChildName]          = useState(() => lsGet(LS_NAME, ""));
+  const [theme,              setTheme]              = useState("");
+  const [customTheme,        setCustomTheme]        = useState("");
+  const [style,              setStyle]              = useState("watercolor");
+  const [voice,              setVoice]              = useState("nova");
+  const [loading,            setLoading]            = useState(false);
+  const [error,              setError]              = useState("");
+  const [streamText,         setStreamText]         = useState("");
   const [selectedThemeLabel, setSelectedThemeLabel] = useState("");
+  const [voicePreviewLoading,setVoicePreviewLoading]= useState(false);
 
   useEffect(() => { lsSet(LS_NAME, childName); }, [childName]);
 
   const THEMES = [
-    { label: "🏫 Going to School",  value: "going to school for the first time" },
-    { label: "🌈 Making Friends",   value: "making new friends" },
-    { label: "🛒 Supermarket",      value: "shopping at the supermarket" },
-    { label: "🚌 Taking the Bus",   value: "taking the bus" },
-    { label: "🏥 Doctor Visit",     value: "visiting the doctor" },
-    { label: "🎉 Birthday Party",   value: "celebrating a birthday" },
+    { label:"🏫 Going to School",  value:"going to school for the first time" },
+    { label:"🌈 Making Friends",   value:"making new friends"                  },
+    { label:"🛒 Supermarket",      value:"shopping at the supermarket"         },
+    { label:"🚌 Taking the Bus",   value:"taking the bus"                      },
+    { label:"🏥 Doctor Visit",     value:"visiting the doctor"                 },
+    { label:"🎉 Birthday Party",   value:"celebrating a birthday"              },
   ];
 
-  const activeTheme = customTheme.trim() || theme;
-  const canGenerate = childName.trim() && activeTheme;
+  const activeTheme  = customTheme.trim() || theme;
+  const canGenerate  = childName.trim() && activeTheme;
+  const styleObj     = STYLES.find(s => s.id === style) || STYLES[0];
+  const voiceObj     = VOICES.find(v => v.id === voice) || VOICES[0];
 
   const themeColorMap = {
     "going to school":    "from-blue-400 to-cyan-300",
@@ -457,7 +461,30 @@ function StoryForm({ lang, onLangChange, onGenerated }) {
     "doctor":             "from-red-400 to-rose-300",
     "birthday":           "from-pink-400 to-rose-300",
   };
-  const loaderColor = Object.entries(themeColorMap).find(([k]) => activeTheme.includes(k))?.[1] || "from-blue-400 to-cyan-300";
+  const loaderColor = Object.entries(themeColorMap)
+    .find(([k]) => activeTheme.toLowerCase().includes(k))?.[1] || "from-blue-400 to-cyan-300";
+
+  // Voice preview — plays a sample sentence
+  const handleVoicePreview = async () => {
+    setVoicePreviewLoading(true);
+    try {
+      const res = await fetch(`${API_URL()}/api/tts`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          text: `Hi ${childName || "friend"}! I'm your storyteller. Ready for a magical adventure? ✨`,
+          voice,
+        }),
+      });
+      if (!res.ok) throw new Error("preview failed");
+      const blob = await res.blob();
+      new Audio(URL.createObjectURL(blob)).play();
+    } catch (e) {
+      console.error("[TTS preview]", e);
+    } finally {
+      setVoicePreviewLoading(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
@@ -467,19 +494,25 @@ function StoryForm({ lang, onLangChange, onGenerated }) {
       const response = await fetch(`${API_URL()}/api/generate-story`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ childName, theme: activeTheme, language: lang }),
+        body:    JSON.stringify({
+          childName,
+          theme:             activeTheme,
+          language:          lang,
+          illustrationStyle: style,
+          stylePrompt:       styleObj.prompt,
+          voice,
+        }),
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({ error: "Generation failed" }));
+        const errData = await response.json().catch(() => ({ error:"Generation failed" }));
         throw new Error(errData.error || "Generation failed");
       }
 
-      // ── Read Groq SSE stream ────────────────────────────────────────────
       const reader  = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
-      let   buffer  = "";
-      let   currentEvent = "";
+      let buffer    = "";
+      let currentEvent = "";
 
       const parseData = line => {
         if (!line.startsWith("data:")) return null;
@@ -489,7 +522,7 @@ function StoryForm({ lang, onLangChange, onGenerated }) {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream:true });
         const lines = buffer.split("\n");
         buffer = lines.pop();
 
@@ -503,8 +536,9 @@ function StoryForm({ lang, onLangChange, onGenerated }) {
             if (currentEvent === "token" && payload.delta) {
               setStreamText(prev => prev + payload.delta);
             } else if (currentEvent === "complete") {
-              await saveStory(payload, userId);
-              onGenerated(payload, lang);
+              const storyWithMeta = { ...payload, style, voice };
+              await saveStory(storyWithMeta, userId);
+              onGenerated(storyWithMeta, lang);
               return;
             } else if (currentEvent === "error") {
               throw new Error(payload.error || "Kiddsy AI had a hiccup — please try again! 🪄");
@@ -513,7 +547,6 @@ function StoryForm({ lang, onLangChange, onGenerated }) {
         }
       }
       throw new Error("Story generation ended unexpectedly — please try again.");
-
     } catch (e) {
       console.error("Generation error:", e);
       const friendly = (e.message?.toLowerCase().includes("fetch") || e.message?.toLowerCase().includes("network"))
@@ -531,115 +564,241 @@ function StoryForm({ lang, onLangChange, onGenerated }) {
       theme={selectedThemeLabel || activeTheme}
       storyColor={loaderColor}
       streamText={streamText}
+      style={style}
     />
   );
 
+  // ── Shared card style ────────────────────────────────────────────────────
+  const card = {
+    background: "white",
+    borderRadius: 24,
+    padding: "20px 20px",
+    border: "2px solid #F1F5F9",
+    boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+  };
+  const sectionLabel = {
+    fontFamily: "var(--font-display,'Nunito',sans-serif)",
+    fontWeight: 700, fontSize: 13, color: "#64748B",
+    marginBottom: 10, display: "block",
+  };
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-xl mx-auto">
-      <div className="bg-white/90 backdrop-blur-md rounded-4xl shadow-xl border-4 border-white p-8 md:p-10">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            animate={{ rotate: [-8, 8, -8] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-5xl mb-3 inline-block"
-          >🪄</motion.div>
-          <h2 style={{ lineHeight: 1 }}>
-            <BubbleTitle color={C.blue} size={34}>Create a Magic Story</BubbleTitle>
-          </h2>
-          <div
-            className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full font-body text-xs font-semibold"
-            style={{ background: "#FFF3E0", color: C.orange }}
-          >📱 Saved locally on this device</div>
-        </div>
+    <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }}
+      className="max-w-xl mx-auto space-y-4">
 
-        <div className="space-y-5">
-          {/* Child name */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">✏️ Child's name</label>
-            <input
-              type="text" value={childName} onChange={e => setChildName(e.target.value)}
-              placeholder="e.g. Sofia, Omar, Lucas…" maxLength={20}
-              className="w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 font-body text-lg focus:outline-none focus:border-blue-400 bg-amber-50 transition-colors placeholder-slate-300"
-            />
-          </div>
-
-          {/* Preset themes */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">🌟 Story theme</label>
-            <div className="grid grid-cols-2 gap-2">
-              {THEMES.map(t => (
-                <button key={t.value}
-                  onClick={() => { setTheme(t.value); setCustomTheme(""); setSelectedThemeLabel(t.label); }}
-                  className="px-3 py-2.5 rounded-xl font-body text-sm text-left transition-all"
-                  style={{
-                    background: theme === t.value && !customTheme ? C.blue : "#F8FAFC",
-                    color:      theme === t.value && !customTheme ? "white" : "#4B5563",
-                    border:     `2px solid ${theme === t.value && !customTheme ? C.blue : "#E2E8F0"}`,
-                  }}
-                >{t.label}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom theme */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">✍️ Or write your own</label>
-            <input
-              type="text"
-              placeholder="e.g. A trip to the moon, a talking dog…"
-              className="w-full px-5 py-3.5 rounded-2xl border-2 border-dashed border-blue-200 focus:border-blue-400 focus:outline-none font-body text-base bg-blue-50/30 placeholder-slate-300"
-              value={customTheme}
-              onChange={e => { setCustomTheme(e.target.value); setTheme(""); }}
-            />
-          </div>
-
-          {/* Language picker */}
-          <div>
-            <label className="block font-display text-slate-600 text-sm mb-2">🌍 Translation language</label>
-            <LanguagePicker value={lang} onChange={onLangChange} fullWidth/>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2"
-            ><span>⚠️</span><span>{error}</span></motion.div>
-          )}
-
-          {/* Generate button */}
-          <motion.button
-            whileHover={canGenerate ? { scale: 1.02 } : {}}
-            whileTap={canGenerate ? { scale: 0.98 } : {}}
-            onClick={handleGenerate}
-            disabled={!canGenerate}
-            className="w-full py-5 rounded-3xl font-display shadow-lg transition-all flex items-center justify-center gap-2 mt-2"
-            style={{
-              background:  canGenerate ? `linear-gradient(135deg,${C.blue},#42A5F5)` : "#E5E7EB",
-              color:       canGenerate ? "white" : "#9CA3AF",
-              cursor:      canGenerate ? "pointer" : "not-allowed",
-              boxShadow:   canGenerate ? "0 8px 24px rgba(21,101,192,0.35)" : "none",
-            }}
-          >
-            <span className="text-2xl">🪄</span>
-            <KiddsyTitle className="text-xl text-white">Generate Story</KiddsyTitle>
-          </motion.button>
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="text-center pb-2">
+        <motion.div animate={{ rotate:[-8,8,-8] }} transition={{ duration:2, repeat:Infinity, ease:"easeInOut" }}
+          className="text-5xl mb-3 inline-block">🪄</motion.div>
+        <h2 style={{ lineHeight:1 }}>
+          <BubbleTitle color={C.blue} size={34}>Create a Magic Story</BubbleTitle>
+        </h2>
+        <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full font-body text-xs font-semibold"
+          style={{ background:"#FFF3E0", color:C.orange }}>
+          ✨ Groq LLAMA + DALL·E 3 + OpenAI TTS
         </div>
       </div>
+
+      {/* ── 1. Child's name ─────────────────────────────────────────── */}
+      <div style={card}>
+        <span style={sectionLabel}>👤 Child's name</span>
+        <input type="text" value={childName} onChange={e => setChildName(e.target.value)}
+          placeholder="e.g. Sofia, Omar, Lucas…" maxLength={20}
+          className="w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 font-body text-lg focus:outline-none focus:border-blue-400 bg-amber-50 transition-colors placeholder-slate-300"
+        />
+      </div>
+
+      {/* ── 2. Story theme ──────────────────────────────────────────── */}
+      <div style={card}>
+        <span style={sectionLabel}>🌟 Story theme</span>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {THEMES.map(t => (
+            <button key={t.value}
+              onClick={() => { setTheme(t.value); setCustomTheme(""); setSelectedThemeLabel(t.label); }}
+              className="px-3 py-2.5 rounded-xl font-body text-sm text-left transition-all"
+              style={{
+                background: theme===t.value && !customTheme ? C.blue : "#F8FAFC",
+                color:      theme===t.value && !customTheme ? "white" : "#4B5563",
+                border:     `2px solid ${theme===t.value && !customTheme ? C.blue : "#E2E8F0"}`,
+              }}
+            >{t.label}</button>
+          ))}
+        </div>
+        <input type="text" value={customTheme}
+          placeholder="✍️ Or write your own… e.g. A trip to the moon"
+          className="w-full px-5 py-3 rounded-2xl border-2 border-dashed border-blue-200 focus:border-blue-400 focus:outline-none font-body text-sm bg-blue-50/30 placeholder-slate-300"
+          onChange={e => { setCustomTheme(e.target.value); setTheme(""); }}
+        />
+      </div>
+
+      {/* ── 3. Illustration style ───────────────────────────────────── */}
+      <div style={card}>
+        <span style={sectionLabel}>🎨 Illustration style
+          <span className="ml-2 font-normal text-xs opacity-60">via DALL·E 3</span>
+        </span>
+        {/* Row 1: 4 styles */}
+        <div className="grid grid-cols-4 gap-2 mb-2">
+          {STYLES.slice(0,4).map(s => {
+            const active = style === s.id;
+            return (
+              <motion.button key={s.id} whileTap={{ scale:0.96 }}
+                onClick={() => setStyle(s.id)}
+                style={{
+                  display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+                  gap:3, padding:"10px 6px", borderRadius:14, cursor:"pointer",
+                  border:`2.5px solid ${active ? C.blue : "#E2E8F0"}`,
+                  background: active ? C.blueSoft : "white",
+                  boxShadow: active ? `0 4px 16px ${C.blue}28` : "none",
+                  transition:"all 0.15s",
+                }}
+              >
+                <span style={{ fontSize:20 }}>{s.icon}</span>
+                <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:10, color:active?C.blue:"#64748B" }}>
+                  {s.label}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+        {/* Row 2: 2 styles centred */}
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          {STYLES.slice(4).map(s => {
+            const active = style === s.id;
+            return (
+              <motion.button key={s.id} whileTap={{ scale:0.96 }}
+                onClick={() => setStyle(s.id)}
+                style={{
+                  display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+                  gap:3, padding:"10px 6px", borderRadius:14, cursor:"pointer",
+                  border:`2.5px solid ${active ? C.blue : "#E2E8F0"}`,
+                  background: active ? C.blueSoft : "white",
+                  boxShadow: active ? `0 4px 16px ${C.blue}28` : "none",
+                  transition:"all 0.15s",
+                }}
+              >
+                <span style={{ fontSize:20 }}>{s.icon}</span>
+                <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:10, color:active?C.blue:"#64748B" }}>
+                  {s.label}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+        {/* Style description preview */}
+        <div className="px-3 py-2.5 rounded-xl text-xs font-body flex items-start gap-2"
+          style={{ background:C.blueSoft, color:C.blue }}>
+          <span style={{ fontSize:16, flexShrink:0 }}>{styleObj.icon}</span>
+          <div>
+            <strong>{styleObj.label}:</strong> {styleObj.prompt}
+          </div>
+        </div>
+      </div>
+
+      {/* ── 4. Voice ────────────────────────────────────────────────── */}
+      <div style={card}>
+        <span style={sectionLabel}>🔊 Narrator voice
+          <span className="ml-2 font-normal text-xs opacity-60">via OpenAI TTS</span>
+        </span>
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          {VOICES.map(v => {
+            const active = voice === v.id;
+            return (
+              <motion.button key={v.id} whileTap={{ scale:0.96 }}
+                onClick={() => setVoice(v.id)}
+                style={{
+                  display:"flex", flexDirection:"column", alignItems:"center",
+                  gap:3, padding:"10px 6px", borderRadius:14, cursor:"pointer",
+                  border:`2.5px solid ${active ? C.green : "#E2E8F0"}`,
+                  background: active ? C.greenSoft : "white",
+                  boxShadow: active ? `0 4px 14px ${C.green}28` : "none",
+                  transition:"all 0.15s",
+                }}
+              >
+                <span style={{ fontSize:20 }}>{v.icon}</span>
+                <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:11, color:active?C.green:"#64748B" }}>
+                  {v.label}
+                </span>
+                <span style={{ fontSize:9, color:"#94A3B8", textAlign:"center", lineHeight:1.2 }}>
+                  {v.desc}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+        {/* Preview button */}
+        <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
+          onClick={handleVoicePreview}
+          disabled={voicePreviewLoading}
+          style={{
+            display:"flex", alignItems:"center", justifyContent:"center", gap:7,
+            width:"100%", padding:"10px 0", borderRadius:12, cursor:"pointer",
+            border:`2px solid ${C.green}`, background: voicePreviewLoading ? "#F1F5F9" : C.greenSoft,
+            fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:13,
+            color: voicePreviewLoading ? "#94A3B8" : C.green,
+          }}
+        >
+          {voicePreviewLoading
+            ? <><Loader size={14} className="animate-spin"/> Generating preview…</>
+            : <><Play size={13} fill={C.green}/> Preview voice {voiceObj.icon}</>
+          }
+        </motion.button>
+      </div>
+
+      {/* ── 5. Language ─────────────────────────────────────────────── */}
+      <div style={card}>
+        <span style={sectionLabel}>🌍 Translation language</span>
+        <LanguagePicker value={lang} onChange={onLangChange} fullWidth/>
+        <p className="mt-2 text-xs font-body text-slate-400 text-center">
+          Story will be generated in English + {getLang(lang).name}
+        </p>
+      </div>
+
+      {/* ── Error ───────────────────────────────────────────────────── */}
+      {error && (
+        <motion.div initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }}
+          className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2">
+          <span>⚠️</span><span>{error}</span>
+        </motion.div>
+      )}
+
+      {/* ── Generate button ─────────────────────────────────────────── */}
+      <motion.button
+        whileHover={canGenerate ? { scale:1.02 } : {}}
+        whileTap={canGenerate ? { scale:0.97 } : {}}
+        onClick={handleGenerate}
+        disabled={!canGenerate}
+        className="w-full py-5 rounded-3xl font-display shadow-2xl flex items-center justify-center gap-3"
+        style={{
+          background:  canGenerate ? `linear-gradient(135deg,${C.blue},#42A5F5)` : "#E5E7EB",
+          color:       canGenerate ? "white" : "#9CA3AF",
+          cursor:      canGenerate ? "pointer" : "not-allowed",
+          boxShadow:   canGenerate ? "0 10px 32px rgba(21,101,192,0.4)" : "none",
+          fontSize: 18, fontWeight: 800,
+        }}
+      >
+        <span className="text-2xl">🪄</span>
+        <KiddsyTitle className="text-xl text-white">Generate Story</KiddsyTitle>
+        <span style={{ fontSize:12, opacity:0.7, fontWeight:400 }}>
+          {styleObj.icon} + {voiceObj.icon}
+        </span>
+      </motion.button>
+
+      <p className="text-center font-body text-xs text-white/60 pb-4">
+        💡 DALL·E 3 illustrations take a few extra seconds — the magic is worth it!
+      </p>
     </motion.div>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// RecentStories — mini-carrusel de cuentos guardados
+// RecentStories
 // ════════════════════════════════════════════════════════════════════════════
 function RecentStories({ onRead }) {
   const stories = lsGet(LS_STORIES, []).slice(0, 6);
   if (stories.length === 0) return null;
-
   return (
     <div className="max-w-3xl mx-auto mt-10 px-1">
-      <h3 className="font-display text-xl mb-4 text-center" style={{ color: C.blue }}>
+      <h3 className="font-display text-xl mb-4 text-center" style={{ color:"white" }}>
         📚 Recently generated
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -652,26 +811,21 @@ function RecentStories({ onRead }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// StoryGenerator — página principal exportada
+// StoryGenerator — main export
 // ════════════════════════════════════════════════════════════════════════════
 export default function StoryGenerator({ lang, onLangChange, onGenerated, onBack }) {
-  const [activeStory, setActiveStory] = useState(null); // cuento abierto en lector
+  const [activeStory, setActiveStory] = useState(null);
 
-  // Callback cuando se genera un cuento nuevo
   const handleGenerated = (story, storyLang) => {
     setActiveStory(story);
     if (onGenerated) onGenerated(story, storyLang);
   };
 
   return (
-    <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
-      {/* Fondo nocturno de cuentos */}
+    <div style={{ position:"relative", minHeight:"100vh", overflow:"hidden" }}>
       <StoryBg/>
+      <div style={{ position:"relative", zIndex:1, paddingTop:24, paddingBottom:80 }}>
 
-      {/* Contenido sobre el fondo */}
-      <div style={{ position: "relative", zIndex: 1, paddingTop: 24, paddingBottom: 80 }}>
-
-        {/* Título de sección */}
         {!activeStory && (
           <div className="text-center mb-8 pt-6">
             <BubbleTitle color="white" size={48} wobble>Story Time ✨</BubbleTitle>
