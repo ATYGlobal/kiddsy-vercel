@@ -15,16 +15,7 @@ function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 4
   // Estimate SVG width: ~0.58em per char at given font size, with padding
   const estW  = Math.max(200, text.length * size * 0.56 + 40);
   const estH  = size * 1.48;
-// ── Lógica de Reinicio ────────────────────────────────────────────────
-  const handleReset = () => {
-    // 1. Limpiamos las palabras encontradas
-    setFoundWords([]);
-    // 2. Quitamos el estado de victoria si existe
-    if (setGameWon) setGameWon(false);
-    // 3. Opcional: Si tienes una función para regenerar la rejilla, la llamas aquí:
-    // generateGrid(); 
-    console.log("Juego reiniciado");
-  };
+
   return (
     <span
       className={className}
@@ -403,15 +394,16 @@ function Confetti({ active }) {
 
 // ─── Main WordSearch component ─────────────────────────────────────────────
 export default function WordSearch() {
-  const [packIdx, setPackIdx]     = useState(0);
-  const [lang, setLang]           = useState("es");
-  const [gameData, setGameData]   = useState(null);
+  const [packIdx,   setPackIdx]   = useState(0);
+  const [lang,      setLang]      = useState("es");
+  const [gameData,  setGameData]  = useState(null);
   const [selecting, setSelecting] = useState(false);
-  const [selection, setSelection] = useState([]); // [{r,c}]
-  const [found, setFound]         = useState([]); // word indices found
-  const [confetti, setConfetti]   = useState(false);
-  const [won, setWon]             = useState(false);
+  const [selection, setSelection] = useState([]);
+  const [found,     setFound]     = useState([]);
+  const [confetti,  setConfetti]  = useState(false);
+  const [won,       setWon]       = useState(false);
 
+  // ── pack y startGame — declarados UNA sola vez ────────────────────────
   const pack = PACKS[packIdx];
 
   const startGame = useCallback((pIdx = packIdx) => {
@@ -425,12 +417,13 @@ export default function WordSearch() {
 
   useEffect(() => { startGame(packIdx); }, [packIdx]);
 
-  // Check if current selection matches any word
+  const handleReset = () => { startGame(); };
+
+  // ── Lógica de selección ───────────────────────────────────────────────
   const checkSelection = (sel) => {
     if (!gameData || sel.length < 2) return;
     const selKey = sel.map(c => `${c.r},${c.c}`).join("|");
     const revKey = [...sel].reverse().map(c => `${c.r},${c.c}`).join("|");
-
     gameData.placed.forEach(({ word, cells }, wi) => {
       if (found.includes(wi)) return;
       const wKey = cells.map(c => `${c.r},${c.c}`).join("|");
@@ -446,10 +439,8 @@ export default function WordSearch() {
     });
   };
 
-  // Determine highlight color for a cell
   const getCellStyle = (r, c) => {
     if (!gameData) return {};
-    // Is it in a found word?
     for (const wi of found) {
       const { cells } = gameData.placed[wi];
       if (cells.some(cell => cell.r === r && cell.c === c)) {
@@ -457,7 +448,6 @@ export default function WordSearch() {
         return { background: col.bg, color: col.text, fontWeight: 700 };
       }
     }
-    // Is it in current selection?
     if (selection.some(cell => cell.r === r && cell.c === c)) {
       return { background: C.yellow + "80", color: C.blue, fontWeight: 700 };
     }
@@ -471,16 +461,12 @@ export default function WordSearch() {
 
   const handleCellEnter = (r, c) => {
     if (!selecting) return;
-    // Only extend in a straight line
     const first = selection[0];
     if (!first) return;
     const dr = Math.sign(r - first.r);
     const dc = Math.sign(c - first.c);
     const len = Math.max(Math.abs(r - first.r), Math.abs(c - first.c)) + 1;
-
-    // Validate straight line
     if (dr !== 0 && dc !== 0 && Math.abs(r - first.r) !== Math.abs(c - first.c)) return;
-
     const newSel = [];
     for (let i = 0; i < len; i++) {
       newSel.push({ r: first.r + dr * i, c: first.c + dc * i });
@@ -488,177 +474,176 @@ export default function WordSearch() {
     setSelection(newSel);
   };
 
-const handleCellEnd = () => {
-  if (!selecting) return;
-  setSelecting(false);
-  checkSelection(selection);
-  setSelection([]);
-};
+  const handleCellEnd = () => {
+    if (!selecting) return;
+    setSelecting(false);
+    checkSelection(selection);
+    setSelection([]);
+  };
 
-// ── UI ─────────────────────────────────────────────────────────────────
-return (
-  <div className="relative min-h-screen overflow-hidden">
-    {/* Fondo temático de sopa de letras / Ramen */}
-    <WordSearchBg />
+  // ── UI ─────────────────────────────────────────────────────────────────
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      <WordSearchBg />
+      <Confetti active={confetti} />
 
-    <Confetti active={confetti} />
-
-    {/* Contenido sobre el fondo */}
-    <div className="relative z-10">
-      
-      {/* Header */}
-      <div className="text-center py-10 px-4">
-        <motion.div 
-          initial={{ scale: 0.8, opacity: 0 }} 
-          animate={{ scale: 1, opacity: 1 }} 
-          transition={{ type: "spring" }}
-          className="mb-4"
-        >
-          {/* Título con estilo Bubble y el nuevo nombre sugerido */}
-          <h1 style={{ lineHeight: 1.2 }}>
-            <BubbleTitle color="#E11D48" size={54}>
-              Word Hunt
-            </BubbleTitle>
-          </h1>
-        </motion.div>
-        
-        <p className="font-display text-slate-700 text-lg font-medium bg-white/40 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
-          Find all the hidden English words!
-        </p>
-      </div>
-
-      {/* Controls */}
-      <div className="flex flex-wrap justify-center gap-3 px-4 mb-6">
-        {/* Pack selector */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {PACKS.map((p, i) => {
-            const PackIcon = p.icon;
-            return (
-              <button key={i} onClick={() => setPackIdx(i)}
-                className="px-4 py-2 rounded-full font-display text-sm border-2 transition-all"
-                style={{ background:packIdx===i?C.blue:"white", color:packIdx===i?"white":"#6B7280", borderColor:packIdx===i?C.blue:"#E2E8F0",
-                  display:"flex", alignItems:"center", gap:6 }}
-              >
-                <PackIcon size={13} strokeWidth={2}/>
-                {p.name}
-              </button>
-            );
-          })}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="text-center py-10 px-4">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring" }}
+            className="mb-4"
+          >
+            <h1 style={{ lineHeight: 1.2 }}>
+              <BubbleTitle color="#E11D48" size={54}>Word Hunt</BubbleTitle>
+            </h1>
+          </motion.div>
+          <p className="font-display text-slate-700 text-lg font-medium bg-white/40 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
+            Find all the hidden English words!
+          </p>
         </div>
 
-        {/* Lang picker */}
-        <div className="flex gap-1 bg-white/80 rounded-full p-1 shadow-sm">
-          {Object.entries(LANG_LABELS).map(([code, label]) => (
-            <button key={code} onClick={() => setLang(code)}
-              className="px-3 py-1.5 rounded-full font-display text-xs transition-all"
-              style={{ background:lang===code?C.green:"transparent", color:lang===code?"white":"#6B7280" }}
-            >{label}</button>
-          ))}
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 pb-20">
-      {won && (
-      <motion.div 
-        initial={{ scale: 0.8, opacity: 0 }} 
-        animate={{ scale: 1, opacity: 1 }}
-        className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
-        style={{ 
-          background: `linear-gradient(135deg, ${C.green}, #2E7D32)`,
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center", 
-          gap: 8 
-        }}
-      >
-        <Trophy size={22} strokeWidth={2}/> You found all the words! Amazing!
-      </motion.div>
-    )}
-        <div className="grid md:grid-cols-2 gap-8 items-start">
-          {/* Grid */}
-          <div>
-            <div
-              className="grid gap-1 p-3 rounded-3xl shadow-xl border-4 border-white select-none"
-              style={{ gridTemplateColumns:`repeat(${GRID_SIZE},1fr)`, background:C.blueSoft }}
-              onMouseLeave={handleCellEnd}
-              onTouchEnd={handleCellEnd}
-            >
-              {gameData && gameData.grid.map((row, r) =>
-                row.map((letter, c) => (
-                  <motion.div
-                    key={`${r}-${c}`}
-                    className="aspect-square flex items-center justify-center rounded-lg font-display text-sm cursor-pointer transition-all"
-                    style={{ background:"white", color:C.blue, fontSize:"clamp(11px,2vw,16px)", ...getCellStyle(r, c) }}
-                    onMouseDown={() => handleCellStart(r, c)}
-                    onMouseEnter={() => handleCellEnter(r, c)}
-                    onMouseUp={handleCellEnd}
-                    onTouchStart={() => handleCellStart(r, c)}
-                  >
-                    {letter}
-                  </motion.div>
-                ))
-              )}
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
-                onClick={() => startGame()}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-md"
-                style={{ background:C.red }}
-              ><RotateCcw size={16}/> New puzzle</motion.button>
-            </div>
+        {/* Controls */}
+        <div className="flex flex-wrap justify-center gap-3 px-4 mb-6">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {PACKS.map((p, i) => {
+              const PackIcon = p.icon;
+              return (
+                <button key={i} onClick={() => setPackIdx(i)}
+                  className="px-4 py-2 rounded-full font-display text-sm border-2 transition-all"
+                  style={{
+                    background: packIdx === i ? C.blue : "white",
+                    color:      packIdx === i ? "white" : "#6B7280",
+                    borderColor:packIdx === i ? C.blue : "#E2E8F0",
+                    display: "flex", alignItems: "center", gap: 6,
+                  }}
+                >
+                  <PackIcon size={13} strokeWidth={2}/> {p.name}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Word list */}
-          <div>
-            <h3 className="font-display text-xl mb-4" style={{ color:C.blue }}>
-              Find these words ({found.length}/{pack.words.length})
-            </h3>
-            <div className="space-y-2">
-              {gameData && gameData.placed.map(({ word }, wi) => {
-                const isFound = found.includes(wi);
-                const col = WORD_COLORS[wi % WORD_COLORS.length];
-                return (
-                  <motion.div
-                    key={wi}
-                    initial={{ opacity:0, x:20 }}
-                    animate={{ opacity:1, x:0 }}
-                    transition={{ delay:wi*0.06 }}
-                    className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all"
-                    style={{
-                      background: isFound ? col.bg : "white",
-                      borderColor: isFound ? col.border : "#E2E8F0",
-                    }}
-                  >
-                    {isFound
-                      ? <CheckCircle size={18} style={{ color:col.text }} />
-                      : <div className="w-4.5 h-4.5 rounded-full border-2 border-slate-300" />
-                    }
-                    <div className="flex-1">
-                      <div className="font-display text-lg" style={{ color: isFound ? col.text : C.blue }}>
-                        {isFound ? word.en : "?".repeat(word.en.length)}
-                      </div>
-                      <div className="font-body text-sm text-slate-500" dir={lang==="ar"?"rtl":"ltr"}>
-                        {word[lang]}
-                      </div>
-                    </div>
-                    {isFound && <Star size={16} style={{ color:col.text }} />}
-                  </motion.div>
-                );
-              })}
+          <div className="flex gap-1 bg-white/80 rounded-full p-1 shadow-sm">
+            {Object.entries(LANG_LABELS).map(([code, label]) => (
+              <button key={code} onClick={() => setLang(code)}
+                className="px-3 py-1.5 rounded-full font-display text-xs transition-all"
+                style={{
+                  background: lang === code ? C.green : "transparent",
+                  color:      lang === code ? "white" : "#6B7280",
+                }}
+              >{label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 pb-20">
+          {won && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
+              style={{
+                background: `linear-gradient(135deg, ${C.green}, #2E7D32)`,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              }}
+            >
+              <Trophy size={22} strokeWidth={2}/> {getTranslation("wellDone", lang)}
+            </motion.div>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            {/* Grid */}
+            <div>
+              <div
+                className="grid gap-1 p-3 rounded-3xl shadow-xl border-4 border-white select-none"
+                style={{ gridTemplateColumns: `repeat(${GRID_SIZE},1fr)`, background: C.blueSoft }}
+                onMouseLeave={handleCellEnd}
+                onTouchEnd={handleCellEnd}
+              >
+                {gameData && gameData.grid.map((row, r) =>
+                  row.map((letter, c) => (
+                    <motion.div
+                      key={`${r}-${c}`}
+                      className="aspect-square flex items-center justify-center rounded-lg font-display text-sm cursor-pointer transition-all"
+                      style={{ background: "white", color: C.blue, fontSize: "clamp(11px,2vw,16px)", ...getCellStyle(r, c) }}
+                      onMouseDown={()  => handleCellStart(r, c)}
+                      onMouseEnter={() => handleCellEnter(r, c)}
+                      onMouseUp={handleCellEnd}
+                      onTouchStart={()  => handleCellStart(r, c)}
+                    >
+                      {letter}
+                    </motion.div>
+                  ))
+                )}
+              </div>
+
+              <div className="mt-4 flex justify-center">
+                <motion.button
+                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                  onClick={handleReset}
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-md"
+                  style={{ background: C.red }}
+                >
+                  <RotateCcw size={16}/> {getTranslation("newPuzzle", lang)}
+                </motion.button>
+              </div>
             </div>
 
-            {/* Instructions */}
-            <div className="mt-6 rounded-3xl p-4 border-2 border-white shadow-sm" style={{ background:C.yellowSoft }}>
-              <p className="font-display text-sm mb-1" style={{ color:C.yellow }}>How to play</p>
-              <p className="font-body text-xs text-slate-600">
-                Click and drag across letters to select a word. Words can go in any direction: horizontal, vertical, or diagonal!
-              </p>
+            {/* Word list */}
+            <div>
+              <h3 className="font-display text-xl mb-4" style={{ color: C.blue }}>
+                {getTranslation("findWords", lang)} ({found.length}/{pack.words.length})
+              </h3>
+              <div className="space-y-2">
+                {gameData && gameData.placed.map(({ word }, wi) => {
+                  const isFound = found.includes(wi);
+                  const col = WORD_COLORS[wi % WORD_COLORS.length];
+                  return (
+                    <motion.div
+                      key={wi}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: wi * 0.06 }}
+                      className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all"
+                      style={{
+                        background:  isFound ? col.bg : "white",
+                        borderColor: isFound ? col.border : "#E2E8F0",
+                      }}
+                    >
+                      {isFound
+                        ? <CheckCircle size={18} style={{ color: col.text }}/>
+                        : <div className="w-4.5 h-4.5 rounded-full border-2 border-slate-300"/>
+                      }
+                      <div className="flex-1">
+                        <div className="font-display text-lg" style={{ color: isFound ? col.text : C.blue }}>
+                          {isFound ? word.en : "?".repeat(word.en.length)}
+                        </div>
+                        <div className="font-body text-sm text-slate-500" dir={lang === "ar" ? "rtl" : "ltr"}>
+                          {word[lang]}
+                        </div>
+                      </div>
+                      {isFound && <Star size={16} style={{ color: col.text }}/>}
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Instructions */}
+              <div className="mt-6 rounded-3xl p-4 border-2 border-white shadow-sm" style={{ background: C.yellowSoft }}>
+                <p className="font-display text-sm mb-1" style={{ color: C.yellow }}>
+                  {getTranslation("howToPlay", lang)}
+                </p>
+                <p className="font-body text-xs text-slate-600">
+                  Click and drag across letters to select a word. Words can go in any direction: horizontal, vertical, or diagonal!
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
   );
 }
