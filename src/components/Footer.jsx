@@ -32,7 +32,124 @@ const C = {
 
 const FF = "var(--font-display,'Nunito',ui-rounded,sans-serif)";
 const FB = "var(--font-body,'Nunito',sans-serif)";
+// AÑADE ESTE COMPONENTE ANTES DEL FOOTER PRINCIPAL
+function ClimateBadge() {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <motion.a
+        href="https://stripe.com/climate"
+        target="_blank"
+        rel="noopener noreferrer"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 16px",
+          borderRadius: 40,
+          background: "linear-gradient(135deg, #0A4A3B, #1E7A5C)",
+          border: "2px solid rgba(255,255,255,0.2)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          cursor: "pointer",
+          textDecoration: "none",
+          color: "white",
+          fontFamily: "var(--font-display,'Nunito',sans-serif)",
+          fontWeight: 600,
+          fontSize: 13,
+        }}
+      >
+        {/* Icono de hoja / clima */}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <path d="M12 3v12m0 0c-1.5 0-3 .5-3 2 0 1.5 1.5 2 3 2s3-.5 3-2c0-1.5-1.5-2-3-2z" />
+          <path d="M6 8c2.5 0 4-1.5 4-3 0-1.5-1.5-3-4-3S2 3.5 2 5c0 1.5 1.5 3 4 3z" />
+          <path d="M18 8c2.5 0 4-1.5 4-3 0-1.5-1.5-3-4-3s-4 1.5-4 3c0 1.5 1.5 3 4 3z" />
+        </svg>
+        
+        <span>
+          🌱 <strong>1%</strong> for the planet
+        </span>
+        
+        {/* Logo de Stripe Climate */}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="white">
+          <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" fill="white"/>
+          <path d="M11 5.5c0 .3-.2.5-.5.5h-5c-.3 0-.5-.2-.5-.5v-1c0-.3.2-.5.5-.5h5c.3 0 .5.2.5.5v1z" fill="white"/>
+          <path d="M11 9.5c0 .3-.2.5-.5.5h-5c-.3 0-.5-.2-.5-.5v-1c0-.3.2-.5.5-.5h5c.3 0 .5.2.5.5v1z" fill="white"/>
+        </svg>
+      </motion.a>
 
+      {/* Tooltip */}
+      <AnimatePresence>
+        {showTooltip && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 5 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 8px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 280,
+              padding: "12px 16px",
+              background: "white",
+              borderRadius: 12,
+              boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              border: "2px solid #E2E8F0",
+              zIndex: 100,
+              textAlign: "center",
+            }}
+          >
+            <div style={{ 
+              width: 32, 
+              height: 32, 
+              borderRadius: "50%", 
+              background: "#0A4A3B",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 8px"
+            }}>
+              🌱
+            </div>
+            <h4 style={{ 
+              fontFamily: "var(--font-display,'Nunito',sans-serif)", 
+              fontWeight: 800, 
+              fontSize: 14,
+              color: "#0A4A3B",
+              margin: "0 0 4px"
+            }}>
+              Kiddsy contribuye al clima 🌍
+            </h4>
+            <p style={{ 
+              fontFamily: "var(--font-body,'Nunito',sans-serif)", 
+              fontSize: 12,
+              color: "#64748B",
+              margin: 0,
+              lineHeight: 1.5
+            }}>
+              Destinamos <strong>el 1% de todos los pagos</strong> a eliminar CO₂ de la atmósfera a través de Stripe Climate.
+            </p>
+            <div style={{
+              marginTop: 8,
+              paddingTop: 8,
+              borderTop: "1px solid #E2E8F0",
+              fontSize: 11,
+              color: "#94A3B8"
+            }}>
+              Verificado por Stripe ✅
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 // ── Decorative star ───────────────────────────────────────────────────────
 function FloatingStar({ style }) {
   return (
@@ -645,9 +762,20 @@ export default function Footer({ onNav, lang = "es" }) {
           <NavLink onClick={() => onNav("subscription")} color={C.yellow} icon={Heart}>Subscription</NavLink>
           <NavLink onClick={() => onNav("collaborate")} color={C.magenta} icon={null}><EmojiSvg code="1f91d" size={12} /> Collaborate</NavLink>
         </div>
+        {/* ── Climate badge ─────────────────────────────────────── */}
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: 16,
+          gap: 16,
+          flexWrap: "wrap",
+        }}>
+          <ClimateBadge />
+        </div>
 
         <Divider/>
-
+        
         {/* ── Legal links ────────────────────────────────────────────── */}
         <div style={{
           display:        "flex",
