@@ -14,6 +14,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Smartphone } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 const C = {
   blue:   "#1565C0",
@@ -126,7 +127,7 @@ export default function InstallPrompt() {
                   fontFamily: "var(--font-display,'Nunito',sans-serif)",
                   fontWeight: 900, fontSize:16, color:"#0F3460", marginBottom:2,
                 }}>
-                  Install Kiddsy! 🚀
+                  Install Kiddsy! <EmojiSvg code="1f680" size={16} />
                 </div>
                 <div style={{
                   fontFamily: "var(--font-body,'Nunito',sans-serif)",
@@ -227,7 +228,7 @@ export default function InstallPrompt() {
                   fontFamily:"var(--font-display,'Nunito',sans-serif)",
                   fontWeight:900, fontSize:15, color:"#0F3460", marginBottom:6,
                 }}>
-                  Add Kiddsy to your Home Screen 📱
+                  Add Kiddsy to your Home Screen <EmojiSvg code="1f4f1" size={16} />
                 </div>
                 {/* Step by step */}
                 {[
@@ -240,7 +241,7 @@ export default function InstallPrompt() {
                     marginBottom:6, fontSize:12, color:"#475569",
                     fontFamily:"var(--font-body,'Nunito',sans-serif)",
                   }}>
-                    <span style={{ flexShrink:0, fontSize:15 }}>{step.icon}</span>
+                    <span style={{ flexShrink:0, fontSize:15 }}><EmojiSvg code={step.icon === "⬆️" ? "2b06" : step.icon === "➕" ? "2795" : step.icon === "✅" ? "2705" : "2b06"} size={15} /></span>
                     <span style={{ lineHeight:1.45 }}>{step.text}</span>
                   </div>
                 ))}
@@ -263,7 +264,7 @@ export default function InstallPrompt() {
                 fontFamily:"var(--font-display,'Nunito',sans-serif)",
                 fontWeight:700, fontSize:13, cursor:"pointer",
               }}>
-                Got it! 👍
+                Got it! <EmojiSvg code="1f44d" size={12} />
               </button>
             </div>
           </motion.div>

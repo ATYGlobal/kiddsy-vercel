@@ -19,6 +19,7 @@
 // import logoUrl from "../assets/Kiddsy_Loop_Logo.png";
 
 import { motion } from "framer-motion";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 const C = {
   blue:    "#1565C0",
@@ -72,7 +73,7 @@ export default function KiddsyLogo({
       </div>
       {showTagline && (
         <span className={`font-body ${s.sub} text-slate-400 block mt-0.5`}>
-          Learning together ✨
+          Learning together <EmojiSvg code="2728" size={12} />
         </span>
       )}
     </div>
