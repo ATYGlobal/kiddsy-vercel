@@ -299,19 +299,27 @@ export default function Pricing({ onClose, lockedCategory = null }) {
     <AnimatePresence>
       {/* Backdrop */}
       <motion.div
-        key="backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
+        key="sheet"
+        initial={{ opacity: 0, y: 50, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 50, scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
         style={{
-          position:   "fixed",
-          inset:       0,
-          background: "rgba(15,23,42,0.55)",
-          backdropFilter: "blur(6px)",
-          zIndex:     200,
+          position: "fixed !important",
+          left: "50% !important",
+          top: "50% !important",
+          transform: "translate(-50%, -50%) !important",
+          zIndex: "999999 !important",
+          width: "min(96vw, 960px)",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          background: "linear-gradient(160deg, #F0F9FF 0%, #FFFDE7 50%, #F0FFF4 100%)",
+          borderRadius: 28,
+          boxShadow: "0 32px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.1)",
+          padding: "32px 24px 28px",
+          margin: "0 auto",  // ← AÑADE ESTO
         }}
-      />
+            />
 
       {/* Sheet */}
       <motion.div
