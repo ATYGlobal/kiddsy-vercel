@@ -19,7 +19,7 @@ import WordSearch from "./pages/WordSearch.jsx";
 import PuzzleMaster from "./pages/PuzzleMaster.jsx";
 
 // ── Componentes ────────────────────────────────────────────────────────────
-import Navbar from "./components/Navbar.jsx";
+import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import SwUpdateToast from "./components/SwUpdateToast.jsx";
 import { StoryCoverCard } from "./pages/StoryReader.jsx";
