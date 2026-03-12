@@ -12,26 +12,26 @@ import MyLibrary from "./pages/MyLibrary.jsx";
 import StoryGenerator from "./pages/StoryGenerator";
 import StoryReader from "./pages/StoryReader.jsx";
 import { AvisoLegal, Privacidad } from "./pages/LegalPages.jsx";
-import Subscription from "./pages/Subscription.jsx"; // CORREGIDO: nombre correcto
+import Subscription from "./pages/Subscription.jsx";
 import Games from "./pages/Games.jsx";
 import Education from "./pages/Education.jsx";
 import WordSearch from "./pages/WordSearch.jsx";
 import PuzzleMaster from "./pages/PuzzleMaster.jsx";
 
 // ── Componentes ────────────────────────────────────────────────────────────
-import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar.jsx";
+import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import SwUpdateToast from "./components/SwUpdateToast.jsx";
 import { StoryCoverCard } from "./pages/StoryReader.jsx";
 
 // ── Utils ──────────────────────────────────────────────────────────────────
 import {
-  LS_LANG, LS_STORIES,
+  LS_LANG,
   lsGet, lsSet,
-  getGuestId, fetchUserStories, saveStory,
+  getGuestId, fetchUserStories,
 } from "./utils/storage.js";
 
-// ── Auth stub (reemplaza con AuthContext cuando actives login) ─────────────
+// ── Auth stub ─────────────────────────────────────────────────────────────
 function useAuth() {
   return { user: null, isAuthenticated: false, loading: false, logout: () => {} };
 }
@@ -59,8 +59,6 @@ function KiddsyBgStyles() {
         100% { background-position: 0% 50%; }
       }
       .kiddsy-bg-drift { background-size: 300% 300%; animation: bgDrift 18s ease infinite; }
-      @keyframes bgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.82; } }
-      .kiddsy-bg-pulse { animation: bgPulse 8s ease-in-out infinite; }
     `}</style>
   );
 }
@@ -108,6 +106,29 @@ function StarField() {
 
 // ── LibraryView ────────────────────────────────────────────────────────────
 function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
+  // Verificación de que las funciones existen
+  console.log("LibraryView props:", { onSelectStory, onGenerate, isGuest });
+  
+  const handleGenerateClick = (e) => {
+    e.preventDefault();
+    console.log("Generate button clicked");
+    if (typeof onGenerate === 'function') {
+      onGenerate();
+    } else {
+      console.error("onGenerate no es una función");
+    }
+  };
+
+  const handleStoryClick = (story) => (e) => {
+    e.preventDefault();
+    console.log("Story clicked:", story.title);
+    if (typeof onSelectStory === 'function') {
+      onSelectStory(story);
+    } else {
+      console.error("onSelectStory no es una función");
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="text-center mb-10">
@@ -124,47 +145,15 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "10px 16px",
-            marginBottom: 18,
-            borderRadius: 14,
-            background: "rgba(255,255,255,0.72)",
-            backdropFilter: "blur(10px)",
-            border: "1.5px solid rgba(249,168,37,0.22)",
-            boxShadow: "0 2px 10px rgba(249,168,37,0.09)",
-          }}
+          className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-white/70 backdrop-blur-sm border border-yellow-200"
         >
-          <span style={{
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            color: "#B45309",
-            fontFamily: "var(--font-display,'Nunito',sans-serif)",
-            opacity: 0.75,
-            flexShrink: 0,
-          }}>
+          <span className="text-xs font-bold uppercase text-amber-700 font-display">
             Guest
           </span>
-          <div style={{
-            width: 1,
-            height: 14,
-            background: "#F9A82540",
-            flexShrink: 0
-          }}/>
-          <p style={{
-            fontFamily: "var(--font-body,'Nunito',sans-serif)",
-            fontSize: 12,
-            color: "#78350F",
-            margin: 0,
-            lineHeight: 1.4,
-            opacity: 0.82,
-          }}>
+          <div className="w-px h-3 bg-amber-300"/>
+          <p className="text-xs text-amber-800 font-body">
             Stories saved on this device only.{" "}
-            <span style={{ fontWeight: 700, color: C.orange }}>
+            <span className="font-bold text-orange-600">
               Sign in
             </span>{" "}
             to sync across devices 🌍
@@ -175,8 +164,8 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={onGenerate}
-        className="w-full mb-8 py-5 rounded-4xl text-white font-display text-xl shadow-xl border-4 border-white flex items-center justify-center gap-3"
+        onClick={handleGenerateClick}
+        className="w-full mb-8 py-5 rounded-4xl text-white font-display text-xl shadow-xl border-4 border-white flex items-center justify-center gap-3 cursor-pointer"
         style={{
           background: `linear-gradient(135deg,${C.yellow},#FF8F00)`,
           boxShadow: "0 12px 36px rgba(249,168,37,0.35)"
@@ -202,12 +191,16 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {stories.map((story, i) => (
-            <StoryCoverCard
-              key={story.id}
-              story={story}
-              index={i}
-              onClick={() => onSelectStory(story)}
-            />
+            <div 
+              key={story.id} 
+              onClick={handleStoryClick(story)}
+              className="cursor-pointer"
+            >
+              <StoryCoverCard
+                story={story}
+                index={i}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -233,7 +226,8 @@ function Collaborate() {
     { value: "other", label: "🌟 Other" },
   ];
   
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const subject = encodeURIComponent(`Kiddsy Collaboration — ${form.role}`);
     const body = encodeURIComponent(
       `Name: ${form.name}\nRole: ${form.role}\nEmail: ${form.email}\n\n${form.message}`
@@ -263,14 +257,14 @@ function Collaborate() {
             </h2>
             <button
               onClick={() => setSent(false)}
-              className="mt-5 font-display text-sm"
+              className="mt-5 font-display text-sm text-magenta-600 hover:underline cursor-pointer"
               style={{ color: C.magenta }}
             >
               Send another
             </button>
           </div>
         ) : (
-          <div className="bg-white/90 rounded-4xl p-8 shadow-xl border-4 border-white space-y-4">
+          <form onSubmit={handleSubmit} className="bg-white/90 rounded-4xl p-8 shadow-xl border-4 border-white space-y-4">
             <div>
               <label className="block font-display text-slate-600 text-sm mb-1">
                 👤 Your name
@@ -280,6 +274,7 @@ function Collaborate() {
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 placeholder="Your full name"
+                required
                 className="w-full px-5 py-3 rounded-2xl border-2 border-slate-200 font-body focus:outline-none focus:border-pink-400 bg-pink-50 placeholder-slate-300"
               />
             </div>
@@ -293,6 +288,7 @@ function Collaborate() {
                 value={form.email}
                 onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder="your@email.com"
+                required
                 className="w-full px-5 py-3 rounded-2xl border-2 border-slate-200 font-body focus:outline-none focus:border-pink-400 bg-pink-50 placeholder-slate-300"
               />
             </div>
@@ -304,9 +300,10 @@ function Collaborate() {
               <div className="grid grid-cols-2 gap-2">
                 {ROLES.map(r => (
                   <button
+                    type="button"
                     key={r.value}
                     onClick={() => setForm({ ...form, role: r.value })}
-                    className="px-3 py-2 rounded-xl font-body text-sm text-left transition-all"
+                    className="px-3 py-2 rounded-xl font-body text-sm text-left transition-all cursor-pointer"
                     style={{
                       background: form.role === r.value ? C.magenta : "#FDF2F8",
                       color: form.role === r.value ? "white" : "#4B5563",
@@ -328,6 +325,7 @@ function Collaborate() {
                 value={form.message}
                 onChange={e => setForm({ ...form, message: e.target.value })}
                 placeholder="Tell us your idea…"
+                required
                 className="w-full px-5 py-3 rounded-2xl border-2 border-slate-200 font-body focus:outline-none focus:border-pink-400 bg-pink-50 resize-none placeholder-slate-300"
               />
             </div>
@@ -335,13 +333,13 @@ function Collaborate() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
-              onClick={handleSubmit}
-              className="w-full py-4 rounded-2xl font-display text-xl text-white shadow-lg"
+              type="submit"
+              className="w-full py-4 rounded-2xl font-display text-xl text-white shadow-lg cursor-pointer"
               style={{ background: `linear-gradient(135deg,${C.magenta},#E91E8C)` }}
             >
               Send Message 🚀
             </motion.button>
-          </div>
+          </form>
         )}
       </div>
     </div>
@@ -353,7 +351,7 @@ function Collaborate() {
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
   const { user } = useAuth();
-  const [view, setView] = useState("hero");
+  const [view, setView] = useState("library"); // Cambiado a "library" para pruebas
   const [lang, setLang] = useState(() => lsGet(LS_LANG, "es"));
   const [stories, setStories] = useState([]);
   const [activeStory, setActiveStory] = useState(null);
@@ -370,9 +368,14 @@ export default function App() {
       ? "http://localhost:10000"
       : "https://kiddsy-vercel.onrender.com";
     
+    console.log("Fetching stories from:", API_URL);
+    
     fetch(`${API_URL}/api/stories`)
       .then(r => r.json())
-      .then(data => setStories(data))
+      .then(data => {
+        console.log("Stories loaded:", data);
+        setStories(data);
+      })
       .catch(err => console.error("Story fetch error:", err));
   }, []);
 
@@ -390,12 +393,14 @@ export default function App() {
   }, [user]);
 
   const handleSelectStory = (story) => {
+    console.log("handleSelectStory llamado con:", story);
     setActiveStory(story);
     setView("reader");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGeneratedStory = (story, chosenLang) => {
+    console.log("handleGeneratedStory llamado");
     setLang(chosenLang);
     setStories(prev => [story, ...prev]);
     setActiveStory(story);
@@ -404,30 +409,28 @@ export default function App() {
   };
 
   const handleNavigation = (viewId) => {
+    console.log("handleNavigation llamado con:", viewId);
     setView(viewId);
     setActiveStory(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Si estamos en hero, mostramos solo eso
-  if (view === "hero") {
-    return (
-      <HeroScreen onPlay={() => {
-        setView("library");
-        window.scrollTo({ top: 0 });
-      }}/>
-    );
-  }
+  const handleGenerateClick = () => {
+    console.log("handleGenerateClick llamado");
+    setView("generator");
+  };
 
-  // Mapeo de vistas a componentes (CORREGIDO)
+  // Mapeo de vistas a componentes
   const renderView = () => {
+    console.log("Renderizando vista:", view);
+    
     switch (view) {
       case "library":
         return (
           <LibraryView
             stories={stories}
             onSelectStory={handleSelectStory}
-            onGenerate={() => setView("generator")}
+            onGenerate={handleGenerateClick}
             isGuest={isGuest}
           />
         );
@@ -489,7 +492,7 @@ export default function App() {
           <LibraryView
             stories={stories}
             onSelectStory={handleSelectStory}
-            onGenerate={() => setView("generator")}
+            onGenerate={handleGenerateClick}
             isGuest={isGuest}
           />
         );
@@ -516,12 +519,14 @@ export default function App() {
       </div>
 
       <div className="relative z-10">
-              <Navbar 
-        currentView={view}
-        onNavigate={handleNavigation}
-        lang={lang}
-        onLangChange={setLang}
-      />
+        {/* Navbar con manejadores */}
+        <Navbar 
+          currentView={view}
+          onNavigate={handleNavigation}
+          lang={lang}
+          onLangChange={setLang}
+        />
+        
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
             <motion.div
