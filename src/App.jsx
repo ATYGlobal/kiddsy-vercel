@@ -250,6 +250,7 @@ export default function App() {
     games:           <Games/>,
     wordsearch:      <WordSearch/>,
     animals:         <PuzzleMaster/>,
+    puzzles:         <PuzzleMaster/>,  
     education:       <Education/>,
     "legal":         <AvisoLegal onNav={handleNav}/>,
     "aviso-legal":   <AvisoLegal onNav={handleNav}/>,
