@@ -516,6 +516,12 @@ export default function App() {
       </div>
 
       <div className="relative z-10">
+              <Navbar 
+        currentView={view}
+        onNavigate={handleNavigation}
+        lang={lang}
+        onLangChange={setLang}
+      />
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
             <motion.div
