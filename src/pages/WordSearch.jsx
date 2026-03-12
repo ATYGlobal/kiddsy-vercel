@@ -10,63 +10,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import CartoonTitle from "../components/CartoonTitle.jsx";
 import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils, Cat, Palette, Apple, Home, Leaf } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-// ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
-// fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
-function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 42, className = "" }) {
-  const text  = String(children);
-  // Estimate SVG width: ~0.58em per char at given font size, with padding
-  const estW  = Math.max(200, text.length * size * 0.56 + 40);
-  const estH  = size * 1.48;
-
-  return (
-    <span
-      className={className}
-      style={{ display: "inline-block", lineHeight: 1 }}
-      aria-label={text}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={estW}
-        height={estH}
-        viewBox={`0 0 ${estW} ${estH}`}
-        style={{ display: "block", maxWidth: "100%", overflow: "visible" }}
-      >
-        {/* Stroke pass — slightly thicker, drawn first so fill sits on top */}
-        <text
-          x="50%"
-          y="75%"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
-          fontWeight="800"
-          fontSize={size}
-          fill="none"
-          stroke={stroke}
-          strokeWidth="6"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          paintOrder="stroke"
-        >
-          {text}
-        </text>
-        {/* Fill pass */}
-        <text
-          x="50%"
-          y="75%"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontFamily="var(--font-display,'Nunito',ui-rounded,sans-serif)"
-          fontWeight="800"
-          fontSize={size}
-          fill={fill}
-          stroke="none"
-        >
-          {text}
-        </text>
-      </svg>
-    </span>
-  );
-}
 
 const C = {
   blue:       "#1565C0",
