@@ -476,9 +476,9 @@ export default function Pricing({ onClose, lockedCategory = null }) {
               lineHeight: 1.5,
             }}>
               All prices in EUR · Cancel anytime · Secure checkout via Stripe ·{" "}
-              <a href="mailto:legal@kiddsy.org"
+              <a href="mailto:support@kiddsy.org"
                 style={{ color: C.blue, textDecoration: "none" }}>
-                legal@kiddsy.org
+                support@kiddsy.org
               </a>
             </p>
           </motion.div>

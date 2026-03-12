@@ -23,6 +23,7 @@ import {
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 import Games from "../pages/Games.jsx";
 import { GameStickerTile } from "./KiddsyIcons.jsx";
+import { NAV_TRANSLATIONS } from "../data/navbarTranslations.js";
 
 // ── Paleta local (copia de App.jsx para evitar dependencia circular) ────────
 const C = {
@@ -210,17 +211,17 @@ export function LanguagePicker({ value = "en", onChange, fullWidth = false }) {
 // ─── NAV CONFIG ───────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 const NAV_PRIMARY = [
-  { id:"library",    label:"Stories",     icon:BookOpen, color:C.blue    },
-  { id:"mylibrary",  label:"My Library",  icon:Library,  color:C.green   },
-  { id:"games",      label:"Games",       icon:Gamepad2,   color:C.red     },
-  { id:"wordsearch", label:"Word Search", icon:Search,   color:C.cyan    },
-  { id:"puzzles",    label:"Puzzles",     icon:Puzzle,   color:C.green   },
-  { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
+  { id:"library",    labelKey:"library",     icon:BookOpen, color:C.blue    },
+  { id:"mylibrary",  labelKey:"mylibrary",   icon:Library,  color:C.green   },
+  { id:"games",      labelKey:"games",       icon:Gamepad2, color:C.red     },
+  { id:"wordsearch", labelKey:"wordsearch",  icon:Search,   color:C.cyan    },
+  { id:"puzzles",    labelKey:"puzzles",     icon:Puzzle,   color:C.green   },
+  { id:"education",  labelKey:"education",   icon:Music,    color:C.orange  },
 ];
 const NAV_SECONDARY = [
-  { id:"legal",       label:"Help & FAQ",  icon:HelpCircle, color:C.magenta },
-  { id:"subscription",      label:"Subscription",      icon:Heart,      color:C.yellow  },
-  { id:"collaborate", label:"Collaborate", icon:Users,      color:C.magenta },
+  { id:"legal",       labelKey:"legal",       icon:HelpCircle, color:C.magenta },
+  { id:"subscription",labelKey:"donate",      icon:Heart,      color:C.yellow  },
+  { id:"collaborate", labelKey:"collaborate", icon:Users,      color:C.magenta },
 ];
 const ALL_NAV = [...NAV_PRIMARY, ...NAV_SECONDARY];
 
@@ -231,7 +232,9 @@ export default function Navbar({ view, onNav, lang, onLangChange }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
-
+  const t = (key) => {
+    return NAV_TRANSLATIONS[key]?.[lang] || NAV_TRANSLATIONS[key]?.en || key;
+  };
   // Close "more" dropdown on outside click
   useEffect(() => {
     const h = e => { if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false); };
@@ -331,7 +334,7 @@ export default function Navbar({ view, onNav, lang, onLangChange }) {
                 }}
               >
                 <Icon size={14} strokeWidth={2.2}/>
-                {item.label}
+                /t{item.labelKey}
               </motion.button>
             );
           })}
@@ -386,35 +389,35 @@ export default function Navbar({ view, onNav, lang, onLangChange }) {
                     zIndex:       60,
                   }}
                 >
-                  {NAV_SECONDARY.map(item => {
-                    const Icon = item.icon;
-                    const isActive = view === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => { onNav(item.id); setMoreOpen(false); }}
-                        style={{
-                          display:    "flex",
-                          alignItems: "center",
-                          gap:        8,
-                          width:      "100%",
-                          padding:    "10px 14px",
-                          border:     "none",
-                          background: isActive ? item.color : "transparent",
-                          color:      isActive ? "white"   : "#374151",
-                          fontFamily: "var(--font-display,'Nunito',sans-serif)",
-                          fontWeight: 600,
-                          fontSize:   13,
-                          cursor:     "pointer",
-                          textAlign:  "left",
-                        }}
-                        onMouseEnter={e => { if (!isActive) e.currentTarget.style.background="#F8FAFC"; }}
-                        onMouseLeave={e => { if (!isActive) e.currentTarget.style.background="transparent"; }}
-                      >
-                        <Icon size={14}/> {item.label}
-                      </button>
-                    );
-                  })}
+                    {NAV_SECONDARY.map(item => {
+                      const Icon = item.icon;
+                      const isActive = view === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => { onNav(item.id); setMoreOpen(false); }}
+                          style={{
+                            display:    "flex",
+                            alignItems: "center",
+                            gap:        8,
+                            width:      "100%",
+                            padding:    "10px 14px",
+                            border:     "none",
+                            background: isActive ? item.color : "transparent",
+                            color:      isActive ? "white"   : "#374151",
+                            fontFamily: "var(--font-display,'Nunito',sans-serif)",
+                            fontWeight: 600,
+                            fontSize:   13,
+                            cursor:     "pointer",
+                            textAlign:  "left",
+                          }}
+                          onMouseEnter={e => { if (!isActive) e.currentTarget.style.background="#F8FAFC"; }}
+                          onMouseLeave={e => { if (!isActive) e.currentTarget.style.background="transparent"; }}
+                        >
+                          <Icon size={14}/> {t(item.labelKey)} 
+                        </button>
+                      );
+                    })}
                   {/* ── Trustpilot ── */}
                   <a
                     href="https://www.trustpilot.com/evaluate/kiddsy.vercel.app"
