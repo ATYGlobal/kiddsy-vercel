@@ -114,7 +114,7 @@ export const DEMO_STORIES = [
         fr: "« La musique est coincée dans ma gorge », coassa la grenouille. Mia joua une chanson douce et joyeuse. Elle dansa sur l'herbe verte et tendre.",
         ar: "قال الضفدع بصوت أجش: 'الموسيقى عالقة في حلقي'. عزفت ميا لحنًا ناعمًا وسعيدًا. رقصت على العشب الأخضر الناعم.",
         pt: "'A música está presa na minha garganta', coaxou o sapo. Mia tocou uma música suave e feliz. Ela dançou na grama verde e macia.",
-        de: "„Die Musik steckt in meinem Hals fest", quakte der Frosch. Mia spielte ein sanftes, fröhliches Lied. Sie tanzte auf dem weichen grünen Gras.",
+        de: "„Die Musik steckt in meinem Hals fest\", quakte der Frosch. Mia spielte ein sanftes, fröhliches Lied. Sie tanzte auf dem weichen grünen Gras.",
         it: "'La musica è bloccata nella mia gola', gracchiò la rana. Mia suonò una canzone dolce e felice. Ballò sull'erba verde e morbida.",
         zh: "'音乐卡在我的喉咙里了，'青蛙呱呱地说。米娅演奏了一首轻柔快乐的歌曲。她在柔软的绿草地上跳舞。",
         ja: "「音楽が喉に詰まっているんだ」とカエルはしわがれ声で言いました。ミアは柔らかくて幸せな歌を演奏しました。彼女は柔らかい緑の草の上で踊りました。",
