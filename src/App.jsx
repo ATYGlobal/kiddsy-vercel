@@ -271,7 +271,34 @@ export default function App() {
         <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.blue}07` }}/>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.yellow}0F` }}/>
       </div>
+        return (
+                    <div className="min-h-screen relative kiddsy-bg-drift" style={{
+                      background: "linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 25%, #FFF3E0 50%, #FFFDE7 75%, #F3E5F5 100%)",
+                    }}>
+                      <KiddsyBgStyles/>
+                      <SwUpdateToast/>
+                      <StarField/>
 
+                      <div className="fixed inset-0 pointer-events-none z-0">
+                        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.blue}07` }}/>
+                        <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.yellow}0F` }}/>
+                      </div>
+
+                      <div className="relative z-10">
+                        
+                        {/* ── AÑADE LA NAVBAR AQUÍ ── */}
+                        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
+
+                        <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
+                          <AnimatePresence mode="wait">
+                            {/* ... resto del contenido ... */}
+                          </AnimatePresence>
+                        </main>
+                        
+                        <Footer onNav={handleNav} lang={lang}/>
+                      </div>
+                    </div>
+                  );
       <div className="relative z-10">
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
@@ -303,34 +330,7 @@ export default function App() {
                 <StoryReader story={activeStory} lang={lang} onBack={() => setView("library")}/>
               </motion.div>
             ) : null}
-            return (
-            <div className="min-h-screen relative kiddsy-bg-drift" style={{
-              background: "linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 25%, #FFF3E0 50%, #FFFDE7 75%, #F3E5F5 100%)",
-            }}>
-              <KiddsyBgStyles/>
-              <SwUpdateToast/>
-              <StarField/>
-
-              <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.blue}07` }}/>
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.yellow}0F` }}/>
-              </div>
-
-              <div className="relative z-10">
-                
-                {/* ── AÑADE LA NAVBAR AQUÍ ── */}
-                <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
-
-                <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
-                  <AnimatePresence mode="wait">
-                    {/* ... resto del contenido ... */}
-                  </AnimatePresence>
-                </main>
-                
-                <Footer onNav={handleNav} lang={lang}/>
-              </div>
-            </div>
-          );
+            
           </AnimatePresence>
         </main>
         <Footer onNav={handleNav} lang={lang}/>
