@@ -169,7 +169,15 @@ function DHeader({ children }) {
     }}>{children}</div>
   );
 }
-
+function StarRow({ count = 1, size = 12, color = "#F9A825" }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+      {[...Array(count)].map((_, i) => (
+        <Star key={i} size={size} fill={color} color={color} strokeWidth={0} />
+      ))}
+    </span>
+  );
+}
 // ════════════════════════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
 // ════════════════════════════════════════════════════════════════════════════
