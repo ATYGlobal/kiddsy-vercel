@@ -268,7 +268,7 @@ export function StoryCoverCard({ story, onClick, index }) {
 // ════════════════════════════════════════════════════════════════════════════
 // StoryReader — lector página a página con flip 3D, imágenes y TTS
 // ════════════════════════════════════════════════════════════════════════════
-export default function StoryReader({ story, lang = "es", onBack }) {
+export default function StoryReader({ story, lang = "en", onBack }) {
   const [pageIdx,      setPageIdx]      = useState(0);
   const [direction,    setDirection]    = useState(1);
   const [audioBlobUrl, setAudioBlobUrl] = useState(null);

@@ -66,7 +66,7 @@ export function getLang(code) {
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── LANGUAGE PICKER ──────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-export function LanguagePicker({ value = "es", onChange, fullWidth = false }) {
+export function LanguagePicker({ value = "en", onChange, fullWidth = false }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const selected = getLang(value);
