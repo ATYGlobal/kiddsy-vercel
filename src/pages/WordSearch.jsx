@@ -239,7 +239,12 @@ const UI_STRINGS = {
     nl:"Hoe te spelen", pl:"Jak grać",        sv:"Hur man spelar",
   },
 };
-
+// ─── Función de traducción ──────────────────────────────────────────────
+function getTranslation(key, langCode) {
+  const translations = UI_STRINGS[key];
+  if (!translations) return key;
+  return translations[langCode] || translations["es"] || key;
+}
 // ─── Grid builder ──────────────────────────────────────────────────────────
 function buildGrid(words) {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
