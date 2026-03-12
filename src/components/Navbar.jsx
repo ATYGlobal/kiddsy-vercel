@@ -214,7 +214,7 @@ const NAV_PRIMARY = [
   { id:"mylibrary",  label:"My Library",  icon:Library,  color:C.green   },
   { id:"games",      label:"Games",       icon:Gamepad2,   color:C.red     },
   { id:"wordsearch", label:"Word Search", icon:Search,   color:C.cyan    },
-  { id:"Puzzles",    label:"Puzzles",     icon:Puzzle,   color:C.green   },
+  { id:"puzzles",    label:"Puzzles",     icon:Puzzle,   color:C.green   },
   { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
 ];
 const NAV_SECONDARY = [
