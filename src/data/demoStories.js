@@ -29,7 +29,7 @@ export const DEMO_STORIES = [
     pages: [
       // ── Page 1 ─────────────────────────────────────────────────────
       {
-        dalle_url: "/stories/mia/page_2.png",   // Mia_2 → silent forest
+        dalle_url: "/stories/mia/page_1.png",   // Mia_2 → silent forest
         en: "Mia lived near a forest with purple trees. She loved to hear the trees talk. It was a very magical and quiet place.",
         es: "Mia vivía cerca de un bosque con árboles morados. Le encantaba escuchar a los árboles hablar. Era un lugar muy mágico y tranquilo.",
         fr: "Mia vivait près d'une forêt aux arbres violets. Elle adorait entendre les arbres parler. C'était un endroit très magique et calme.",
@@ -109,6 +109,7 @@ export const DEMO_STORIES = [
       },
       // ── Page 5 ─────────────────────────────────────────────────────
       {
+        dalle_url: "/stories/mia/page_5.png",   
         en: "'The music is stuck in my throat,' the frog croaked. Mia played a soft, happy song. She danced on the soft green grass.",
         es: "—La música está atrapada en mi garganta —croó la rana. Mia tocó una canción suave y feliz. Bailó sobre la hierba verde y suave.",
         fr: "« La musique est coincée dans ma gorge », coassa la grenouille. Mia joua une chanson douce et joyeuse. Elle dansa sur l'herbe verte et tendre.",
@@ -128,6 +129,7 @@ export const DEMO_STORIES = [
       },
       // ── Page 6 ─────────────────────────────────────────────────────
       {
+        dalle_url: "/stories/mia/page_6.png",
         en: "The frog started to hum along. Soon, it let out a big, musical chirp. All the birds started to sing their pretty songs.",
         es: "La rana empezó a tararear. Pronto, soltó un gran chirrido musical. Todos los pájaros empezaron a cantar sus hermosas canciones.",
         fr: "La grenouille se mit à fredonner. Bientôt, elle émit un grand gazouillis musical. Tous les oiseaux se mirent à chanter leurs jolies chansons.",
@@ -147,6 +149,7 @@ export const DEMO_STORIES = [
       },
       // ── Page 7 ─────────────────────────────────────────────────────
       {
+        dalle_url: "/stories/mia/page_7.png",
         en: "The forest was full of joy again. The trees swayed and clapped. Mia felt like a brave hero in her colorful kingdom.",
         es: "El bosque se llenó de alegría otra vez. Los árboles se mecían y aplaudían. Mia se sintió como una heroína valiente en su reino colorido.",
         fr: "La forêt était à nouveau pleine de joie. Les arbres se balançaient et applaudissaient. Mia se sentait comme une héroïne courageuse dans son royaume coloré.",
@@ -166,6 +169,7 @@ export const DEMO_STORIES = [
       },
       // ── Page 8 ─────────────────────────────────────────────────────
       {
+        dalle_url: "/stories/mia/page_8.png",
         en: "Mia went home for dinner. Her heart was full of melodies. She knew her courage saved the music for everyone she loved.",
         es: "Mia fue a casa a cenar. Su corazón estaba lleno de melodías. Sabía que su valentía salvó la música para todos sus seres queridos.",
         fr: "Mia rentra chez elle pour dîner. Son cœur était plein de mélodies. Elle savait que son courage avait sauvé la musique pour tous ceux qu'elle aimait.",
