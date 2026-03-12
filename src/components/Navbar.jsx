@@ -20,6 +20,7 @@ import {
   Users, Menu, X, Library, ChevronDown,
   Search, Cat, Globe, Star,
 } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ── Paleta local (copia de App.jsx para evitar dependencia circular) ────────
 const C = {
@@ -38,22 +39,22 @@ const C = {
 // ─── LANGUAGES + getLang ──────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 export const LANGUAGES = [
-  { code:"es", name:"Español",   flag:"🇪🇸", dir:"ltr" },
-  { code:"fr", name:"Français",  flag:"🇫🇷", dir:"ltr" },
-  { code:"ar", name:"العربية",   flag:"🇸🇦", dir:"rtl" },
-  { code:"de", name:"Deutsch",   flag:"🇩🇪", dir:"ltr" },
-  { code:"it", name:"Italiano",  flag:"🇮🇹", dir:"ltr" },
-  { code:"pt", name:"Português", flag:"🇧🇷", dir:"ltr" },
-  { code:"ru", name:"Русский",   flag:"🇷🇺", dir:"ltr" },
-  { code:"zh", name:"中文(简体)", flag:"🇨🇳", dir:"ltr" },
-  { code:"ja", name:"日本語",     flag:"🇯🇵", dir:"ltr" },
-  { code:"ko", name:"한국어",     flag:"🇰🇷", dir:"ltr" },
-  { code:"bn", name:"বাংলা",    flag:"🇧🇩", dir:"ltr" },
-  { code:"hi", name:"हिंदी",    flag:"🇮🇳", dir:"ltr" },
-  { code:"nl", name:"Nederlands",flag:"🇳🇱", dir:"ltr" },
-  { code:"pl", name:"Polski",    flag:"🇵🇱", dir:"ltr" },
-  { code:"no", name:"Norsk",     flag:"🇳🇴", dir:"ltr" },
-  { code:"sv", name:"Svenska",   flag:"🇸🇪", dir:"ltr" },
+  { code:"es", name:"Español",   flag:"🇪🇸", flagCode:"1f1ea-1f1f8", dir:"ltr" },
+  { code:"fr", name:"Français",  flag:"🇫🇷", flagCode:"1f1eb-1f1f7", dir:"ltr" },
+  { code:"ar", name:"العربية",   flag:"🇸🇦", flagCode:"1f1f8-1f1e6", dir:"rtl" },
+  { code:"de", name:"Deutsch",   flag:"🇩🇪", flagCode:"1f1e9-1f1ea", dir:"ltr" },
+  { code:"it", name:"Italiano",  flag:"🇮🇹", flagCode:"1f1ee-1f1f9", dir:"ltr" },
+  { code:"pt", name:"Português", flag:"🇧🇷", flagCode:"1f1e7-1f1f7", dir:"ltr" },
+  { code:"ru", name:"Русский",   flag:"🇷🇺", flagCode:"1f1f7-1f1fa", dir:"ltr" },
+  { code:"zh", name:"中文(简体)", flag:"🇨🇳", flagCode:"1f1e8-1f1f3", dir:"ltr" },
+  { code:"ja", name:"日本語",     flag:"🇯🇵", flagCode:"1f1ef-1f1f5", dir:"ltr" },
+  { code:"ko", name:"한국어",     flag:"🇰🇷", flagCode:"1f1f0-1f1f7", dir:"ltr" },
+  { code:"bn", name:"বাংলা",    flag:"🇧🇩", flagCode:"1f1e7-1f1e9", dir:"ltr" },
+  { code:"hi", name:"हिंदी",    flag:"🇮🇳", flagCode:"1f1ee-1f1f3", dir:"ltr" },
+  { code:"nl", name:"Nederlands",flag:"🇳🇱", flagCode:"1f1f3-1f1f1", dir:"ltr" },
+  { code:"pl", name:"Polski",    flag:"🇵🇱", flagCode:"1f1f5-1f1f1", dir:"ltr" },
+  { code:"no", name:"Norsk",     flag:"🇳🇴", flagCode:"1f1f3-1f1f4", dir:"ltr" },
+  { code:"sv", name:"Svenska",   flag:"🇸🇪", flagCode:"1f1f8-1f1ea", dir:"ltr" },
 ];
 
 export function getLang(code) {
@@ -104,7 +105,9 @@ export function LanguagePicker({ value, onChange, fullWidth = false }) {
       >
         <span style={{ display:"flex", alignItems:"center", gap:6 }}>
           <Globe size={15} style={{ flexShrink:0 }}/>
-          <span style={{ fontSize:18, lineHeight:1 }}>{selected.flag}</span>
+          <span style={{ fontSize:18, lineHeight:1 }}>
+            <EmojiSvg code={selected.flagCode} size={18} />
+          </span>
           <span>{selected.name}</span>
         </span>
         <motion.span
@@ -184,7 +187,9 @@ export function LanguagePicker({ value, onChange, fullWidth = false }) {
                   onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "#F0F9FF"; }}
                   onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
                 >
-                  <span style={{ fontSize:20, lineHeight:1, flexShrink:0 }}>{lang.flag}</span>
+                  <span style={{ fontSize:20, lineHeight:1, flexShrink:0 }}>
+                    <EmojiSvg code={lang.flagCode} size={20} />
+                  </span>
                   <span style={{ flex:1 }}>{lang.name}</span>
                   {isActive && (
                     <span style={{ width:7, height:7, borderRadius:"50%", background:C.blue, flexShrink:0 }}/>

@@ -7,6 +7,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Coffee, Star, Sparkles, Users, BookOpen, Globe, Zap } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ─── Brand palette ─────────────────────────────────────────────────────────
 const C = {
@@ -71,7 +72,7 @@ function DonationTier({ tier, onSelect, isSelected }) {
           className="absolute top-3 right-3 px-3 py-1 rounded-full font-display text-xs text-white"
           style={{ background: tier.color }}
         >
-          ⭐ Popular
+          <EmojiSvg code="2b50" size={12} /> Popular
         </div>
       )}
 
@@ -81,7 +82,7 @@ function DonationTier({ tier, onSelect, isSelected }) {
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm"
             style={{ background: tier.softBg }}
           >
-            <EmojiSvg code={item.emoji} size={24}/>
+            <EmojiSvg code={tier.emojiCode} size={24}/>
           </div>
           <div>
             <div className="font-display text-3xl font-bold" style={{ color: tier.color }}>
@@ -140,10 +141,10 @@ function ImpactCard({ icon: Icon, value, label, color, bg, delay }) {
 
 // ─── Main Donation Component ───────────────────────────────────────────────
 const TIERS = [
-  { amount: 3, emoji: "☕", label: "A hot chocolate", color: C.yellow, softBg: "#FFFDE7", popular: false, description: "Warms us up during late-night coding sessions! Keeps the server running for one week.", perks: ["☕ 1 week server", "💛 Warm thanks"] },
-  { amount: 10, emoji: "📚", label: "A storybook", color: C.blue, softBg: "#E3F2FD", popular: true, description: "Helps us add 5 new bilingual stories to the library for all families to enjoy.", perks: ["📚 5 new stories", "🌟 Name in credits", "💙 Big thanks"] },
-  { amount: 25, emoji: "🌍", label: "A new language", color: C.green, softBg: "#E8F5E9", popular: false, description: "Funds the translation and testing of a new language pair, reaching more families.", perks: ["🌍 New language", "🎨 Custom story", "💚 Sponsor badge"] },
-  { amount: 50, emoji: "🚀", label: "A full feature", color: C.magenta, softBg: "#FCE4EC", popular: false, description: "Sponsors a full new feature — like audio narration or an interactive word game!", perks: ["🚀 Feature sponsor", "📧 Direct update", "❤️ Hero status"] },
+  { amount: 3, emoji: "☕", emojiCode: "2615", label: "A hot chocolate", color: C.yellow, softBg: "#FFFDE7", popular: false, description: "Warms us up during late-night coding sessions! Keeps the server running for one week.", perks: ["☕ 1 week server", "💛 Warm thanks"] },
+  { amount: 10, emoji: "📚", emojiCode: "1f4da", label: "A storybook", color: C.blue, softBg: "#E3F2FD", popular: true, description: "Helps us add 5 new bilingual stories to the library for all families to enjoy.", perks: ["📚 5 new stories", "🌟 Name in credits", "💙 Big thanks"] },
+  { amount: 25, emoji: "🌍", emojiCode: "1f30d", label: "A new language", color: C.green, softBg: "#E8F5E9", popular: false, description: "Funds the translation and testing of a new language pair, reaching more families.", perks: ["🌍 New language", "🎨 Custom story", "💚 Sponsor badge"] },
+  { amount: 50, emoji: "🚀", emojiCode: "1f680", label: "A full feature", color: C.magenta, softBg: "#FCE4EC", popular: false, description: "Sponsors a full new feature — like audio narration or an interactive word game!", perks: ["🚀 Feature sponsor", "📧 Direct update", "❤️ Hero status"] },
 ];
 
 const IMPACT_STATS = [
@@ -184,13 +185,13 @@ export default function Donation() {
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: -24 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
           <motion.div animate={{ rotate: [0, -8, 8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} className="text-7xl mb-4 inline-block">
-            ☕
+            <EmojiSvg code="2615" size={56} />
           </motion.div>
           <h1 className="font-display text-4xl md:text-5xl mb-3 font-bold" style={{ color: C.blue }}>
-            Buy us a hot chocolate!
+            Buy us a hot chocolate <EmojiSvg code="2615" size={28} />
           </h1>
           <p className="font-body text-slate-600 text-lg max-w-xl mx-auto leading-relaxed">
-            Kiddsy is free for every family, forever. But magic needs fuel! 🪄
+            Kiddsy is free for every family, forever. But magic needs fuel <EmojiSvg code="1fa84" size={18} />
             Your donation helps us add stories, languages, and games.
           </p>
         </motion.div>
@@ -227,7 +228,9 @@ export default function Donation() {
               <div className="text-white/70 font-display mb-1">Your contribution</div>
               <div className="font-display text-5xl font-bold mb-1">${finalAmount || "—"}</div>
               {selectedTier && !customAmount && (
-                <div className="font-body text-white/80 text-sm mb-4">{selectedTier.label} {selectedTier.emoji}</div>
+                <div className="font-body text-white/80 text-sm mb-4">
+                  <EmojiSvg code={selectedTier.emojiCode} size={16} /> {selectedTier.label}
+                </div>
               )}
               <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-white/80 font-body text-sm"><Shield size={16} /> Secure payment via PayPal</div>
@@ -238,7 +241,7 @@ export default function Donation() {
             <AnimatePresence mode="wait">
               {donated ? (
                 <motion.div key="thanks" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="w-full py-5 rounded-3xl font-display text-xl text-center font-bold" style={{ background: C.green, color: "white" }}>
-                  🎉 Thank you, superstar!
+                  <EmojiSvg code="1f389" size={24} /> Thank you, superstar!
                 </motion.div>
               ) : (
                 <motion.button key="donate-btn" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={handleDonate} disabled={!finalAmount || Number(finalAmount) < 1} className="w-full py-5 rounded-3xl font-display text-xl flex items-center justify-center gap-3 shadow-lg transition-all font-bold" style={{ background: (!finalAmount || Number(finalAmount) < 1) ? "#E5E7EB" : `linear-gradient(135deg, ${C.yellow} 0%, #FF8F00 100%)`, color: (!finalAmount || Number(finalAmount) < 1) ? "#9CA3AF" : "white", cursor: (!finalAmount || Number(finalAmount) < 1) ? "not-allowed" : "pointer" }}>
@@ -257,7 +260,7 @@ export default function Donation() {
           <div className="flex flex-wrap justify-center gap-3">
             {["María G.", "Ahmed K.", "Famille Dumont", "Sofia R.", "Omar A.", "The Chen Family", "Yasmin B.", "Lucas F."].map((name, i) => (
               <motion.span key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6 + i * 0.07, type: "spring" }} className="px-4 py-2 rounded-full font-body text-sm font-semibold bg-white shadow-sm border-2 border-white text-slate-600">
-                ❤️ {name}
+                <EmojiSvg code="2764" size={12} /> {name}
               </motion.span>
             ))}
           </div>

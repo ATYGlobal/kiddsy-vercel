@@ -7,6 +7,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, CheckCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ─── Logo import — replace path with your actual logo ─────────────────────
 // import logoUrl from "../assets/Kiddsy_Loop_Logo.png";
@@ -150,7 +151,7 @@ export default function Auth({ onSuccess }) {
     setLoading("");
     if (ok) {
       if (subMode === "register") {
-        setSuccessMsg("Check your email to confirm your account! ✉️");
+        setSuccessMsg(`Check your email to confirm your account! ${EmojiSvg({code:"1f4e7", size:14})}`);
       }
       // onSuccess will be called by AuthContext's onAuthStateChange listener
     }
@@ -213,7 +214,9 @@ export default function Auth({ onSuccess }) {
               <motion.div variants={itemVariants} className="font-display text-4xl mb-3">
                 <span style={{ color: C.blue }}>Kiddsy </span>
                 <span style={{ color: C.red }}>Family</span>
-                <span className="ml-1">✨</span>
+                <span className="ml-1">
+                  <EmojiSvg code="2728" size={20} />
+                </span>
               </motion.div>
               <motion.p variants={itemVariants} className="font-body text-slate-500 text-base">
                 Sign in to save stories and track your child's progress.
@@ -227,7 +230,9 @@ export default function Auth({ onSuccess }) {
                   initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                   className="mb-5 px-4 py-3 rounded-2xl font-body text-sm text-red-600 border border-red-200 bg-red-50 flex items-start gap-2"
                 >
-                  <span>⚠️</span>
+                  <span>
+                    <EmojiSvg code="26a0" size={16} />
+                  </span>
                   <span>{authError}</span>
                 </motion.div>
               )}
@@ -237,7 +242,7 @@ export default function Auth({ onSuccess }) {
                   className="mb-5 px-4 py-3 rounded-2xl font-body text-sm text-green-700 border border-green-200 bg-green-50 flex items-start gap-2"
                 >
                   <CheckCircle size={16} className="mt-0.5 flex-shrink-0" />
-                  <span>{successMsg}</span>
+                  <span dangerouslySetInnerHTML={{ __html: successMsg }} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -305,7 +310,7 @@ export default function Auth({ onSuccess }) {
                           transition={{ duration: 2, repeat: Infinity }}
                           className="text-6xl mb-4"
                         >
-                          ✉️
+                          <EmojiSvg code="1f4e9" size={48} />
                         </motion.div>
                         <h3 className="font-display text-2xl mb-2" style={{ color: C.blue }}>Check your inbox!</h3>
                         <p className="font-body text-slate-500 text-sm mb-6">
@@ -333,7 +338,7 @@ export default function Auth({ onSuccess }) {
                           className="w-full py-4 rounded-2xl font-display text-xl text-white shadow-lg disabled:opacity-50"
                           style={{ background: `linear-gradient(135deg, ${C.blue}, #42A5F5)` }}
                         >
-                          {loading === "magic" ? "Sending…" : "✨ Send Magic Link"}
+                          {loading === "magic" ? "Sending…" : <><EmojiSvg code="2728" size={18} /> Send Magic Link</>}
                         </motion.button>
                       </motion.form>
                     )}
@@ -397,7 +402,9 @@ export default function Auth({ onSuccess }) {
                     >
                       {loading === "email"
                         ? "Please wait…"
-                        : subMode === "login" ? "Sign In 🚀" : "Create Account ✨"}
+                        : subMode === "login" 
+                          ? <><EmojiSvg code="1f680" size={18} /> Sign In</>
+                          : <><EmojiSvg code="2728" size={18} /> Create Account</>}
                     </motion.button>
                   </form>
                 </motion.div>
@@ -433,7 +440,7 @@ export default function Auth({ onSuccess }) {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
           className="text-center mt-5 font-body text-slate-500 text-sm"
         >
-          🌍 Free for every family. Always.
+          <EmojiSvg code="1f30d" size={14} /> Free for every family. Always.
         </motion.p>
       </motion.div>
     </div>

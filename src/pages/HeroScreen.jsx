@@ -8,6 +8,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Rocket, BookOpen, Puzzle, Star } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 const SPRING = { type: "spring", stiffness: 280, damping: 22 };
 
@@ -527,7 +528,7 @@ export default function HeroScreen({ onPlay }) {
             boxShadow:      "0 4px 16px rgba(21,101,192,0.15)",
           }}>
             <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontSize:13, color:"#1565C0", fontWeight:700, letterSpacing:"0.04em" }}>
-              ✨ FREE · No Login Required
+              <EmojiSvg code="2728" size={12} /> FREE · No Login Required
             </span>
           </div>
           <h1 style={{
@@ -597,7 +598,7 @@ export default function HeroScreen({ onPlay }) {
               }}
             />
             <Rocket size={28} strokeWidth={2.5} style={{ filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}/>
-            Let's Play! 🚀
+            Let's Play! <EmojiSvg code="1f680" size={28} />
           </motion.button>
         </motion.div>
 

@@ -379,7 +379,7 @@ return (
             ...LANGUAGES.map(l => (
               <DRow key={l.code} active={lang === l.code} accent={C.blue}
                 onClick={() => { setLang(l.code); close(); }}>
-                <span style={{ fontSize:16, flexShrink:0 }}>{l.flag}</span>
+                <span style={{ fontSize:16, flexShrink:0 }}><EmojiSvg code={l.flagCode} size={16} /></span>
                 <span>{l.label}</span>
               </DRow>
             )),
@@ -591,7 +591,7 @@ return (
                 paddingBottom:10, borderBottom:"1.5px solid #F0FFF4", marginBottom:8,
               }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <span style={{ fontSize:22 }}>{langMeta.flag}</span>
+                  <span style={{ fontSize:22 }}><EmojiSvg code={langMeta.flagCode} size={22} /></span>
                   <div>
                     <div style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:10, color:"#94A3B8", textTransform:"uppercase", letterSpacing:"0.06em" }}>
                       {langMeta.label}
@@ -635,7 +635,7 @@ return (
               {teaserLangs.map(l => (
                 <div key={l.code} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"6px 0", borderBottom:"1px solid #F8FAFC" }}>
                   <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-                    <span style={{ fontSize:15 }}>{l.flag}</span>
+                    <span style={{ fontSize:15 }}><EmojiSvg code={l.flagCode} size={15} /></span>
                     <div>
                       <div style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:9, color:"#CBD5E1" }}>{l.label}</div>
                       <div style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:600, fontSize:13, color:"#64748B", direction:l.dir }}>
@@ -651,14 +651,13 @@ return (
               ))}
 
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:10, color:"#CBD5E1", textAlign:"center", marginTop:7 }}>
-                Switch language above to hear more translations 🌍
+                Switch language above to hear more translations <EmojiSvg code="1f30d" size={10} />
               </p>
             </div>
 
-            <EmojiSvg code="1f31f" size={14} style={{ marginRight:4, verticalAlign:"middle" }}/> Fun fact!
             <div style={{ borderRadius:18, padding:"13px 15px", background:C.yellowSoft, border:"2px solid white", boxShadow:"0 2px 10px rgba(0,0,0,0.04)" }}>
               <div style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:12, color:C.yellow, marginBottom:4 }}>
-                🌟 Fun fact!
+                <EmojiSvg code="1f31f" size={14} style={{ marginRight:4, verticalAlign:"middle" }}/> Fun fact!
               </div>
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:13, color:"#64748B", lineHeight:1.55, margin:0 }}>
                 {item.fact}
@@ -671,7 +670,7 @@ return (
                 How to play
               </p>
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:12, color:"#64748B", margin:0, lineHeight:1.5 }}>
-                Tap a tile to select it (glows 🟡), then tap another to swap.
+                Tap a tile to select it (glows <EmojiSvg code="1f7e1" size={12} />), then tap another to swap.
                 Numbers show each tile's correct position. Good luck!
               </p>
             </div>
@@ -681,4 +680,4 @@ return (
     </div>
   </div>
   ); 
-}; 
+};

@@ -52,7 +52,9 @@ function LangDropdown({value,onChange}){
           whiteSpace:"nowrap",minWidth:170,justifyContent:"space-between"}}>
         <span style={{display:"flex",alignItems:"center",gap:7}}>
           <Globe size={14} style={{flexShrink:0}}/>
-          <span style={{fontSize:20,lineHeight:1}}>{sel.flag}</span>
+          <span style={{fontSize:20,lineHeight:1}}>
+            <EmojiSvg code={sel.flagCode} size={20} />
+          </span>
           <span>{sel.label}</span>
         </span>
         <motion.span animate={{rotate:open?180:0}} transition={{duration:0.2}} style={{display:"flex"}}>
@@ -82,7 +84,9 @@ function LangDropdown({value,onChange}){
                 borderLeft:isA?`3px solid ${C.orange}`:"3px solid transparent"}}
               onMouseEnter={e=>{if(!isA)e.currentTarget.style.background="#FFF8F0";}}
               onMouseLeave={e=>{if(!isA)e.currentTarget.style.background="transparent";}}>
-              <span style={{fontSize:18,lineHeight:1,flexShrink:0}}>{l.flag}</span>
+              <span style={{fontSize:18,lineHeight:1,flexShrink:0}}>
+                <EmojiSvg code={l.flagCode} size={18} />
+              </span>
               <span style={{flex:1}}>{l.label}</span>
               {isA&&<span style={{width:6,height:6,borderRadius:"50%",background:C.orange,flexShrink:0}}/>}
             </button>;
@@ -102,7 +106,7 @@ function LetterCard({item,lang,langMeta,active,onClick}){
         style={{borderColor:active?item.color:"white",
           background:active?`${item.color}18`:"white",
           boxShadow:active?`0 8px 32px ${item.color}40`:"0 4px 16px rgba(0,0,0,0.08)"}}>
-        <div className="text-4xl mb-1"><EmojiSvg code={item.emoji} size={24}/></div>
+        <div className="text-4xl mb-1"><EmojiSvg code={item.emojiCode} size={24}/></div>
         <div className="font-display text-4xl font-black mb-1" style={{color:item.color}}>
           {item.letter}
         </div>
@@ -133,7 +137,7 @@ function NumberCard({item,lang,langMeta,active,onClick}){
           background:active?`${color}18`:"white",
           boxShadow:active?`0 8px 32px ${color}40`:"0 4px 16px rgba(0,0,0,0.08)"}}>
         <div className="font-display text-5xl font-black mb-1" style={{color}}>{item.n}</div>
-        <div className="text-3xl mb-1"><EmojiSvg code={item.emoji} size={24}/></div>
+        <div className="text-3xl mb-1"><EmojiSvg code={item.emojiCode} size={24}/></div>
         <div className="font-display text-base" style={{color}}>
           {Array.from({length:Math.max(item.n,1)},(_,i)=>"⭐").join(" ").slice(0,item.n===0?0:undefined)||"—"}
         </div>
@@ -159,7 +163,7 @@ function WordCard({item,lang,langMeta,active,onClick}){
           background:active?`${item.color}14`:"white",
           boxShadow:active?`0 8px 32px ${item.color}35`:"0 4px 16px rgba(0,0,0,0.07)"}}>
         <div className="flex items-center gap-3">
-          <span style={{fontSize:32}}><EmojiSvg code={item.emoji} size={24}/></span>
+          <span style={{fontSize:32}}><EmojiSvg code={item.emojiCode} size={24}/></span>
           <div className="flex-1 min-w-0">
             <div className="font-display text-lg font-bold" style={{color:item.color}}>{item.en}</div>
             <div className="font-body text-base text-slate-700" dir={langMeta.dir}>
@@ -190,7 +194,7 @@ function DetailPanel({item,lang,langMeta,type,onClose}){
       className="rounded-3xl border-4 p-6 shadow-2xl" style={{borderColor:color,background:"white"}}>
       {/* Main display */}
       <div className="text-center mb-5">
-        <div style={{fontSize:56,marginBottom:4}}><EmojiSvg code={item.emoji} size={24}/></div>
+        <div style={{fontSize:56,marginBottom:4}}><EmojiSvg code={item.emojiCode} size={48}/></div>
         {type==="letters"&&<div className="font-display text-6xl font-black mb-1" style={{color}}>{item.letter}</div>}
         {type==="numbers"&&<div className="font-display text-6xl font-black mb-1" style={{color}}>{item.n}</div>}
         <div className="font-display text-xl" style={{color}}>{englishText}</div>
@@ -198,7 +202,9 @@ function DetailPanel({item,lang,langMeta,type,onClose}){
 
       {/* Translation highlight */}
       <div className="rounded-2xl p-4 mb-4 text-center" style={{background:`${color}18`,border:`2px solid ${color}50`}}>
-        <div className="font-body text-xs text-slate-400 mb-1">{langMeta.flag} {langMeta.label}</div>
+        <div className="font-body text-xs text-slate-400 mb-1">
+          <EmojiSvg code={langMeta.flagCode} size={14} /> {langMeta.label}
+        </div>
         <div className="font-display text-2xl font-bold" style={{color,direction:langMeta.dir}}>{localText}</div>
       </div>
 
@@ -207,7 +213,9 @@ function DetailPanel({item,lang,langMeta,type,onClose}){
         {LANGUAGES.map(l=>(
           <div key={l.code} className="flex items-center gap-2 rounded-xl px-3 py-2"
             style={{background:l.code===lang?`${color}18`:"#F8FAFC",border:l.code===lang?`1.5px solid ${color}60`:"1.5px solid transparent"}}>
-            <span style={{fontSize:16,lineHeight:1,flexShrink:0}}>{l.flag}</span>
+            <span style={{fontSize:16,lineHeight:1,flexShrink:0}}>
+              <EmojiSvg code={l.flagCode} size={16} />
+            </span>
             <span className="font-body text-xs truncate" style={{color:l.code===lang?color:"#64748B",direction:l.dir}}>
               {item[l.code]||"—"}
             </span>
@@ -221,13 +229,13 @@ function DetailPanel({item,lang,langMeta,type,onClose}){
           onClick={()=>speak(englishText,"en-US")}
           className="flex items-center gap-2 px-4 py-2 rounded-full text-white font-display text-sm"
           style={{background:"#37474F"}}>
-          <Volume2 size={14}/> 🇬🇧 English
+          <Volume2 size={14}/> <EmojiSvg code="1f1ec-1f1e7" size={14} /> English
         </motion.button>
         <motion.button whileHover={{scale:1.05}} whileTap={{scale:0.95}}
           onClick={()=>speak(localText,langMeta.voice)}
           className="flex items-center gap-2 px-4 py-2 rounded-full text-white font-display text-sm"
           style={{background:color}}>
-          <Volume2 size={14}/> {langMeta.flag} {langMeta.label}
+          <Volume2 size={14}/> <EmojiSvg code={langMeta.flagCode} size={14} /> {langMeta.label}
         </motion.button>
       </div>
     </motion.div>
@@ -303,7 +311,7 @@ return (
         </motion.div>
 
         <p className="font-display text-slate-700 text-lg font-medium bg-white/50 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
-          Learn English with {langMeta.flag} {langMeta.label} translations! 🌍
+          Learn English with <EmojiSvg code={langMeta.flagCode} size={18} /> {langMeta.label} translations! <EmojiSvg code="1f30d" size={16} />
         </p>
       </div>
       {/* Top controls */}
@@ -331,7 +339,7 @@ return (
           </span>
           {totalLearned===totalItems&&totalItems>0&&
             <span className="font-display text-sm text-white px-3 py-1 rounded-full" style={{background:tabColor}}>
-              ⭐ All done!
+              <EmojiSvg code="2b50" size={12} /> All done!
             </span>}
         </div>
         <div className="h-3 rounded-full overflow-hidden" style={{background:`${tabColor}20`}}>
@@ -397,7 +405,7 @@ return (
         {/* Tip */}
         <div className="mt-8 rounded-3xl p-4 border-2 border-white shadow-sm text-center" style={{background:C.yellowSoft}}>
           <p className="font-body text-sm text-slate-600">
-            💡 Tap any card to see all 16 language translations + hear the pronunciation!
+            <EmojiSvg code="1f4a1" size={14} /> Tap any card to see all 16 language translations + hear the pronunciation!
           </p>
         </div>
       </div>

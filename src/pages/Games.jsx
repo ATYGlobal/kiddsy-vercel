@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Puzzle, Brain, RotateCcw } from "lucide-react";
 import { CATEGORY_TILES, GameStickerTile, StickerBadge } from "../components/KiddsyIcons.jsx";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 // ── CartoonTitle ──────────────────────────────────────────────────────────
 function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 44 }) {
   const text = String(children);
@@ -179,7 +180,7 @@ function SlidingPuzzle() {
       {/* Stats */}
       <div className="flex gap-3 mb-5 flex-wrap justify-center">
         <div className="px-5 py-2 rounded-full font-display bg-white/90 shadow-sm border border-white" style={{ color:cat.color }}>
-          🏃 {moves} moves
+          <EmojiSvg code="1f3c3" size={14} /> {moves} moves
         </div>
         {won && (
           <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={SPRING}
@@ -308,10 +309,10 @@ function MemoryMatch() {
 
       <div className="flex gap-3 mb-5 flex-wrap justify-center">
         <div className="px-5 py-2 rounded-full font-display bg-white/90 shadow-sm border border-white" style={{ color:cat.color }}>
-          🧠 {moves} pairs tried
+          <EmojiSvg code="1f9e0" size={14} /> {moves} pairs tried
         </div>
         <div className="px-5 py-2 rounded-full font-display bg-white/90 shadow-sm border border-white" style={{ color:C.green }}>
-          ✅ {matchedCount} / 8 found
+          <EmojiSvg code="2705" size={14} /> {matchedCount} / 8 found
         </div>
         {won && (
           <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={SPRING}
@@ -406,7 +407,7 @@ export default function Games() {
 
         <div className="bg-white/40 backdrop-blur-md rounded-3xl p-4 max-w-md mx-auto shadow-sm border border-white/50">
           <p className="font-display text-slate-700 text-lg font-medium">
-            Fun games that make learning English feel like playtime! 🌟
+            Fun games that make learning English feel like playtime! <EmojiSvg code="1f31f" size={16} />
           </p>
           <p className="font-display text-slate-500 text-sm mt-1 font-semibold uppercase tracking-wider">
             4 categories · 25 icon variants

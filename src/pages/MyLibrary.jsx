@@ -15,6 +15,7 @@ import {
   BookOpen, Puzzle, Trash2, Plus, RefreshCw,
   RotateCcw, ChevronLeft,
 } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 // ── CartoonTitle ──────────────────────────────────────────────────────────
 function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 44 }) {
   const text = String(children);
@@ -186,7 +187,7 @@ function StoryPuzzle({ story, onClose }) {
             <ChevronLeft size={16} /> Back
           </button>
           <div className="text-center">
-            <div className="text-2xl">{story.emoji}</div>
+            <div className="text-2xl"><EmojiSvg code={story.emojiCode || story.emoji} size={28}/></div>
             <div className="font-display text-sm" style={{ color: C.blue }}>{story.title}</div>
           </div>
           <div className="font-display text-sm text-slate-400">{moves} moves</div>
@@ -197,7 +198,7 @@ function StoryPuzzle({ story, onClose }) {
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               className="text-center mb-4 py-3 rounded-2xl font-display text-white"
               style={{ background: `linear-gradient(135deg,${C.green},#2E7D32)` }}>
-              🏆 Puzzle solved in {moves} moves!
+              <EmojiSvg code="1f3c6" size={20} /> Puzzle solved in {moves} moves!
             </motion.div>
           )}
         </AnimatePresence>
@@ -230,7 +231,9 @@ function StoryPuzzle({ story, onClose }) {
                   style={{ background: tile === null ? "transparent" : "white",
                     borderColor: tile === null ? `${C.blue}30` : C.blue,
                     boxShadow: tile !== null ? "0 3px 10px rgba(0,0,0,0.1)" : "none" }}>
-                  {tile !== null && emojiGrid[tile]}
+                  {tile !== null && (
+                    <EmojiSvg code={emojiGrid[tile]} size={28} />
+                  )}
                 </motion.button>
               ))}
             </div>
@@ -240,7 +243,11 @@ function StoryPuzzle({ story, onClose }) {
         <div className="text-center mb-4">
           <p className="font-body text-xs text-slate-400 mb-1.5">Arrange in this order:</p>
           <div className="flex gap-1 justify-center flex-wrap">
-            {emojiGrid.slice(0, TOTAL - 1).map((e, i) => <span key={i} className="text-sm">{e}</span>)}
+            {emojiGrid.slice(0, TOTAL - 1).map((e, i) => (
+              <span key={i} className="text-sm">
+                <EmojiSvg code={e} size={16} />
+              </span>
+            ))}
           </div>
         </div>
 
@@ -264,7 +271,9 @@ function StoryCard({ story, onRead, onPuzzle, onDelete, index }) {
       className="relative group rounded-3xl overflow-hidden border-4 border-white shadow-lg">
       <div className={`bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} p-5 min-h-[160px] flex flex-col`}>
         <div className="absolute left-0 inset-y-0 w-3 bg-black/10" />
-        <div className="text-5xl mb-2 drop-shadow">{story.emoji}</div>
+        <div className="text-5xl mb-2 drop-shadow">
+          <EmojiSvg code={story.emojiCode || story.emoji} size={44} />
+        </div>
         <h3 className="font-display text-white text-lg leading-tight flex-1 drop-shadow-sm">{story.title}</h3>
         <div className="flex items-center gap-1.5 text-white/70 font-body text-xs mt-2">
           <BookOpen size={11} /> {story.pages?.length ?? 0} pages
@@ -349,14 +358,14 @@ return (
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
           className="w-full mb-8 py-5 rounded-3xl font-display text-xl text-white flex items-center justify-center gap-3 border-4 border-white shadow-xl"
           style={{ background: `linear-gradient(135deg,${C.yellow},#FF8F00)` }}>
-          <Plus size={24} /> Create a New Story ✨
+          <Plus size={24} /> Create a New Story <EmojiSvg code="2728" size={20} />
         </motion.button>
 
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-16">
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="text-5xl">✨</motion.div>
+              className="text-5xl"><EmojiSvg code="2728" size={48} /></motion.div>
           </div>
         )}
 
@@ -364,7 +373,7 @@ return (
         {!loading && stories.length === 0 && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="text-center py-16 bg-white/80 rounded-3xl border-4 border-white shadow-md">
-            <div className="text-7xl mb-4">📖</div>
+            <div className="text-7xl mb-4"><EmojiSvg code="1f4d6" size={64} /></div>
             <h2 className="mb-2" style={{ lineHeight:1 }}>
               <CartoonTitle fill={C.blue} stroke="#BBDEFB" size={32}>
                 No stories yet!
@@ -376,7 +385,7 @@ return (
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={onCreateStory}
               className="px-8 py-4 rounded-2xl font-display text-lg text-white shadow-lg"
               style={{ background: `linear-gradient(135deg,${C.blue},#42A5F5)` }}>
-              Create First Story 🪄
+              Create First Story <EmojiSvg code="1fa84" size={18} />
             </motion.button>
           </motion.div>
         )}

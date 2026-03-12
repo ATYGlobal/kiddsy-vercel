@@ -8,6 +8,7 @@ import { BubbleTitle } from "../components/KiddsyFont";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils, Cat, Palette, Apple, Home, Leaf } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 // ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
 // fill: color de relleno  |  stroke: color del trazo  |  size: fontSize SVG
 function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 42, className = "" }) {

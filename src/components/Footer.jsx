@@ -12,6 +12,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Heart, Shield, Sparkles, CheckCircle, Star, BookOpen } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ── Paleta ────────────────────────────────────────────────────────────────
 const C = {
@@ -357,7 +358,7 @@ function NewsletterBlock({ lang = "es" }) {
         margin:      "0 0 6px",
         lineHeight:  1.2,
       }}>
-        ¡Únete al club de las aventuras! 🚀
+        {t(lang, "title")}
       </h3>
       <p style={{
         fontFamily:  FB,
@@ -367,8 +368,7 @@ function NewsletterBlock({ lang = "es" }) {
         lineHeight:  1.5,
         maxWidth:    420,
       }}>
-        Nuevas historias, actividades y sorpresas directamente a tu correo.
-        Solo cosas buenas — nunca spam. ✨
+        {t(lang, "subtitle")}
       </p>
 
       <AnimatePresence mode="wait">
@@ -391,10 +391,10 @@ function NewsletterBlock({ lang = "es" }) {
             <CheckCircle size={20} strokeWidth={2.5} style={{ color: C.green, flexShrink: 0 }}/>
             <div>
               <div style={{ fontFamily: FF, fontWeight: 800, fontSize: 14, color: C.green }}>
-                ¡Ya eres del club! 🎉
+                {t(lang, "successTitle")}
               </div>
               <div style={{ fontFamily: FB, fontSize: 12, color: C.slate, marginTop: 2 }}>
-                Revisa tu bandeja de entrada — y no olvides la carpeta de spam.
+                {t(lang, "successSub")}
               </div>
             </div>
           </motion.div>
@@ -425,7 +425,7 @@ function NewsletterBlock({ lang = "es" }) {
                   value={email}
                   onChange={e => { setEmail(e.target.value); setError(""); }}
                   onKeyDown={e => e.key === "Enter" && handleSubmit()}
-                  placeholder="tu@email.com — ¡te esperamos!"
+                  placeholder={t(lang, "placeholder")}
                   style={{
                     width:        "100%",
                     padding:      "12px 14px 12px 36px",
@@ -483,7 +483,7 @@ function NewsletterBlock({ lang = "es" }) {
                 ) : (
                   <Sparkles size={14}/>
                 )}
-                {loading ? "Enviando…" : "¡Apuntarme!"}
+                {loading ? t(lang, "sending") : t(lang, "cta")}
               </motion.button>
             </div>
 
@@ -515,7 +515,7 @@ function NewsletterBlock({ lang = "es" }) {
               marginTop:  9,
               marginBottom: 0,
             }}>
-              Newsletter Kiddsy Club · Puedes darte de baja en cada email con un clic ·{" "}
+              {t(lang, "finePrint")}{" "}
               <a href="mailto:hello@kiddsy.org"
                 style={{ color: C.blue, textDecoration: "none", fontWeight: 600 }}>
                 hello@kiddsy.org
@@ -625,7 +625,7 @@ export default function Footer({ onNav, lang = "es" }) {
             margin:     0,
             lineHeight: 1.5,
           }}>
-            Bilingual stories for families learning English together 🌍
+            Bilingual stories for families learning English together <EmojiSvg code="1f30d" size={14} />
           </p>
         </div>
 
@@ -640,10 +640,10 @@ export default function Footer({ onNav, lang = "es" }) {
           marginBottom:   16,
         }}>
           <NavLink onClick={() => onNav("library")}   color={C.blue}    icon={BookOpen}>Stories</NavLink>
-          <NavLink onClick={() => onNav("games")}     color="#E53935"   icon={null}>🎮 Games</NavLink>
-          <NavLink onClick={() => onNav("education")} color={C.orange}  icon={null}>📖 Learn ABC</NavLink>
+          <NavLink onClick={() => onNav("games")}     color="#E53935"   icon={null}><EmojiSvg code="1f3ae" size={12} /> Games</NavLink>
+          <NavLink onClick={() => onNav("education")} color={C.orange}  icon={null}><EmojiSvg code="1f4d6" size={12} /> Learn ABC</NavLink>
           <NavLink onClick={() => onNav("donate")}    color={C.yellow}  icon={Heart}>Support us</NavLink>
-          <NavLink onClick={() => onNav("collaborate")} color={C.magenta} icon={null}>🤝 Collaborate</NavLink>
+          <NavLink onClick={() => onNav("collaborate")} color={C.magenta} icon={null}><EmojiSvg code="1f91d" size={12} /> Collaborate</NavLink>
         </div>
 
         <Divider/>
@@ -752,7 +752,7 @@ export default function Footer({ onNav, lang = "es" }) {
           }}>
             <span>© {new Date().getFullYear()} Kiddsy</span>
             <Heart size={10} fill={C.magenta} color={C.magenta} strokeWidth={0}/>
-            <span>Free for every family · Made in France 🇫🇷</span>
+            <span>Free for every family · Made in France <EmojiSvg code="1f1eb-1f1f7" size={12} /></span>
           </p>
         </div>
 
