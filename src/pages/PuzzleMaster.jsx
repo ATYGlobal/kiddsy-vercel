@@ -3,6 +3,7 @@
  * Solo UI + estado. Datos → src/data/puzzleMasterData.js
  * Helpers → src/utils/puzzleHelpers.js
  */
+console.log("PuzzleMaster se está renderizando");
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
