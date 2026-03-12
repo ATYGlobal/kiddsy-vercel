@@ -22,17 +22,17 @@ import {
 } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 
+
 // ── Stripe imports ─────────────────────────────────────────────────────────
 // Uncomment once you install @stripe/react-stripe-js and @stripe/stripe-js:
-//
-// import { loadStripe }                             from "@stripe/stripe-js";
-// import { Elements, PaymentElement,
-//          PaymentRequestButtonElement,
-//          useStripe, useElements }                 from "@stripe/react-stripe-js";
-//
-// const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-import EmojiSvg from "../utils/EmojiSvg.jsx";
+import { loadStripe }                             from "@stripe/stripe-js";
+import { Elements, PaymentElement,
+          PaymentRequestButtonElement,
+          useStripe, useElements }                 from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
 
 // ─── Brand palette ─────────────────────────────────────────────────────────
 const C = {
