@@ -6,12 +6,20 @@
  * ✅ OpenAI TTS — voz dinámica (nova / onyx / fable / shimmer)
  * ✅ 16 idiomas: ES, FR, AR, DE, IT, PT, RU, ZH, JA, KO, BN, HI, NL, PL, NO, SV
  * ✅ Estilos de ilustración: watercolor | realistic | pencil | cartoon | vintage | fantasy
+ * ✅ Cuotas mensuales: free=3 · plus=15 · annual=15 · family=25 · lifetime=20
  * ─────────────────────────────────────────────────────────────────────────
  */
 
 import express from 'express';
 import cors    from 'cors';
 import Groq    from 'groq-sdk';
+import {
+  checkQuota,
+  incrementQuota,
+  quotaStatusHandler,
+  quotaStatsHandler,
+  PLAN_LIMITS,
+} from './usageQuota.js';
 
 const app = express();
 app.use(cors());
@@ -156,7 +164,7 @@ async function generateDallEImage(dallePrompt, stylePrompt = "") {
 // ═══════════════════════════════════════════════════════════════════════════
 // POST /api/generate-story — Groq SSE streaming + DALL·E 3 images per page
 // ═══════════════════════════════════════════════════════════════════════════
-app.post("/api/generate-story", async (req, res) => {
+app.post("/api/generate-story", checkQuota, async (req, res) => {
   const {
     childName,
     theme,
@@ -164,6 +172,8 @@ app.post("/api/generate-story", async (req, res) => {
     illustrationStyle = "watercolor",
     stylePrompt       = "watercolor illustration, soft pastel colors, gentle washes, children's book style",
     voice             = "nova",
+    guestId,          // required for quota tracking
+    planId  = "free", // "free" | "plus" | "annual" | "family" | "lifetime"
   } = req.body;
 
   if (!childName?.trim() || !theme?.trim()) {
@@ -235,7 +245,10 @@ app.post("/api/generate-story", async (req, res) => {
     }
 
     // ── Generate DALL·E 3 images (parallel, one per page) ─────────────
-    if (process.env.OPENAI_API_KEY) {
+    // Free plan → text only, no DALL·E cost
+    const isFreeUser = (req.quota?.planId ?? planId) === "free";
+
+    if (process.env.OPENAI_API_KEY && !isFreeUser) {
       console.log(`🎨 [DALL·E] Generating ${story.pages.length} images (${illustrationStyle})…`);
 
       // Keep SSE alive while images are generating
@@ -263,10 +276,19 @@ app.post("/api/generate-story", async (req, res) => {
     }
 
     // ── Enrich story metadata ──────────────────────────────────────────
-    story.id       = `gen-${Date.now()}`;
-    story.language = langCode;
-    story.style    = illustrationStyle;
-    story.voice    = voice;
+    story.id          = `gen-${Date.now()}`;
+    story.language    = langCode;
+    story.style       = illustrationStyle;
+    story.voice       = voice;
+    story.isFreeStory = isFreeUser;          // client uses this to activate browser TTS
+
+    // ── Increment quota counter AFTER successful generation ──────────
+    incrementQuota(req);
+    story.quota = {
+      used:      req.quota?.used      ?? 1,
+      limit:     req.quota?.limit     ?? PLAN_LIMITS.free,
+      remaining: Math.max(0, (req.quota?.limit ?? PLAN_LIMITS.free) - (req.quota?.used ?? 1)),
+    };
 
     console.log(`✅ [Groq] Story complete: "${story.title}" (${langName})`);
     send("complete", story);
@@ -352,6 +374,16 @@ app.post("/api/tts", async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// GET /api/quota — check remaining stories for a guest+plan
+// ═══════════════════════════════════════════════════════════════════════════
+app.get("/api/quota", quotaStatusHandler);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET /api/admin/quota-stats — usage overview (protect in production!)
+// ═══════════════════════════════════════════════════════════════════════════
+app.get("/api/admin/quota-stats", quotaStatsHandler);
+
+// ═══════════════════════════════════════════════════════════════════════════
 // GET /api/stories — demo stories (real ones come from Supabase / localStorage)
 // ═══════════════════════════════════════════════════════════════════════════
 app.get("/api/stories", (_req, res) => {
@@ -372,6 +404,7 @@ app.get("/api/health", (_req, res) => {
     languages: Object.keys(LANG_MAP).length,
     groqKey:   !!process.env.GROQ_API_KEY,
     openaiKey: !!process.env.OPENAI_API_KEY,
+    quotaLimits: PLAN_LIMITS,
   });
 });
 

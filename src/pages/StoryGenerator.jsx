@@ -14,12 +14,13 @@ import {
   RefreshCw, ArrowLeft, ChevronLeft, ChevronRight,
   Play, Loader,
 } from "lucide-react";
+
 import { getLang, LanguagePicker }   from "../components/Navbar.jsx";
 import { StoryCoverIcon }             from "../components/KiddsyIcons.jsx";
 import { StoryBg }                    from "../components/PageBg.jsx";
 import { BubbleTitle }                from "../components/KiddsyFont.jsx";
 import KiddsyTitle                    from "../components/KiddsyTitle";
-import EmojiSvg                        from "../utils/EmojiSvg.jsx";
+import useQuota, { PLAN_LABELS }      from "../hooks/useQuota.js";
 
 // ── Brand colours ─────────────────────────────────────────────────────────
 const C = {
@@ -117,7 +118,7 @@ const VOICES = [
 // ════════════════════════════════════════════════════════════════════════════
 // GeneratingLoader
 // ════════════════════════════════════════════════════════════════════════════
-function GeneratingLoader({ childName, theme, storyColor, streamText, style }) {
+function GeneratingLoader({ childName, theme, storyColor, streamText, style, isFree = false }) {
   const accent  = getStoryAccent(storyColor);
   const styleObj = STYLES.find(s => s.id === style) || STYLES[0];
   const emojis  = ["✨","📖","🌟","🪄","💫","🌈","⭐","🎨"];
@@ -147,9 +148,7 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style }) {
           style={{ left: `${p.x}%`, top: `${p.y}%` }}
           animate={{ y:[0,-30,0], opacity:[0.4,0.9,0.4], scale:[0.9,1.2,0.9] }}
           transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <EmojiSvg code={p.emoji === "✨" ? "2728" : p.emoji === "📖" ? "1f4d6" : p.emoji === "🌟" ? "1f31f" : p.emoji === "🪄" ? "1fa84" : p.emoji === "💫" ? "1f4ab" : p.emoji === "🌈" ? "1f308" : p.emoji === "⭐" ? "2b50" : p.emoji === "🎨" ? "1f3a8" : "2728"} size={24} />
-        </motion.span>
+        >{p.emoji}</motion.span>
       ))}
 
       <motion.div
@@ -170,11 +169,14 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style }) {
         {theme && `About: ${theme}`}
       </p>
 
-      {/* Style badge */}
+      {/* Style / mode badge */}
       <div className="flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-display"
         style={{ background:`${accent.primary}18`, color:accent.text }}>
-        <EmojiSvg code={styleObj.icon === "💧" ? "1f4a7" : styleObj.icon === "🖼️" ? "1f5bc" : styleObj.icon === "✏️" ? "270f" : styleObj.icon === "😊" ? "1f60a" : styleObj.icon === "🎨" ? "1f3a8" : styleObj.icon === "🌟" ? "1f31f" : "1f4a7"} size={16} /> {styleObj.label} illustrations
-        <span className="text-xs opacity-60">+ DALL·E 3</span>
+        {isFree ? (
+          <><span>📝</span> Text story · no illustrations</>
+        ) : (
+          <><span>{styleObj.icon}</span> {styleObj.label} <span className="text-xs opacity-60">+ DALL·E 3</span></>
+        )}
       </div>
 
       <AnimatePresence>
@@ -193,7 +195,7 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style }) {
         />
       </div>
       <p className="font-body text-xs mt-4 text-center" style={{ color:`${accent.text}60` }}>
-        Groq LLAMA + DALL·E 3 creating your story… <EmojiSvg code="2728" size={12} />
+        {isFree ? "Groq LLAMA writing your story…" : "Groq LLAMA + DALL·E 3 creating your story… ✨"}
       </p>
     </motion.div>
   );
@@ -226,7 +228,7 @@ function StoryCoverCard({ story, onClick, index }) {
         <div className="absolute inset-0 rounded-3xl bg-white/0 group-hover:bg-white/15 transition-all flex items-center justify-center">
           <motion.div initial={{ scale:0.8, opacity:0 }} whileHover={{ scale:1, opacity:1 }}
             className="font-display text-sm px-4 py-2 bg-white rounded-full shadow-lg"
-            style={{ color:C.blue }}>Read <EmojiSvg code="2728" size={12} /></motion.div>
+            style={{ color:C.blue }}>Read ✨</motion.div>
         </div>
       </div>
     </motion.button>
@@ -246,7 +248,8 @@ function StoryReader({ story, lang, onBack }) {
   const total    = story.pages.length;
   const accent   = getStoryAccent(story.color);
   const langMeta = getLang(lang);
-  const ttsVoice = story.voice || "nova";
+  const ttsVoice   = story.voice || "nova";
+  const isFreeStory = story.isFreeStory === true;
 
   useEffect(() => {
     const onKey = e => {
@@ -260,13 +263,33 @@ function StoryReader({ story, lang, onBack }) {
   // Reset audio when page changes
   useEffect(() => { setAudioBlobUrl(null); }, [pageIdx]);
 
+  // ── Browser SpeechSynthesis TTS (free plan) ──────────────────────────
+  const speakWithBrowser = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang  = lang === "es" ? "es-ES" : lang === "fr" ? "fr-FR"
+              : lang === "de" ? "de-DE" : lang === "pt" ? "pt-PT"
+              : lang === "it" ? "it-IT" : lang === "ar" ? "ar-SA"
+              : "en-US";
+    utt.rate  = 0.92;
+    utt.pitch = 1.05;
+    window.speechSynthesis.speak(utt);
+  };
+
   const handlePlayAudio = async () => {
+    const textToRead = [page?.en || "", page?.[lang] || ""]
+      .filter(Boolean).join("  ").slice(0, 4000);
+
+    // ── Free plan → browser TTS (no API cost) ────────────────────────
+    if (isFreeStory) {
+      speakWithBrowser(textToRead);
+      return;
+    }
+
+    // ── Premium plan → OpenAI TTS ─────────────────────────────────────
     if (audioBlobUrl) { new Audio(audioBlobUrl).play(); return; }
     setAudioLoading(true);
-    const textToRead = [
-      page?.en || "",
-      page?.[lang] || "",
-    ].filter(Boolean).join("  ").slice(0, 4000);
     try {
       const res = await fetch(`${API_URL()}/api/tts`, {
         method:  "POST",
@@ -280,6 +303,8 @@ function StoryReader({ story, lang, onBack }) {
       new Audio(url).play();
     } catch (e) {
       console.error("[TTS]", e);
+      // Fallback to browser TTS if OpenAI fails
+      speakWithBrowser(textToRead);
     } finally {
       setAudioLoading(false);
     }
@@ -322,10 +347,12 @@ function StoryReader({ story, lang, onBack }) {
           }}
         >
           {audioLoading
-            ? <><RefreshCw size={16} className="animate-spin"/> Generating audio…</>
-            : audioBlobUrl
-              ? <><Volume2 size={16}/> Play again</>
-              : <><Volume2 size={16}/> Listen <EmojiSvg code={VOICES.find(v=>v.id===ttsVoice)?.icon === "👩" ? "1f469" : VOICES.find(v=>v.id===ttsVoice)?.icon === "👨" ? "1f468" : VOICES.find(v=>v.id===ttsVoice)?.icon === "🧒" ? "1f9d2" : VOICES.find(v=>v.id===ttsVoice)?.icon === "🤖" ? "1f916" : "1f50a"} size={16} /></>
+            ? <><RefreshCw size={16} className="animate-spin"/> Loading audio…</>
+            : isFreeStory
+              ? <><Volume2 size={16}/> Listen <span style={{fontSize:10,opacity:0.7,marginLeft:4}}>Browser TTS</span></>
+              : audioBlobUrl
+                ? <><Volume2 size={16}/> Play again</>
+                : <><Volume2 size={16}/> Listen {VOICES.find(v=>v.id===ttsVoice)?.icon || "🔊"}</>
           }
         </motion.button>
       </div>
@@ -352,7 +379,7 @@ function StoryReader({ story, lang, onBack }) {
                     </div>
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-display"
                       style={{ background:accent.soft, color:accent.text }}>
-                      <EmojiSvg code={langMeta.flagCode} size={12} /> {langMeta.name}
+                      <span>{langMeta.flag}</span> {langMeta.name}
                     </div>
                   </div>
 
@@ -388,7 +415,7 @@ function StoryReader({ story, lang, onBack }) {
                       <div className="border-t-2 pt-5" style={{ borderColor:`${accent.primary}25` }}>
                         <div dir={langMeta.dir} className="flex items-start gap-3 p-4 rounded-2xl"
                           style={{ background:accent.soft }}>
-                          <EmojiSvg code={langMeta.flagCode} size={20} />
+                          <span className="text-xl flex-shrink-0">{langMeta.flag}</span>
                           <p className="font-body text-base leading-relaxed" style={{ color:accent.text }}>
                             {page[lang] || "Translation not available"}
                           </p>
@@ -425,9 +452,95 @@ function StoryReader({ story, lang, onBack }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// QuotaBadge — small pill shown in the form header
+// ════════════════════════════════════════════════════════════════════════════
+function QuotaBadge({ quota }) {
+  const pct     = quota.limit > 0 ? quota.used / quota.limit : 1;
+  const isLow   = quota.remaining <= 1 && quota.remaining > 0;
+  const isEmpty = quota.remaining === 0;
+
+  const bg    = isEmpty ? "#FEE2E2" : isLow ? "#FEF3C7" : "#E3F2FD";
+  const color = isEmpty ? "#DC2626" : isLow ? "#D97706" : C.blue;
+  const icon  = isEmpty ? "🔒" : isLow ? "⚠️" : "📖";
+
+  return (
+    <motion.div
+      initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
+      className="flex items-center justify-between rounded-2xl px-4 py-3"
+      style={{ background: bg }}
+    >
+      <div className="flex items-center gap-2">
+        <span style={{ fontSize:14 }}>{icon}</span>
+        <span className="font-display text-sm font-bold" style={{ color }}>
+          {isEmpty
+            ? `Monthly limit reached`
+            : `${quota.remaining} of ${quota.limit} stories left this month`}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        {/* Mini progress bar */}
+        <div className="w-20 h-2 rounded-full overflow-hidden" style={{ background:"rgba(0,0,0,0.08)" }}>
+          <motion.div
+            initial={{ width:0 }} animate={{ width:`${Math.min(pct*100,100)}%` }}
+            transition={{ duration:0.6, ease:"easeOut" }}
+            className="h-full rounded-full"
+            style={{ background: isEmpty ? "#DC2626" : isLow ? "#D97706" : C.blue }}
+          />
+        </div>
+        {!isEmpty && (
+          <span className="font-body text-xs" style={{ color, opacity:0.7 }}>
+            {quota.used}/{quota.limit}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// QuotaWall — full block shown when limit is hit
+// ════════════════════════════════════════════════════════════════════════════
+function QuotaWall({ quota, onUpgrade }) {
+  return (
+    <motion.div
+      initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
+      className="rounded-3xl p-6 text-center"
+      style={{ background:"#FEF2F2", border:"2px solid #FECACA" }}
+    >
+      <motion.div
+        animate={{ rotate:[0,-10,10,-10,0] }}
+        transition={{ duration:0.5, repeat:Infinity, repeatDelay:3 }}
+        className="text-4xl mb-3"
+      >🔒</motion.div>
+      <h3 className="font-display text-xl font-bold mb-1" style={{ color:"#DC2626" }}>
+        Monthly limit reached
+      </h3>
+      <p className="font-body text-sm text-slate-500 mb-2 leading-relaxed">
+        You've used all <strong>{quota.limit} stories</strong> for this month
+        ({PLAN_LABELS[quota.planId] || "Free"} plan).
+        Your stories reset on <strong>{quota.resetDate}</strong>.
+      </p>
+      <p className="font-body text-xs text-slate-400 mb-5">
+        Upgrade for more stories and unlimited access.
+      </p>
+      {onUpgrade && (
+        <motion.button
+          whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
+          onClick={onUpgrade}
+          className="px-6 py-3 rounded-2xl font-display text-sm font-bold text-white shadow-lg"
+          style={{ background:`linear-gradient(135deg,${C.blue},#42A5F5)` }}
+        >
+          ✨ See plans & upgrade
+        </motion.button>
+      )}
+    </motion.div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // StoryForm — full form with style + voice picker
 // ════════════════════════════════════════════════════════════════════════════
-async function StoryForm({ lang, onLangChange, onGenerated }) {
+function StoryForm({ lang, onLangChange, onGenerated, planId = "free", onUpgrade }) {
   const [childName,          setChildName]          = useState(() => lsGet(LS_NAME, ""));
   const [theme,              setTheme]              = useState("");
   const [customTheme,        setCustomTheme]        = useState("");
@@ -438,20 +551,21 @@ async function StoryForm({ lang, onLangChange, onGenerated }) {
   const [streamText,         setStreamText]         = useState("");
   const [selectedThemeLabel, setSelectedThemeLabel] = useState("");
   const [voicePreviewLoading,setVoicePreviewLoading]= useState(false);
+  const quota = useQuota(planId);
 
   useEffect(() => { lsSet(LS_NAME, childName); }, [childName]);
 
   const THEMES = [
-    { label:"Going to School",  value:"going to school for the first time", emojiCode:"1f3eb" },
-    { label:"Making Friends",   value:"making new friends", emojiCode:"1f308" },
-    { label:"Supermarket",      value:"shopping at the supermarket", emojiCode:"1f6d2" },
-    { label:"Taking the Bus",   value:"taking the bus", emojiCode:"1f68d" },
-    { label:"Doctor Visit",     value:"visiting the doctor", emojiCode:"1f489" },
-    { label:"Birthday Party",   value:"celebrating a birthday", emojiCode:"1f389" },
+    { label:"🏫 Going to School",  value:"going to school for the first time" },
+    { label:"🌈 Making Friends",   value:"making new friends"                  },
+    { label:"🛒 Supermarket",      value:"shopping at the supermarket"         },
+    { label:"🚌 Taking the Bus",   value:"taking the bus"                      },
+    { label:"🏥 Doctor Visit",     value:"visiting the doctor"                 },
+    { label:"🎉 Birthday Party",   value:"celebrating a birthday"              },
   ];
 
   const activeTheme  = customTheme.trim() || theme;
-  const canGenerate  = childName.trim() && activeTheme;
+  const canGenerate  = childName.trim() && activeTheme && quota.canGenerate;
   const styleObj     = STYLES.find(s => s.id === style) || STYLES[0];
   const voiceObj     = VOICES.find(v => v.id === voice) || VOICES[0];
 
@@ -474,7 +588,7 @@ async function StoryForm({ lang, onLangChange, onGenerated }) {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({
-          text: `Hi ${childName || "friend"}! I'm your storyteller. Ready for a magical adventure? <EmojiSvg code="2728" size={12} />`,
+          text: `Hi ${childName || "friend"}! I'm your storyteller. Ready for a magical adventure? ✨`,
           voice,
         }),
       });
@@ -488,94 +602,93 @@ async function StoryForm({ lang, onLangChange, onGenerated }) {
     }
   };
 
-  throw new Error("Story generation ended unexpectedly — please try again.");
-await fetch(`${API_URL()}/api/generate-story`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    childName,
-    theme: activeTheme,
-    language: lang,
-    illustrationStyle: style,
-    stylePrompt: styleObj.prompt,
-    voice,
-  }),
-});
-      console.error("Generation error:", e);
-      const friendly = (e.message?.toLowerCase().includes("fetch") || e.message?.toLowerCase().includes("network"))
-      ? "Can't reach Kiddsy AI — check your connection and try again 🌐"
-      : e.message || "Something magical went wrong — please try again! 🌟";
   const handleGenerate = async () => {
-  if (!canGenerate) return;
-  setLoading(true); setError(""); setStreamText("");
-  const userId = getGuestId();
-  try {
-    const response = await fetch(`${API_URL()}/api/generate-story`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({
-        childName,
-        theme:             activeTheme,
-        language:          lang,
-        illustrationStyle: style,
-        stylePrompt:       styleObj.prompt,
-        voice,
-      }),
-    });
+    if (!canGenerate) return;
+    setLoading(true); setError(""); setStreamText("");
+    const userId = getGuestId();
+    try {
+      const response = await fetch(`${API_URL()}/api/generate-story`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          childName,
+          theme:             activeTheme,
+          language:          lang,
+          illustrationStyle: style,
+          stylePrompt:       styleObj.prompt,
+          voice,
+          guestId:           getGuestId(),
+          planId,
+        }),
+      });
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({ error:"Generation failed" }));
-      throw new Error(errData.error || "Generation failed");
-    }
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ error:"Generation failed" }));
+        // 429 = quota exceeded (server-side check)
+        if (response.status === 429) {
+          const resetStr = errData.resetDate ? ` Resets on ${errData.resetDate}.` : "";
+          throw new Error(`QUOTA_EXCEEDED:${errData.limit ?? ""}:${resetStr}`);
+        }
+        throw new Error(errData.error || "Generation failed");
+      }
 
-    const reader  = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let buffer    = "";
-    let currentEvent = "";
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer    = "";
+      let currentEvent = "";
 
-    const parseData = line => {
-      if (!line.startsWith("data:")) return null;
-      try { return JSON.parse(line.slice(5).trim()); } catch { return null; }
-    };
+      const parseData = line => {
+        if (!line.startsWith("data:")) return null;
+        try { return JSON.parse(line.slice(5).trim()); } catch { return null; }
+      };
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream:true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream:true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith("event:")) {
-          currentEvent = trimmed.slice(6).trim();
-        } else if (trimmed.startsWith("data:")) {
-          const payload = parseData(trimmed);
-          if (!payload) continue;
-          if (currentEvent === "token" && payload.delta) {
-            setStreamText(prev => prev + payload.delta);
-          } else if (currentEvent === "complete") {
-            const storyWithMeta = { ...payload, style, voice };
-            await saveStory(storyWithMeta, userId);
-            onGenerated(storyWithMeta, lang);
-            return;
-          } else if (currentEvent === "error") {
-            throw new Error(payload.error || "Kiddsy AI had a hiccup — please try again! 🪄");
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("event:")) {
+            currentEvent = trimmed.slice(6).trim();
+          } else if (trimmed.startsWith("data:")) {
+            const payload = parseData(trimmed);
+            if (!payload) continue;
+            if (currentEvent === "token" && payload.delta) {
+              setStreamText(prev => prev + payload.delta);
+            } else if (currentEvent === "complete") {
+              const storyWithMeta = { ...payload, style, voice };
+              quota.recordGenerated();           // ← increment local counter
+              await saveStory(storyWithMeta, userId);
+              onGenerated(storyWithMeta, lang);
+              return;
+            } else if (currentEvent === "error") {
+              throw new Error(payload.error || "Kiddsy AI had a hiccup — please try again! 🪄");
+            }
           }
         }
       }
+      throw new Error("Story generation ended unexpectedly — please try again.");
+    } catch (e) {
+      console.error("Generation error:", e);
+      let friendly;
+      if (e.message?.startsWith("QUOTA_EXCEEDED:")) {
+        const parts = e.message.split(":");
+        const lim   = parts[1];
+        const reset = parts.slice(2).join(":").trim();
+        friendly = `You've used all ${lim ? lim + " stories" : "your stories"} for this month.${reset ? " " + reset : ""} Upgrade your plan for more! ✨`;
+      } else if (e.message?.toLowerCase().includes("fetch") || e.message?.toLowerCase().includes("network")) {
+        friendly = "Can't reach Kiddsy AI — check your connection and try again 🌐";
+      } else {
+        friendly = e.message || "Something magical went wrong — please try again! 🌟";
+      }
+      setError(friendly);
+      setLoading(false);
+      setStreamText("");
     }
-    throw new Error("Story generation ended unexpectedly — please try again.");
-  } catch (e) {
-    console.error("Generation error:", e);
-    const friendly = (e.message?.toLowerCase().includes("fetch") || e.message?.toLowerCase().includes("network"))
-      ? "Can't reach Kiddsy AI — check your connection and try again 🌐"
-      : e.message || "Something magical went wrong — please try again! 🌟";
-    setError(friendly);
-    setLoading(false);
-    setStreamText("");
-  }
-};
+  };
 
   if (loading) return (
     <GeneratingLoader
@@ -584,6 +697,7 @@ await fetch(`${API_URL()}/api/generate-story`, {
       storyColor={loaderColor}
       streamText={streamText}
       style={style}
+      isFree={!quota.hasIllustrations}
     />
   );
 
@@ -608,19 +722,40 @@ await fetch(`${API_URL()}/api/generate-story`, {
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="text-center pb-2">
         <motion.div animate={{ rotate:[-8,8,-8] }} transition={{ duration:2, repeat:Infinity, ease:"easeInOut" }}
-          className="text-5xl mb-3 inline-block"><EmojiSvg code="1fa84" size={44} /></motion.div>
+          className="text-5xl mb-3 inline-block">🪄</motion.div>
         <h2 style={{ lineHeight:1 }}>
           <BubbleTitle color={C.blue} size={34}>Create a Magic Story</BubbleTitle>
         </h2>
         <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full font-body text-xs font-semibold"
           style={{ background:"#FFF3E0", color:C.orange }}>
-          <EmojiSvg code="2728" size={12} /> Groq LLAMA + DALL·E 3 + OpenAI TTS
+          ✨ Groq LLAMA + DALL·E 3 + OpenAI TTS
         </div>
       </div>
 
+      {/* ── Quota badge ─────────────────────────────────────────────── */}
+      <QuotaBadge quota={quota} />
+
+      {/* ── Free plan info banner ───────────────────────────────────── */}
+      {quota.planId === "free" && (
+        <motion.div initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }}
+          className="flex items-start gap-3 rounded-2xl px-4 py-3"
+          style={{ background:"#EFF6FF", border:"2px solid #BFDBFE" }}>
+          <span style={{ fontSize:18, flexShrink:0 }}>ℹ️</span>
+          <div>
+            <div className="font-display text-sm font-bold" style={{ color:C.blue }}>
+              Free plan · Text stories only
+            </div>
+            <div className="font-body text-xs text-slate-500 mt-0.5 leading-relaxed">
+              Generated stories include <strong>text + translation</strong> but no DALL·E illustrations or AI voice.
+              Upgrade for full magic — illustrated pages + premium narration. ✨
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* ── 1. Child's name ─────────────────────────────────────────── */}
       <div style={card}>
-        <span style={sectionLabel}><EmojiSvg code="1f464" size={14} /> Child's name</span>
+        <span style={sectionLabel}>👤 Child's name</span>
         <input type="text" value={childName} onChange={e => setChildName(e.target.value)}
           placeholder="e.g. Sofia, Omar, Lucas…" maxLength={20}
           className="w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 font-body text-lg focus:outline-none focus:border-blue-400 bg-amber-50 transition-colors placeholder-slate-300"
@@ -629,7 +764,7 @@ await fetch(`${API_URL()}/api/generate-story`, {
 
       {/* ── 2. Story theme ──────────────────────────────────────────── */}
       <div style={card}>
-        <span style={sectionLabel}><EmojiSvg code="1f31f" size={14} /> Story theme</span>
+        <span style={sectionLabel}>🌟 Story theme</span>
         <div className="grid grid-cols-3 gap-2 mb-3">
           {THEMES.map(t => (
             <button key={t.value}
@@ -640,7 +775,7 @@ await fetch(`${API_URL()}/api/generate-story`, {
                 color:      theme===t.value && !customTheme ? "white" : "#4B5563",
                 border:     `2px solid ${theme===t.value && !customTheme ? C.blue : "#E2E8F0"}`,
               }}
-            ><EmojiSvg code={t.emojiCode} size={16} /> {t.label}</button>
+            >{t.label}</button>
           ))}
         </div>
         <input type="text" value={customTheme}
@@ -650,9 +785,10 @@ await fetch(`${API_URL()}/api/generate-story`, {
         />
       </div>
 
-      {/* ── 3. Illustration style ───────────────────────────────────── */}
+      {/* ── 3. Illustration style (Premium only) ───────────────────────── */}
+      {quota.hasIllustrations ? (
       <div style={card}>
-        <span style={sectionLabel}><EmojiSvg code="1f3a8" size={14} /> Illustration style
+        <span style={sectionLabel}>🎨 Illustration style
           <span className="ml-2 font-normal text-xs opacity-60">via DALL·E 3</span>
         </span>
         {/* Row 1: 4 styles */}
@@ -671,7 +807,7 @@ await fetch(`${API_URL()}/api/generate-story`, {
                   transition:"all 0.15s",
                 }}
               >
-                <EmojiSvg code={s.icon === "💧" ? "1f4a7" : s.icon === "🖼️" ? "1f5bc" : s.icon === "✏️" ? "270f" : s.icon === "😊" ? "1f60a" : s.icon === "🎨" ? "1f3a8" : s.icon === "🌟" ? "1f31f" : "1f4a7"} size={20} />
+                <span style={{ fontSize:20 }}>{s.icon}</span>
                 <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:10, color:active?C.blue:"#64748B" }}>
                   {s.label}
                 </span>
@@ -695,7 +831,7 @@ await fetch(`${API_URL()}/api/generate-story`, {
                   transition:"all 0.15s",
                 }}
               >
-                <EmojiSvg code={s.icon === "🎨" ? "1f3a8" : s.icon === "🌟" ? "1f31f" : "1f4a7"} size={20} />
+                <span style={{ fontSize:20 }}>{s.icon}</span>
                 <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:10, color:active?C.blue:"#64748B" }}>
                   {s.label}
                 </span>
@@ -706,16 +842,37 @@ await fetch(`${API_URL()}/api/generate-story`, {
         {/* Style description preview */}
         <div className="px-3 py-2.5 rounded-xl text-xs font-body flex items-start gap-2"
           style={{ background:C.blueSoft, color:C.blue }}>
-          <EmojiSvg code={styleObj.icon === "💧" ? "1f4a7" : styleObj.icon === "🖼️" ? "1f5bc" : styleObj.icon === "✏️" ? "270f" : styleObj.icon === "😊" ? "1f60a" : styleObj.icon === "🎨" ? "1f3a8" : styleObj.icon === "🌟" ? "1f31f" : "1f4a7"} size={16} />
+          <span style={{ fontSize:16, flexShrink:0 }}>{styleObj.icon}</span>
           <div>
             <strong>{styleObj.label}:</strong> {styleObj.prompt}
           </div>
         </div>
       </div>
+      ) : (
+        <div style={{...card, opacity:0.7}}>
+          <span style={sectionLabel}>🎨 Illustration style
+            <span className="ml-2 font-normal text-xs opacity-60">Premium feature</span>
+          </span>
+          <div className="flex items-center gap-3 px-3 py-3 rounded-xl"
+            style={{ background:"#F8FAFC", border:"2px dashed #E2E8F0" }}>
+            <span style={{ fontSize:28 }}>🔒</span>
+            <div>
+              <div className="font-display text-sm font-bold text-slate-500">
+                Text-only stories on Free plan
+              </div>
+              <div className="font-body text-xs text-slate-400 mt-0.5">
+                Upgrade for DALL·E 3 illustrations per page ✨
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* ── 4. Voice ────────────────────────────────────────────────── */}
+
+      {/* ── 4. Voice (Premium: OpenAI TTS · Free: browser) ──────────────── */}
+      {quota.hasVoicePicker ? (
       <div style={card}>
-        <span style={sectionLabel}><EmojiSvg code="1f50a" size={14} /> Narrator voice
+        <span style={sectionLabel}>🔊 Narrator voice
           <span className="ml-2 font-normal text-xs opacity-60">via OpenAI TTS</span>
         </span>
         <div className="grid grid-cols-4 gap-2 mb-3">
@@ -733,7 +890,7 @@ await fetch(`${API_URL()}/api/generate-story`, {
                   transition:"all 0.15s",
                 }}
               >
-                <EmojiSvg code={v.icon === "👩" ? "1f469" : v.icon === "👨" ? "1f468" : v.icon === "🧒" ? "1f9d2" : v.icon === "🤖" ? "1f916" : "1f50a"} size={20} />
+                <span style={{ fontSize:20 }}>{v.icon}</span>
                 <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:11, color:active?C.green:"#64748B" }}>
                   {v.label}
                 </span>
@@ -758,25 +915,56 @@ await fetch(`${API_URL()}/api/generate-story`, {
         >
           {voicePreviewLoading
             ? <><Loader size={14} className="animate-spin"/> Generating preview…</>
-            : <><Play size={13} fill={C.green}/> Preview voice <EmojiSvg code={voiceObj.icon === "👩" ? "1f469" : voiceObj.icon === "👨" ? "1f468" : voiceObj.icon === "🧒" ? "1f9d2" : voiceObj.icon === "🤖" ? "1f916" : "1f50a"} size={14} /></>
+            : <><Play size={13} fill={C.green}/> Preview voice {voiceObj.icon}</>
           }
         </motion.button>
       </div>
 
+      ) : (
+        <div style={{...card, opacity:0.75}}>
+          <span style={sectionLabel}>🔊 Narrator voice
+            <span className="ml-2 font-normal text-xs opacity-60">Browser TTS · Free plan</span>
+          </span>
+          <div className="flex items-center gap-3 px-3 py-3 rounded-xl"
+            style={{ background:"#F0FFF4", border:"2px solid #BBF7D0" }}>
+            <span style={{ fontSize:22 }}>🔊</span>
+            <div className="flex-1">
+              <div className="font-display text-sm font-bold" style={{ color:C.green }}>
+                Browser voice — always free
+              </div>
+              <div className="font-body text-xs text-slate-400 mt-0.5">
+                Upgrade for AI voices (OpenAI TTS) with multiple accents ✨
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── 5. Language ─────────────────────────────────────────────── */}
       <div style={card}>
-        <span style={sectionLabel}><EmojiSvg code="1f30d" size={14} /> Translation language</span>
+        <span style={sectionLabel}>🌍 Translation language</span>
         <LanguagePicker value={lang} onChange={onLangChange} fullWidth/>
         <p className="mt-2 text-xs font-body text-slate-400 text-center">
           Story will be generated in English + {getLang(lang).name}
         </p>
       </div>
 
+      {/* ── Quota wall (shown when limit reached) ─────────────────── */}
+      {!quota.canGenerate && quota.planId !== "puzzles_only" && (
+        <QuotaWall quota={quota} onUpgrade={onUpgrade} />
+      )}
+      {quota.planId === "puzzles_only" && (
+        <QuotaWall
+          quota={{ ...quota, limit: 0 }}
+          onUpgrade={onUpgrade}
+        />
+      )}
+
       {/* ── Error ───────────────────────────────────────────────────── */}
       {error && (
         <motion.div initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }}
           className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2">
-          <EmojiSvg code="26a0" size={16} /><span>{error}</span>
+          <span>⚠️</span><span>{error}</span>
         </motion.div>
       )}
 
@@ -795,15 +983,17 @@ await fetch(`${API_URL()}/api/generate-story`, {
           fontSize: 18, fontWeight: 800,
         }}
       >
-        <EmojiSvg code="1fa84" size={24} />
+        <span className="text-2xl">🪄</span>
         <KiddsyTitle className="text-xl text-white">Generate Story</KiddsyTitle>
         <span style={{ fontSize:12, opacity:0.7, fontWeight:400 }}>
-          <EmojiSvg code={styleObj.icon === "💧" ? "1f4a7" : styleObj.icon === "🖼️" ? "1f5bc" : styleObj.icon === "✏️" ? "270f" : styleObj.icon === "😊" ? "1f60a" : styleObj.icon === "🎨" ? "1f3a8" : styleObj.icon === "🌟" ? "1f31f" : "1f4a7"} size={12} /> + <EmojiSvg code={voiceObj.icon === "👩" ? "1f469" : voiceObj.icon === "👨" ? "1f468" : voiceObj.icon === "🧒" ? "1f9d2" : voiceObj.icon === "🤖" ? "1f916" : "1f50a"} size={12} />
+          {styleObj.icon} + {voiceObj.icon}
         </span>
       </motion.button>
 
       <p className="text-center font-body text-xs text-white/60 pb-4">
-        <EmojiSvg code="1f4a1" size={12} /> DALL·E 3 illustrations take a few extra seconds — the magic is worth it!
+        {quota.hasIllustrations
+          ? "💡 DALL·E 3 illustrations take a few extra seconds — the magic is worth it!"
+          : "💡 Generating text story · upgrade for illustrated pages ✨"}
       </p>
     </motion.div>
   );
@@ -818,7 +1008,7 @@ function RecentStories({ onRead }) {
   return (
     <div className="max-w-3xl mx-auto mt-10 px-1">
       <h3 className="font-display text-xl mb-4 text-center" style={{ color:"white" }}>
-        <EmojiSvg code="1f4da" size={18} /> Recently generated
+        📚 Recently generated
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {stories.map((story, i) => (
@@ -832,7 +1022,7 @@ function RecentStories({ onRead }) {
 // ════════════════════════════════════════════════════════════════════════════
 // StoryGenerator — main export
 // ════════════════════════════════════════════════════════════════════════════
-export default function StoryGenerator({ lang = "es", onLangChange, onGenerated, onBack }) {
+export default function StoryGenerator({ lang, onLangChange, onGenerated, onBack, planId = "free", onUpgrade }) {
   const [activeStory, setActiveStory] = useState(null);
 
   const handleGenerated = (story, storyLang) => {
@@ -847,7 +1037,7 @@ export default function StoryGenerator({ lang = "es", onLangChange, onGenerated,
 
         {!activeStory && (
           <div className="text-center mb-8 pt-6">
-            <BubbleTitle color="white" size={48} wobble>Story Time <EmojiSvg code="2728" size={40} /></BubbleTitle>
+            <BubbleTitle color="white" size={48} wobble>Story Time ✨</BubbleTitle>
             <p className="font-body text-white/80 mt-2 text-lg">
               Create a personalised bilingual story in seconds
             </p>
@@ -867,6 +1057,8 @@ export default function StoryGenerator({ lang = "es", onLangChange, onGenerated,
                 lang={lang}
                 onLangChange={onLangChange}
                 onGenerated={handleGenerated}
+                planId={planId || "free"}
+                onUpgrade={onUpgrade}
               />
               <RecentStories onRead={setActiveStory}/>
             </>

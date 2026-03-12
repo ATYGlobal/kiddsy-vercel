@@ -458,20 +458,38 @@ function CheckoutModal({ plan, price, billing, onClose, onSuccess }) {
 // ═══════════════════════════════════════════════════════════════════════════
 function FloatingEmojis() {
   const items = ["2b50","1f4da","1f31f","2764","2728","1f308","1f389","1f36b","1f9e9","1f680"];
+  
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex:0 }}>
-      {items.map((emoji, i) => (
-        <motion.span key={i} className="absolute text-2xl select-none"
-          style={{ left:`${8+i*9}%`, top:`${10+(i%3)*28}%` }}
-          animate={{ y:[0,-20,0], rotate:[-5,5,-5], opacity:[0.3,0.6,0.3] }}
-          transition={{ duration:3+i*0.4, repeat:Infinity, delay:i*0.3, ease:"easeInOut" }}>
-          <EmojiSvg code={emoji} size={26}/>
-        </motion.span>
-      ))}
+      {items.map((emoji, i) => {
+        // Calcula las posiciones fuera del style de motion
+        const left = `${8 + i * 9}%`;
+        const top = `${10 + (i % 3) * 28}%`;
+        
+        return (
+          <motion.span
+            key={i}
+            className="absolute text-2xl select-none"
+            style={{ left, top }}  // ← Ahora son valores fijos, no cálculos
+            animate={{
+              y: [0, -20, 0],
+              rotate: [-5, 5, -5],
+              opacity: [0.3, 0.6, 0.3]
+            }}
+            transition={{
+              duration: 3 + i * 0.4,
+              repeat: Infinity,
+              delay: i * 0.3,
+              ease: "easeInOut"
+            }}
+          >
+            <EmojiSvg code={emoji} size={26} />
+          </motion.span>
+        );
+      })}
     </div>
   );
 }
-
 // ── BillingToggle ──────────────────────────────────────────────────────────
 function BillingToggle({ billing, onChange }) {
   return (
