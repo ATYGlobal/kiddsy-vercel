@@ -16,6 +16,7 @@ import CartoonTitle from "../components/CartoonTitle.jsx";
 import SlidingPuzzle from "../components/SlidingPuzzle.jsx";  
 import MemoryMatch from "../components/MemoryMatch.jsx";     
 import EmojiSvg from "../utils/EmojiSvg.jsx";
+import { BubbleTitle } from "../components/KiddsyFont.jsx";
 
 const C = {
   blue:"#1565C0",   blueSoft:"#E3F2FD",
