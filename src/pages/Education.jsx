@@ -252,7 +252,7 @@ const TABS = [
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 export default function Education({ lang:propLang, onLangChange }){
   const [tab,setTab]         = useState("letters");
-  const [localLang,setLocalLang]=useState("es");
+  const [localLang,setLocalLang]=useState("en");
   const [active,setActive]   = useState(null);
   const [confetti,setConfetti]=useState(false);
   const [learned,setLearned] = useState({letters:new Set(),numbers:new Set(),words:new Set()});

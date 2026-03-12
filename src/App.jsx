@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wand2, Sparkles } from "lucide-react";
+import { DemoBookShelf } from "./pages/StoryReader.jsx";
 
 // ── Páginas (Asegúrate de que TODOS estén en src/pages/) ──────────────────
 import HeroScreen     from "./pages/HeroScreen";
@@ -87,6 +88,7 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
         <h2 className="font-display text-4xl mb-3" style={{ color: C.blue }}>Story Library</h2>
         <p className="font-body text-slate-500 text-lg">Pick a story or create your own! ✨</p>
       </div>
+      
       {isGuest && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", marginBottom: 20, borderRadius: 16, background: "linear-gradient(135deg,#FFF8E1,#FFF3E0)", border: "2px solid #FFE082", boxShadow: "0 2px 12px rgba(249,168,37,0.12)" }}>
@@ -99,15 +101,29 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
           </div>
         </motion.div>
       )}
+      
       <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onGenerate}
         className="w-full mb-8 py-5 rounded-4xl text-white font-display text-xl shadow-xl border-4 border-white flex items-center justify-center gap-3"
         style={{ background: `linear-gradient(135deg,${C.yellow},#FF8F00)`, boxShadow: "0 12px 36px rgba(249,168,37,0.35)" }}
       ><Wand2 size={24}/> Create a Personalized Story ✨ <Sparkles size={20}/></motion.button>
+      
+      {/* ── ESTANTE DE CUENTOS DE DEMO ── */}
+      <div className="mb-8">
+        <h3 className="font-display text-2xl mb-4 text-center" style={{ color: C.blue }}>
+          ✨ Try these magical stories ✨
+        </h3>
+        <DemoBookShelf lang={lang} onRead={story => onSelectStory(story)} />
+      </div>
+      
+      {/* ── TUS CUENTOS GUARDADOS ── */}
+      <h3 className="font-display text-2xl mb-4" style={{ color: C.blue }}>
+        📚 Your Library
+      </h3>
+      
       {stories.length === 0 ? (
         <div className="text-center py-16 text-slate-400 font-body">
           <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-5xl mb-3">📡</motion.div>
-          <p>Connecting to the story server…</p>
-          <p className="text-xs mt-1 opacity-60">Make sure the API server is running on port 10000</p>
+          <p>No stories yet. Create your first one! ✨</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -193,7 +209,7 @@ function Collaborate() {
 export default function App() {
   const { user } = useAuth();
   const [view,        setView]        = useState("hero");
-  const [lang,        setLang]        = useState(() => lsGet(LS_LANG, "es"));
+  const [lang,        setLang]        = useState(() => lsGet(LS_LANG, "en"));
   const [stories,     setStories]     = useState([]);
   const [activeStory, setActiveStory] = useState(null);
 

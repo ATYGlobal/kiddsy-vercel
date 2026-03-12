@@ -166,7 +166,7 @@ function FloatingStar({ style }) {
 const NEWSLETTER_I18N = {
   en: {
     badge:       "Kiddsy Club",
-    title:       "Join the adventure club! 🚀",
+    title:       "Join the adventure club!",
     subtitle:    "New stories, activities and surprises straight to your inbox. Good stuff only — never spam. ✨",
     placeholder: "your@email.com — we're waiting!",
     cta:         "Sign me up!",
@@ -179,7 +179,7 @@ const NEWSLETTER_I18N = {
   },
   es: {
     badge:       "Club Kiddsy",
-    title:       "¡Únete al club de las aventuras! 🚀",
+    title:       "¡Únete al club de las aventuras!",
     subtitle:    "Nuevas historias, actividades y sorpresas directamente a tu correo. Solo cosas buenas — nunca spam. ✨",
     placeholder: "tu@email.com — ¡te esperamos!",
     cta:         "¡Apuntarme!",
@@ -192,7 +192,7 @@ const NEWSLETTER_I18N = {
   },
   fr: {
     badge:       "Club Kiddsy",
-    title:       "Rejoins le club des aventures ! 🚀",
+    title:       "Rejoins le club des aventures !",
     subtitle:    "Nouvelles histoires, activités et surprises dans ta boîte mail. Que des bonnes choses — jamais de spam. ✨",
     placeholder: "ton@email.com — on t'attend !",
     cta:         "Je m'inscris !",
@@ -205,7 +205,7 @@ const NEWSLETTER_I18N = {
   },
   ar: {
     badge:       "نادي كيدزي",
-    title:       "انضم إلى نادي المغامرات! 🚀",
+    title:       "انضم إلى نادي المغامرات!",
     subtitle:    "قصص ونشاطات ومفاجآت جديدة مباشرة إلى بريدك. أشياء جيدة فقط — لا رسائل مزعجة. ✨",
     placeholder: "بريدك@email.com — في انتظارك!",
     cta:         "سجّلني!",
@@ -218,7 +218,7 @@ const NEWSLETTER_I18N = {
   },
   de: {
     badge:       "Kiddsy Club",
-    title:       "Tritt dem Abenteuer-Club bei! 🚀",
+    title:       "Tritt dem Abenteuer-Club bei!",
     subtitle:    "Neue Geschichten, Aktivitäten und Überraschungen direkt in dein Postfach. Nur Gutes — kein Spam. ✨",
     placeholder: "deine@email.com — wir warten!",
     cta:         "Ich bin dabei!",
@@ -231,7 +231,7 @@ const NEWSLETTER_I18N = {
   },
   it: {
     badge:       "Club Kiddsy",
-    title:       "Unisciti al club delle avventure! 🚀",
+    title:       "Unisciti al club delle avventure!",
     subtitle:    "Nuove storie, attività e sorprese direttamente nella tua casella. Solo cose belle — mai spam. ✨",
     placeholder: "la@tuaemail.com — ti aspettiamo!",
     cta:         "Iscrivimi!",
@@ -244,7 +244,7 @@ const NEWSLETTER_I18N = {
   },
   pt: {
     badge:       "Clube Kiddsy",
-    title:       "Entra no clube das aventuras! 🚀",
+    title:       "Entra no clube das aventuras!",
     subtitle:    "Novas histórias, atividades e surpresas direto no teu email. Só coisas boas — nunca spam. ✨",
     placeholder: "teu@email.com — estamos à espera!",
     cta:         "Quero entrar!",
@@ -257,7 +257,7 @@ const NEWSLETTER_I18N = {
   },
   ru: {
     badge:       "Клуб Kiddsy",
-    title:       "Вступай в клуб приключений! 🚀",
+    title:       "Вступай в клуб приключений!",
     subtitle:    "Новые истории, занятия и сюрпризы прямо на твою почту. Только хорошее — никакого спама. ✨",
     placeholder: "твой@email.com — ждём тебя!",
     cta:         "Записаться!",
@@ -270,7 +270,7 @@ const NEWSLETTER_I18N = {
   },
   zh: {
     badge:       "Kiddsy 俱乐部",
-    title:       "加入冒险俱乐部！🚀",
+    title:       "加入冒险俱乐部",
     subtitle:    "全新故事、活动和惊喜直接发到你的邮箱。只有好内容——从不发垃圾邮件。✨",
     placeholder: "你的@email.com — 我们等你！",
     cta:         "立即加入！",
@@ -283,7 +283,7 @@ const NEWSLETTER_I18N = {
   },
   ja: {
     badge:       "Kiddsyクラブ",
-    title:       "冒険クラブに参加しよう！🚀",
+    title:       "冒険クラブに参加しよう！",
     subtitle:    "新しいお話・アクティビティ・サプライズをメールでお届け。良いものだけ——スパムなし。✨",
     placeholder: "あなたの@email.com — お待ちしています！",
     cta:         "参加する！",
@@ -296,7 +296,7 @@ const NEWSLETTER_I18N = {
   },
   ko: {
     badge:       "Kiddsy 클럽",
-    title:       "모험 클럽에 가입하세요! 🚀",
+    title:       "모험 클럽에 가입하세요! ",
     subtitle:    "새로운 이야기, 활동, 깜짝 선물이 메일함으로 직접 배달됩니다. 좋은 것만——스팸 없음. ✨",
     placeholder: "당신의@email.com — 기다리고 있어요!",
     cta:         "가입하기!",
@@ -309,7 +309,7 @@ const NEWSLETTER_I18N = {
   },
   bn: {
     badge:       "Kiddsy ক্লাব",
-    title:       "অ্যাডভেঞ্চার ক্লাবে যোগ দাও! 🚀",
+    title:       "অ্যাডভেঞ্চার ক্লাবে যোগ দাও! ",
     subtitle:    "নতুন গল্প, কার্যক্রম ও চমক সরাসরি তোমার ইনবক্সে। শুধু ভালো জিনিস — কখনো স্প্যাম নয়। ✨",
     placeholder: "তোমার@email.com — অপেক্ষায় আছি!",
     cta:         "যোগ দাও!",
@@ -322,7 +322,7 @@ const NEWSLETTER_I18N = {
   },
   hi: {
     badge:       "Kiddsy क्लब",
-    title:       "एडवेंचर क्लब में शामिल हों! 🚀",
+    title:       "एडवेंचर क्लब में शामिल हों! ",
     subtitle:    "नई कहानियाँ, गतिविधियाँ और सरप्राइज़ सीधे आपके इनबॉक्स में। सिर्फ़ अच्छी चीज़ें — कभी स्पैम नहीं। ✨",
     placeholder: "आपका@email.com — आपका इंतज़ार है!",
     cta:         "जुड़ें!",
@@ -335,7 +335,7 @@ const NEWSLETTER_I18N = {
   },
   nl: {
     badge:       "Kiddsy Club",
-    title:       "Word lid van de avonturenclub! 🚀",
+    title:       "Word lid van de avonturenclub! ",
     subtitle:    "Nieuwe verhalen, activiteiten en verrassingen direct in je inbox. Alleen goede dingen — nooit spam. ✨",
     placeholder: "jouw@email.com — we wachten op je!",
     cta:         "Aanmelden!",
@@ -348,7 +348,7 @@ const NEWSLETTER_I18N = {
   },
   pl: {
     badge:       "Klub Kiddsy",
-    title:       "Dołącz do klubu przygód! 🚀",
+    title:       "Dołącz do klubu przygód! ",
     subtitle:    "Nowe historyjki, aktywności i niespodzianki prosto do Twojej skrzynki. Tylko dobre rzeczy — zero spamu. ✨",
     placeholder: "twój@email.com — czekamy na Ciebie!",
     cta:         "Zapisuję się!",
@@ -361,7 +361,7 @@ const NEWSLETTER_I18N = {
   },
   no: {
     badge:       "Kiddsy-klubben",
-    title:       "Bli med i eventyrklubben! 🚀",
+    title:       "Bli med i eventyrklubben! ",
     subtitle:    "Nye historier, aktiviteter og overraskelser rett i innboksen din. Bare gode ting — aldri spam. ✨",
     placeholder: "din@email.com — vi venter på deg!",
     cta:         "Meld meg på!",
@@ -374,7 +374,7 @@ const NEWSLETTER_I18N = {
   },
   sv: {
     badge:       "Kiddsy-klubben",
-    title:       "Gå med i äventyrsklubb! 🚀",
+    title:       "Gå med i äventyrsklubb! ",
     subtitle:    "Nya berättelser, aktiviteter och överraskningar direkt till din inkorg. Bara bra saker — aldrig skräppost. ✨",
     placeholder: "din@email.com — vi väntar!",
     cta:         "Anmäl mig!",
@@ -391,7 +391,7 @@ function t(lang, key) {
   return (NEWSLETTER_I18N[lang] ?? NEWSLETTER_I18N["en"])[key];
 }
 // ── NewsletterBlock completo (listo para copiar y pegar) ───────────────────
-function NewsletterBlock({ lang = "es" }) {
+function NewsletterBlock({ lang = "en" }) {
   const [email,   setEmail]   = useState("");
   const [success, setSuccess] = useState(false);
   const [error,   setError]   = useState("");
@@ -890,7 +890,6 @@ export default function Footer({ onNav, lang = "es" }) {
           }}>
             <span>© {new Date().getFullYear()} Kiddsy</span>
             <Heart size={10} fill={C.magenta} color={C.magenta} strokeWidth={0}/>
-            <span>Free for every family · Made in France <EmojiSvg code="1f1eb-1f1f7" size={12} /></span>
           </p>
         </div>
 

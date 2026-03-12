@@ -319,7 +319,7 @@ function Confetti({ active }) {
 // ─── Main WordSearch component ─────────────────────────────────────────────
 export default function WordSearch() {
   const [packIdx,   setPackIdx]   = useState(0);
-  const [lang,      setLang]      = useState("es");
+  const [lang,      setLang]      = useState("en");
   const [gameData,  setGameData]  = useState(null);
   const [selecting, setSelecting] = useState(false);
   const [selection, setSelection] = useState([]);
@@ -429,38 +429,53 @@ export default function WordSearch() {
           </p>
         </div>
 
-        {/* Controls */}
-        <div className="flex flex-wrap justify-center gap-3 px-4 mb-6">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {PACKS.map((p, i) => {
-              const PackIcon = p.icon;
-              return (
-                <button key={i} onClick={() => setPackIdx(i)}
-                  className="px-4 py-2 rounded-full font-display text-sm border-2 transition-all"
-                  style={{
-                    background: packIdx === i ? C.blue : "white",
-                    color:      packIdx === i ? "white" : "#6B7280",
-                    borderColor:packIdx === i ? C.blue : "#E2E8F0",
-                    display: "flex", alignItems: "center", gap: 6,
-                  }}
-                >
-                  <PackIcon size={13} strokeWidth={2}/> {p.name}
-                </button>
-              );
-            })}
+        {/* Controls — dropdowns for category + language */}
+        <div className="flex justify-center gap-3 px-4 mb-6">
+
+          {/* Category dropdown */}
+          <div className="relative">
+            <select
+              value={packIdx}
+              onChange={e => setPackIdx(Number(e.target.value))}
+              className="appearance-none font-display text-sm font-bold pl-4 pr-9 py-2.5 rounded-2xl border-2 cursor-pointer outline-none"
+              style={{
+                background:  "white",
+                borderColor: C.blue,
+                color:       C.blue,
+                boxShadow:   `0 4px 14px ${C.blue}22`,
+              }}
+            >
+              {PACKS.map((p, i) => (
+                <option key={i} value={i}>{p.name}</option>
+              ))}
+            </select>
+            {/* chevron */}
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              style={{ color: C.blue, fontSize: 10 }}>▼</span>
           </div>
 
-          <div className="flex gap-1 bg-white/80 rounded-full p-1 shadow-sm">
-            {Object.entries(LANG_LABELS).map(([code, label]) => (
-              <button key={code} onClick={() => setLang(code)}
-                className="px-3 py-1.5 rounded-full font-display text-xs transition-all"
-                style={{
-                  background: lang === code ? C.green : "transparent",
-                  color:      lang === code ? "white" : "#6B7280",
-                }}
-              >{label}</button>
-            ))}
+          {/* Language dropdown */}
+          <div className="relative">
+            <select
+              value={lang}
+              onChange={e => setLang(e.target.value)}
+              className="appearance-none font-display text-sm font-bold pl-4 pr-9 py-2.5 rounded-2xl border-2 cursor-pointer outline-none"
+              style={{
+                background:  "white",
+                borderColor: C.green,
+                color:       C.green,
+                boxShadow:   `0 4px 14px ${C.green}22`,
+              }}
+            >
+              {Object.entries(LANG_LABELS).map(([code, label]) => (
+                <option key={code} value={code}>{label}</option>
+              ))}
+            </select>
+            {/* chevron */}
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              style={{ color: C.green, fontSize: 10 }}>▼</span>
           </div>
+
         </div>
 
         <div className="max-w-4xl mx-auto px-4 pb-20">
@@ -518,38 +533,40 @@ export default function WordSearch() {
 
             {/* Word list */}
             <div>
-              <h3 className="font-display text-xl mb-4" style={{ color: C.blue }}>
-                {getTranslation("findWords", lang)} ({found.length}/{pack.words.length})
+              <h3 className="font-display text-sm font-bold mb-2 flex items-center gap-1.5" style={{ color: C.blue }}>
+                <Search size={13}/> {getTranslation("findWords", lang)} <span className="text-xs font-normal opacity-70">({found.length}/{pack.words.length})</span>
               </h3>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {gameData && gameData.placed.map(({ word }, wi) => {
                   const isFound = found.includes(wi);
                   const col = WORD_COLORS[wi % WORD_COLORS.length];
                   return (
                     <motion.div
                       key={wi}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: wi * 0.06 }}
-                      className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: wi * 0.04 }}
+                      className="flex items-center gap-2 px-2.5 py-2 rounded-xl border-2 transition-all"
                       style={{
                         background:  isFound ? col.bg : "white",
                         borderColor: isFound ? col.border : "#E2E8F0",
                       }}
                     >
                       {isFound
-                        ? <CheckCircle size={18} style={{ color: col.text }}/>
-                        : <div className="w-4.5 h-4.5 rounded-full border-2 border-slate-300"/>
+                        ? <CheckCircle size={13} style={{ color: col.text, flexShrink: 0 }}/>
+                        : <div className="w-3 h-3 rounded-full border-2 border-slate-300 flex-shrink-0"/>
                       }
-                      <div className="flex-1">
-                        <div className="font-display text-lg" style={{ color: isFound ? col.text : C.blue }}>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display text-sm leading-tight truncate"
+                          style={{ color: isFound ? col.text : C.blue }}>
                           {isFound ? word.en : "?".repeat(word.en.length)}
                         </div>
-                        <div className="font-body text-sm text-slate-500" dir={lang === "ar" ? "rtl" : "ltr"}>
+                        <div className="font-body text-xs text-slate-400 leading-tight truncate"
+                          dir={lang === "ar" ? "rtl" : "ltr"}>
                           {word[lang]}
                         </div>
                       </div>
-                      {isFound && <Star size={16} style={{ color: col.text }}/>}
+                      {isFound && <Star size={11} style={{ color: col.text, flexShrink: 0 }}/>}
                     </motion.div>
                   );
                 })}

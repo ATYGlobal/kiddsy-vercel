@@ -194,7 +194,7 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const [dragOver,       setDragOver]       = useState(null);
   const [won,            setWon]            = useState(false);
   const [confetti,       setConfetti]       = useState(false);
-  const [localLang,      setLocalLang]      = useState("es");
+  const [localLang,      setLocalLang]      = useState("en");
   const [moves,          setMoves]          = useState(0);
   const [imgLoaded,      setImgLoaded]      = useState(false);
 
