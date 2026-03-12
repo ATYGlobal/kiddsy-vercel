@@ -6,6 +6,7 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 import React, { useState } from "react";
+import Portal from "./Portal.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Check, Lock, Sparkles, Zap, Heart,
@@ -297,154 +298,46 @@ function PlanCard({ plan, index, onClose }) {
 export default function Pricing({ onClose, lockedCategory = null }) {
   return (
     <AnimatePresence>
-      {/* Backdrop */}
-      <motion.div
-        key="sheet"
-        initial={{ opacity: 0, y: 50, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 50, scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 300, damping: 28 }}
-        style={{
-          position: "fixed !important",
-          left: "50% !important",
-          top: "50% !important",
-          transform: "translate(-50%, -50%) !important",
-          zIndex: "999999 !important",
-          width: "min(96vw, 960px)",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          background: "linear-gradient(160deg, #F0F9FF 0%, #FFFDE7 50%, #F0FFF4 100%)",
-          borderRadius: 28,
-          boxShadow: "0 32px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.1)",
-          padding: "32px 24px 28px",
-          margin: "0 auto",  // ← AÑADE ESTO
-        }}
-            />
-
-      {/* Sheet */}
-      <motion.div
-        key="sheet"
-        initial={{ opacity: 0, y: 48, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0,  scale: 1    }}
-        exit={{    opacity: 0, y: 48, scale: 0.97 }}
-        transition={{ type: "spring", stiffness: 300, damping: 28 }}
-        style={{
-          position:   "fixed",
-          left:       "50%",
-          top:        "50%",
-          transform:  "translate(-50%, -50%)",
-          zIndex:     201,
-          width:      "min(96vw, 960px)",
-          maxHeight:  "92vh",
-          overflowY:  "auto",
-          background: "linear-gradient(160deg, #F0F9FF 0%, #FFFDE7 50%, #F0FFF4 100%)",
-          borderRadius: 28,
-          boxShadow:  "0 32px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.1)",
-          padding:    "32px 24px 28px",
-        }}
-      >
-        {/* Close */}
-        <button
+      <Portal>  {/* ← ENVUELVE TODO CON PORTAL */}
+        <motion.div
+          key="backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           onClick={onClose}
           style={{
-            position:   "absolute",
-            top:        16,
-            right:      16,
-            width:      36,
-            height:     36,
-            borderRadius: 10,
-            border:     "2px solid #E2E8F0",
-            background: "white",
-            cursor:     "pointer",
-            display:    "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color:      "#64748B",
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15,23,42,0.75)",
+            backdropFilter: "blur(8px)",
+            zIndex: 200,
+          }}
+        />
+
+        <motion.div
+          key="sheet"
+          initial={{ opacity: 0, y: 50, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 50, scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 300, damping: 28 }}
+          style={{
+            position: "fixed",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 201,
+            width: "min(96vw, 960px)",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            background: "linear-gradient(160deg, #F0F9FF 0%, #FFFDE7 50%, #F0FFF4 100%)",
+            borderRadius: 28,
+            boxShadow: "0 32px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.1)",
+            padding: "32px 24px 28px",
           }}
         >
-          <X size={18} strokeWidth={2.5}/>
-        </button>
-
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          {/* Lock pill — shown when triggered from a locked category */}
-          {lockedCategory && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1,   opacity: 1 }}
-              style={{
-                display:        "inline-flex",
-                alignItems:     "center",
-                gap:            6,
-                padding:        "5px 16px",
-                borderRadius:   999,
-                background:     C.yellowSoft,
-                border:         `2px solid ${C.yellow}55`,
-                fontFamily:     FF,
-                fontWeight:     700,
-                fontSize:       12,
-                color:          C.orange,
-                marginBottom:   14,
-              }}
-            >
-              <Lock size={13} strokeWidth={2.5}/>
-              <span>
-                <strong>{lockedCategory}</strong> is a Premium category
-              </span>
-            </motion.div>
-          )}
-
-          <h2 style={{
-            fontFamily: FF,
-            fontWeight: 900,
-            fontSize:   28,
-            color:      C.blue,
-            margin:     "0 0 8px",
-          }}>
-            Unlock everything in Kiddsy
-          </h2>
-          <p style={{
-            fontFamily: FB,
-            fontSize:   14,
-            color:      "#64748B",
-            maxWidth:   460,
-            margin:     "0 auto",
-            lineHeight: 1.5,
-          }}>
-            Support our mission to make bilingual learning free for every family —
-            and get unlimited access to all puzzles, stories, and languages.
-          </p>
-        </div>
-
-        {/* Cards grid */}
-        <div style={{
-          display:   "flex",
-          flexWrap:  "wrap",
-          gap:       16,
-          justifyContent: "center",
-          alignItems: "stretch",
-          padding:   "8px 0 4px",
-        }}>
-          {PLANS.map((plan, i) => (
-            <PlanCard key={plan.id} plan={plan} index={i} onClose={onClose}/>
-          ))}
-        </div>
-
-        {/* Footer note */}
-        <p style={{
-          textAlign:  "center",
-          fontFamily: FB,
-          fontSize:   11,
-          color:      "#94A3B8",
-          marginTop:  20,
-        }}>
-          All prices in EUR · Cancel anytime · Secure checkout via Stripe ·{" "}
-          <a href="mailto:legal@kiddsy.org"
-            style={{ color: C.blue, textDecoration: "none" }}>
-            legal@kiddsy.org
-          </a>
-        </p>
-      </motion.div>
+          {/* ... contenido del modal ... */}
+        </motion.div>
+      </Portal>
     </AnimatePresence>
   );
 }
