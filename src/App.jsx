@@ -106,26 +106,17 @@ function StarField() {
 
 // ── LibraryView ────────────────────────────────────────────────────────────
 function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
-  // Verificación de que las funciones existen
-  console.log("LibraryView props:", { onSelectStory, onGenerate, isGuest });
-  
   const handleGenerateClick = (e) => {
     e.preventDefault();
-    console.log("Generate button clicked");
     if (typeof onGenerate === 'function') {
       onGenerate();
-    } else {
-      console.error("onGenerate no es una función");
     }
   };
 
   const handleStoryClick = (story) => (e) => {
     e.preventDefault();
-    console.log("Story clicked:", story.title);
     if (typeof onSelectStory === 'function') {
       onSelectStory(story);
-    } else {
-      console.error("onSelectStory no es una función");
     }
   };
 
@@ -351,7 +342,8 @@ function Collaborate() {
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
   const { user } = useAuth();
-  const [view, setView] = useState("library"); // Cambiado a "library" para pruebas
+  // CORREGIDO: Volvemos a "hero" como vista inicial
+  const [view, setView] = useState("hero");
   const [lang, setLang] = useState(() => lsGet(LS_LANG, "es"));
   const [stories, setStories] = useState([]);
   const [activeStory, setActiveStory] = useState(null);
@@ -368,12 +360,9 @@ export default function App() {
       ? "http://localhost:10000"
       : "https://kiddsy-vercel.onrender.com";
     
-    console.log("Fetching stories from:", API_URL);
-    
     fetch(`${API_URL}/api/stories`)
       .then(r => r.json())
       .then(data => {
-        console.log("Stories loaded:", data);
         setStories(data);
       })
       .catch(err => console.error("Story fetch error:", err));
@@ -393,14 +382,12 @@ export default function App() {
   }, [user]);
 
   const handleSelectStory = (story) => {
-    console.log("handleSelectStory llamado con:", story);
     setActiveStory(story);
     setView("reader");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGeneratedStory = (story, chosenLang) => {
-    console.log("handleGeneratedStory llamado");
     setLang(chosenLang);
     setStories(prev => [story, ...prev]);
     setActiveStory(story);
@@ -409,21 +396,27 @@ export default function App() {
   };
 
   const handleNavigation = (viewId) => {
-    console.log("handleNavigation llamado con:", viewId);
     setView(viewId);
     setActiveStory(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGenerateClick = () => {
-    console.log("handleGenerateClick llamado");
     setView("generator");
   };
 
+  const handlePlayClick = () => {
+    setView("library");
+    window.scrollTo({ top: 0 });
+  };
+
+  // Si estamos en hero, mostramos solo HeroScreen sin Navbar ni Footer
+  if (view === "hero") {
+    return <HeroScreen onPlay={handlePlayClick} />;
+  }
+
   // Mapeo de vistas a componentes
   const renderView = () => {
-    console.log("Renderizando vista:", view);
-    
     switch (view) {
       case "library":
         return (
@@ -519,13 +512,15 @@ export default function App() {
       </div>
 
       <div className="relative z-10">
-        {/* Navbar con manejadores */}
-        <Navbar 
-          currentView={view}
-          onNavigate={handleNavigation}
-          lang={lang}
-          onLangChange={setLang}
-        />
+        {/* Navbar solo visible cuando no estamos en hero */}
+        {view !== "hero" && (
+          <Navbar 
+            currentView={view}
+            onNavigate={handleNavigation}
+            lang={lang}
+            onLangChange={setLang}
+          />
+        )}
         
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
@@ -540,7 +535,10 @@ export default function App() {
           </AnimatePresence>
         </main>
         
-        <Footer onNav={handleNavigation} lang={lang} />
+        {/* Footer solo visible cuando no estamos en hero */}
+        {view !== "hero" && (
+          <Footer onNav={handleNavigation} lang={lang} />
+        )}
       </div>
     </div>
   );
