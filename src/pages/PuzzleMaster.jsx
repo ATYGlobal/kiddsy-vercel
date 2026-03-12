@@ -14,6 +14,7 @@ import Pricing         from "../components/Pricing.jsx";
 import { PuzzleBg }   from "../components/PageBg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg        from "../utils/EmojiSvg.jsx";
+import CartoonTitle from "../components/CartoonTitle.jsx";
 
 import {
   C, LANGUAGES, DIFFICULTIES,

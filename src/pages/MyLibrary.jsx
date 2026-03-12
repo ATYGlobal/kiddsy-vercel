@@ -15,6 +15,7 @@ import {
   BookOpen, Puzzle, Trash2, Plus, RefreshCw,
   RotateCcw, ChevronLeft,
 } from "lucide-react";
+import CartoonTitle from "../components/CartoonTitle.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 // ── CartoonTitle ──────────────────────────────────────────────────────────
 function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 44 }) {

@@ -7,6 +7,7 @@ import { LibraryBg } from "../components/PageBg";
 import { BubbleTitle } from "../components/KiddsyFont";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import CartoonTitle from "../components/CartoonTitle.jsx";
 import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils, Cat, Palette, Apple, Home, Leaf } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 // ── CartoonTitle — título estilo cuento ilustrado ─────────────────────────
