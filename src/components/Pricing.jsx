@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import Portal from "./Portal.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Check, Lock, Sparkles, Zap, Heart,
+  X, Lock, Sparkles, Zap, Heart,
   Puzzle, BookOpen, Star, Crown,
 } from "lucide-react";
 
@@ -256,7 +256,6 @@ function PlanCard({ plan, index, onClose }) {
         disabled={plan.ctaDisabled}
         onClick={() => {
           if (!plan.ctaDisabled) {
-            // TODO: connect to payment provider
             alert(`Redirecting to checkout for ${plan.name}…`);
           }
         }}
@@ -298,7 +297,8 @@ function PlanCard({ plan, index, onClose }) {
 export default function Pricing({ onClose, lockedCategory = null }) {
   return (
     <AnimatePresence>
-      <Portal>  {/* ← ENVUELVE TODO CON PORTAL */}
+      <Portal>
+        {/* Backdrop */}
         <motion.div
           key="backdrop"
           initial={{ opacity: 0 }}
@@ -314,6 +314,7 @@ export default function Pricing({ onClose, lockedCategory = null }) {
           }}
         />
 
+        {/* Modal */}
         <motion.div
           key="sheet"
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -335,7 +336,106 @@ export default function Pricing({ onClose, lockedCategory = null }) {
             padding: "32px 24px 28px",
           }}
         >
-          {/* ... contenido del modal ... */}
+          {/* Botón de cierre */}
+          <button
+            onClick={onClose}
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              border: "2px solid #E2E8F0",
+              background: "white",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#64748B",
+            }}
+          >
+            <X size={18} strokeWidth={2.5}/>
+          </button>
+
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            {lockedCategory && (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "5px 16px",
+                  borderRadius: 999,
+                  background: C.yellowSoft,
+                  border: `2px solid ${C.yellow}55`,
+                  fontFamily: FF,
+                  fontWeight: 700,
+                  fontSize: 12,
+                  color: C.orange,
+                  marginBottom: 14,
+                }}
+              >
+                <Lock size={13} strokeWidth={2.5}/>
+                <span>
+                  <strong>{lockedCategory}</strong> is a Premium category
+                </span>
+              </motion.div>
+            )}
+
+            <h2 style={{
+              fontFamily: FF,
+              fontWeight: 900,
+              fontSize: 28,
+              color: C.blue,
+              margin: "0 0 8px",
+            }}>
+              Unlock everything in Kiddsy
+            </h2>
+            <p style={{
+              fontFamily: FB,
+              fontSize: 14,
+              color: "#64748B",
+              maxWidth: 460,
+              margin: "0 auto",
+              lineHeight: 1.5,
+            }}>
+              Support our mission to make bilingual learning free for every family —
+              and get unlimited access to all puzzles, stories, and languages.
+            </p>
+          </div>
+
+          {/* Cards grid */}
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 16,
+            justifyContent: "center",
+            alignItems: "stretch",
+            padding: "8px 0 4px",
+          }}>
+            {PLANS.map((plan, i) => (
+              <PlanCard key={plan.id} plan={plan} index={i} onClose={onClose}/>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <p style={{
+            textAlign: "center",
+            fontFamily: FB,
+            fontSize: 11,
+            color: "#94A3B8",
+            marginTop: 20,
+          }}>
+            All prices in EUR · Cancel anytime · Secure checkout via Stripe ·{" "}
+            <a href="mailto:legal@kiddsy.org"
+              style={{ color: C.blue, textDecoration: "none" }}>
+              legal@kiddsy.org
+            </a>
+          </p>
         </motion.div>
       </Portal>
     </AnimatePresence>

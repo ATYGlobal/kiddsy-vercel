@@ -10,7 +10,5 @@ export default function Portal({ children }) {
     return () => setMounted(false);
   }, []);
 
-  return mounted
-    ? ReactDOM.createPortal(children, document.body)
-    : null;
+  return mounted ? ReactDOM.createPortal(children, document.body) : null;
 }
