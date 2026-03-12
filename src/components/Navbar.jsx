@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Puzzle, Music, HelpCircle, Heart,
   Users, Menu, X, Library, ChevronDown,
-  Search, Cat, Globe, Star,
+  Search, Cat, Globe, Star, Gamepad2,
 } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 import Games from "../pages/Games.jsx";
@@ -212,7 +212,7 @@ export function LanguagePicker({ value = "es", onChange, fullWidth = false }) {
 const NAV_PRIMARY = [
   { id:"library",    label:"Stories",     icon:BookOpen, color:C.blue    },
   { id:"mylibrary",  label:"My Library",  icon:Library,  color:C.green   },
-  { id:"games",      label:"Games",       icon:Games,   color:C.red     },
+  { id:"games",      label:"Games",       icon:Gamepad2,   color:C.red     },
   { id:"wordsearch", label:"Word Search", icon:Search,   color:C.cyan    },
   { id:"Puzzles",    label:"Puzzles",     icon:Puzzle,   color:C.green   },
   { id:"education",  label:"Learn ABC",   icon:Music,    color:C.orange  },
