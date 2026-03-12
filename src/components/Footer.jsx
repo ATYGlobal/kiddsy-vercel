@@ -642,7 +642,7 @@ export default function Footer({ onNav, lang = "es" }) {
           <NavLink onClick={() => onNav("library")}   color={C.blue}    icon={BookOpen}>Stories</NavLink>
           <NavLink onClick={() => onNav("games")}     color="#E53935"   icon={null}><EmojiSvg code="1f3ae" size={12} /> Games</NavLink>
           <NavLink onClick={() => onNav("education")} color={C.orange}  icon={null}><EmojiSvg code="1f4d6" size={12} /> Learn ABC</NavLink>
-          <NavLink onClick={() => onNav("donate")}    color={C.yellow}  icon={Heart}>Support us</NavLink>
+          <NavLink onClick={() => onNav("subscription")} color={C.yellow} icon={Heart}>Subscription</NavLink>
           <NavLink onClick={() => onNav("collaborate")} color={C.magenta} icon={null}><EmojiSvg code="1f91d" size={12} /> Collaborate</NavLink>
         </div>
 

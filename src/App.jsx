@@ -12,7 +12,7 @@ import MyLibrary      from "./pages/MyLibrary";
 import StoryGenerator from "./pages/StoryGenerator";
 import StoryReader, { StoryCoverCard } from "./pages/StoryReader";
 import { AvisoLegal, Privacidad } from "./pages/LegalPages";
-import Donation       from "./pages/Donation";
+import Subscription from "./pages/Subscription";
 import Games          from "./pages/Games";
 import Education      from "./pages/Education";
 import WordSearch     from "./pages/WordSearch";
@@ -255,7 +255,7 @@ export default function App() {
     "legal":         <AvisoLegal onNav={handleNav}/>,
     "aviso-legal":   <AvisoLegal onNav={handleNav}/>,
     "privacidad":    <Privacidad onNav={handleNav}/>,
-    donate:          <Donation/>,
+    subscription: <Subscription/>,
     collaborate:     <Collaborate/>,
     mylibrary:       <MyLibrary onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory}/>,
   };

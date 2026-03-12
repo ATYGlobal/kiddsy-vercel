@@ -219,7 +219,7 @@ const NAV_PRIMARY = [
 ];
 const NAV_SECONDARY = [
   { id:"legal",       label:"Help & FAQ",  icon:HelpCircle, color:C.magenta },
-  { id:"donate",      label:"Donate",      icon:Heart,      color:C.yellow  },
+  { id:"subscription",      label:"Subscription",      icon:Heart,      color:C.yellow  },
   { id:"collaborate", label:"Collaborate", icon:Users,      color:C.magenta },
 ];
 const ALL_NAV = [...NAV_PRIMARY, ...NAV_SECONDARY];

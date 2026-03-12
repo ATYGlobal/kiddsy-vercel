@@ -20,6 +20,7 @@ import {
   Crown, CheckCircle, Infinity, Gift, Puzzle, Lock,
   X, Loader, CreditCard, AlertCircle,
 } from "lucide-react";
+import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ── Stripe imports ─────────────────────────────────────────────────────────
 // Uncomment once you install @stripe/react-stripe-js and @stripe/stripe-js:
