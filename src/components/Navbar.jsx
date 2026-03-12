@@ -305,39 +305,39 @@ export default function Navbar({ view, onNav, lang, onLangChange }) {
         }}
           className="desktop-nav"
         >
-          {NAV_PRIMARY.map(item => {
-            const Icon = item.icon;
-            const isActive = view === item.id;
-            return (
-              <motion.button
-                key={item.id}
-                onClick={() => onNav(item.id)}
-                whileHover={{ scale:1.06, y:-2 }}
-                whileTap={{ scale:0.95 }}
-                style={{
-                  display:    "flex",
-                  alignItems: "center",
-                  gap:        4,
-                  padding:    "7px 10px",
-                  borderRadius: 999,
-                  border:     "none",
-                  background: isActive ? item.color : "transparent",
-                  color:      isActive ? "white" : "#64748B",
-                  fontFamily: "var(--font-display,'Nunito',sans-serif)",
-                  fontWeight: 700,
-                  fontSize:   12,
-                  cursor:     "pointer",
-                  transition: "background 0.18s, color 0.18s",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                  boxShadow:  isActive ? `0 4px 14px ${item.color}40` : "none",
-                }}
-              >
-                <Icon size={14} strokeWidth={2.2}/>
-                /t{item.labelKey}
-              </motion.button>
-            );
-          })}
+            {NAV_PRIMARY.map(item => {
+              const Icon = item.icon;
+              const isActive = view === item.id;
+              return (
+                <motion.button
+                  key={item.id}
+                  onClick={() => onNav(item.id)}
+                  whileHover={{ scale:1.06, y:-2 }}
+                  whileTap={{ scale:0.95 }}
+                  style={{
+                    display:    "flex",
+                    alignItems: "center",
+                    gap:        4,
+                    padding:    "7px 10px",
+                    borderRadius: 999,
+                    border:     "none",
+                    background: isActive ? item.color : "transparent",
+                    color:      isActive ? "white" : "#64748B",
+                    fontFamily: "var(--font-display,'Nunito',sans-serif)",
+                    fontWeight: 700,
+                    fontSize:   12,
+                    cursor:     "pointer",
+                    transition: "background 0.18s, color 0.18s",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    boxShadow:  isActive ? `0 4px 14px ${item.color}40` : "none",
+                  }}
+                >
+                  <Icon size={14} strokeWidth={2.2}/>
+                  {t(item.labelKey)}  {/* ← CORREGIDO */}
+                </motion.button>
+              );
+            })}
 
           {/* ── More dropdown ── */}
           <div ref={moreRef} style={{ position:"relative", flexShrink:0 }}>
@@ -502,34 +502,34 @@ export default function Navbar({ view, onNav, lang, onLangChange }) {
               gridTemplateColumns: "1fr 1fr",
               gap:                 8,
             }}>
-              {ALL_NAV.map(item => {
-                const Icon = item.icon;
-                const isActive = view === item.id;
-                return (
-                  <motion.button
-                    key={item.id}
-                    onClick={() => { onNav(item.id); setMenuOpen(false); }}
-                    whileTap={{ scale:0.95 }}
-                    style={{
-                      display:      "flex",
-                      alignItems:   "center",
-                      gap:          8,
-                      padding:      "12px 14px",
-                      borderRadius: 16,
-                      border:       "2px solid transparent",
-                      background:   isActive ? item.color : "#F8FAFC",
-                      color:        isActive ? "white"    : "#374151",
-                      fontFamily:   "var(--font-display,'Nunito',sans-serif)",
-                      fontWeight:   700,
-                      fontSize:     13,
-                      cursor:       "pointer",
-                      textAlign:    "left",
-                    }}
-                  >
-                    <Icon size={15}/> {item.label}
-                  </motion.button>
-                );
-              })}
+                {ALL_NAV.map(item => {
+                  const Icon = item.icon;
+                  const isActive = view === item.id;
+                  return (
+                    <motion.button
+                      key={item.id}
+                      onClick={() => { onNav(item.id); setMenuOpen(false); }}
+                      whileTap={{ scale:0.95 }}
+                      style={{
+                        display:      "flex",
+                        alignItems:   "center",
+                        gap:          8,
+                        padding:      "12px 14px",
+                        borderRadius: 16,
+                        border:       "2px solid transparent",
+                        background:   isActive ? item.color : "#F8FAFC",
+                        color:        isActive ? "white"    : "#374151",
+                        fontFamily:   "var(--font-display,'Nunito',sans-serif)",
+                        fontWeight:   700,
+                        fontSize:     13,
+                        cursor:       "pointer",
+                        textAlign:    "left",
+                      }}
+                    >
+                      <Icon size={15}/> {t(item.labelKey)}  {/* ← CAMBIA item.label por t(item.labelKey) */}
+                    </motion.button>
+                  );
+                })}
               {/* ── Trustpilot mobile ── */}
               <a
                 href="https://www.trustpilot.com/evaluate/kiddsy.vercel.app"

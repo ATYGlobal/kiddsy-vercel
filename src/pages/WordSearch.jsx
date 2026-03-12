@@ -5,11 +5,12 @@
  */
 import { LibraryBg } from "../components/PageBg";
 import { BubbleTitle } from "../components/KiddsyFont";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WordSearchBg } from "../components/PageBg.jsx";
 import CartoonTitle from "../components/CartoonTitle.jsx";
-import { RotateCcw, Trophy, CheckCircle, Star, Search, Loader, Users, BookOpen, Utensils, Cat, Palette, Apple, Home, Leaf } from "lucide-react";
+import { RotateCcw, Trophy, CheckCircle, Star, Search, Globe, ChevronDown,
+         Cat, Palette, Apple, Home, Leaf, Utensils } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 const C = {
@@ -35,6 +36,25 @@ const WORD_COLORS = [
   { bg: "#F8BBD0", border: "#D81B60", text: "#880E4F" },
   { bg: "#B2EBF2", border: "#00ACC1", text: "#006064" },
   { bg: "#E1BEE7", border: "#8E24AA", text: "#4A148C" },
+];
+
+// ─── Language metadata (replaces flat LANG_LABELS) ─────────────────────────
+const LANGUAGES = [
+  { code:"es", label:"Español",    flag:"🇪🇸" },
+  { code:"fr", label:"Français",   flag:"🇫🇷" },
+  { code:"ar", label:"العربية",    flag:"🇸🇦", rtl:true },
+  { code:"pt", label:"Português",  flag:"🇧🇷" },
+  { code:"de", label:"Deutsch",    flag:"🇩🇪" },
+  { code:"it", label:"Italiano",   flag:"🇮🇹" },
+  { code:"zh", label:"中文",        flag:"🇨🇳" },
+  { code:"ja", label:"日本語",      flag:"🇯🇵" },
+  { code:"ko", label:"한국어",      flag:"🇰🇷" },
+  { code:"ru", label:"Русский",    flag:"🇷🇺" },
+  { code:"hi", label:"हिंदी",      flag:"🇮🇳" },
+  { code:"tr", label:"Türkçe",     flag:"🇹🇷" },
+  { code:"nl", label:"Nederlands", flag:"🇳🇱" },
+  { code:"pl", label:"Polski",     flag:"🇵🇱" },
+  { code:"sv", label:"Svenska",    flag:"🇸🇪" },
 ];
 
 // ─── Word packs ────────────────────────────────────────────────────────────
@@ -98,107 +118,96 @@ const PACKS = [
     name: "Fruits", emoji:"1f34e", icon: Apple,
     words: [
       { en:"APPLE",    es:"Manzana",     fr:"Pomme",         ar:"تفاحة",    pt:"Maçã",      de:"Apfel",      it:"Mela",        zh:"苹果",  ja:"りんご",    ko:"사과",    ru:"Яблоко",    hi:"सेब",       tr:"Elma",           nl:"Appel",       pl:"Jabłko",      sv:"Äpple"     },
-      { en:"MANGO",    es:"Mango",       fr:"Mangue",        ar:"مانجو",    pt:"Manga",     de:"Mango",      it:"Mango",       zh:"芒果",  ja:"マンゴー",  ko:"망고",    ru:"Манго",     hi:"आम",        tr:"Mango",          nl:"Mango",       pl:"Mango",       sv:"Mango"     },
-      { en:"GRAPE",    es:"Uva",         fr:"Raisin",        ar:"عنب",      pt:"Uva",       de:"Traube",     it:"Uva",         zh:"葡萄",  ja:"ぶどう",    ko:"포도",    ru:"Виноград",  hi:"अंगूर",     tr:"Üzüm",           nl:"Druif",       pl:"Winogrono",   sv:"Druva"     },
-      { en:"PLUM",     es:"Ciruela",     fr:"Prune",         ar:"برقوق",    pt:"Ameixa",    de:"Pflaume",    it:"Susina",      zh:"李子",  ja:"すもも",    ko:"자두",    ru:"Слива",     hi:"आलूबुखारा", tr:"Erik",           nl:"Pruim",       pl:"Śliwka",      sv:"Plommon"   },
-      { en:"PEAR",     es:"Pera",        fr:"Poire",         ar:"كمثرى",    pt:"Pera",      de:"Birne",      it:"Pera",        zh:"梨",    ja:"なし",      ko:"배",      ru:"Груша",     hi:"नाशपाती",   tr:"Armut",          nl:"Peer",        pl:"Gruszka",     sv:"Päron"     },
-      { en:"KIWI",     es:"Kiwi",        fr:"Kiwi",          ar:"كيوي",     pt:"Kiwi",      de:"Kiwi",       it:"Kiwi",        zh:"奇异果",ja:"キウイ",    ko:"키위",    ru:"Киви",      hi:"कीवी",      tr:"Kivi",           nl:"Kiwi",        pl:"Kiwi",        sv:"Kiwi"      },
-      { en:"LIME",     es:"Lima",        fr:"Citron vert",   ar:"ليمون أخضر",pt:"Lima",    de:"Limette",    it:"Lime",        zh:"青柠",  ja:"ライム",    ko:"라임",    ru:"Лайм",      hi:"नींबू",     tr:"Misket limonu",  nl:"Limoen",      pl:"Limonka",     sv:"Lime"      },
-      { en:"MELON",    es:"Melón",       fr:"Melon",         ar:"بطيخ",     pt:"Melão",     de:"Melone",     it:"Melone",      zh:"哈密瓜",ja:"メロン",    ko:"멜론",    ru:"Дыня",      hi:"खरबूजा",   tr:"Kavun",          nl:"Meloen",      pl:"Melon",       sv:"Melon"     },
-      { en:"LEMON",    es:"Limón",       fr:"Citron",        ar:"ليمون",    pt:"Limão",     de:"Zitrone",    it:"Limone",      zh:"柠檬",  ja:"レモン",    ko:"레몬",    ru:"Лимон",     hi:"नींबू",     tr:"Limon",          nl:"Citroen",     pl:"Cytryna",     sv:"Citron"    },
-      { en:"PEACH",    es:"Melocotón",   fr:"Pêche",         ar:"خوخ",      pt:"Pêssego",   de:"Pfirsich",   it:"Pesca",       zh:"桃子",  ja:"もも",      ko:"복숭아",  ru:"Персик",    hi:"आड़ू",      tr:"Şeftali",        nl:"Perzik",      pl:"Brzoskwinia", sv:"Persika"   },
-      { en:"CHERRY",   es:"Cereza",      fr:"Cerise",        ar:"كرز",      pt:"Cereja",    de:"Kirsche",    it:"Ciliegia",    zh:"樱桃",  ja:"さくらんぼ",ko:"체리",    ru:"Вишня",     hi:"चेरी",      tr:"Kiraz",          nl:"Kers",        pl:"Wiśnia",      sv:"Körsbär"   },
-      { en:"PAPAYA",   es:"Papaya",      fr:"Papaye",        ar:"بابايا",   pt:"Mamão",     de:"Papaya",     it:"Papaia",      zh:"木瓜",  ja:"パパイヤ",  ko:"파파야",  ru:"Папайя",    hi:"पपीता",     tr:"Papaya",         nl:"Papaja",      pl:"Papaja",      sv:"Papaya"    },
-      { en:"BANANA",   es:"Plátano",     fr:"Banane",        ar:"موز",      pt:"Banana",    de:"Banane",     it:"Banana",      zh:"香蕉",  ja:"バナナ",    ko:"바나나",  ru:"Банан",     hi:"केला",      tr:"Muz",            nl:"Banaan",      pl:"Banan",       sv:"Banan"     },
-      { en:"ORANGE",   es:"Naranja",     fr:"Orange",        ar:"برتقال",   pt:"Laranja",   de:"Orange",     it:"Arancia",     zh:"橙子",  ja:"オレンジ",  ko:"오렌지",  ru:"Апельсин",  hi:"संतरा",     tr:"Portakal",       nl:"Sinaasappel", pl:"Pomarańcza",  sv:"Apelsin"   },
-      { en:"GUAVA",    es:"Guayaba",     fr:"Goyave",        ar:"جوافة",    pt:"Goiaba",    de:"Guave",      it:"Guava",       zh:"番石榴",ja:"グアバ",    ko:"구아바",  ru:"Гуава",     hi:"अमरूद",     tr:"Guava",          nl:"Guave",       pl:"Guawa",       sv:"Guava"     },
-      { en:"COCONUT",  es:"Coco",        fr:"Noix de coco",  ar:"جوز الهند",pt:"Coco",      de:"Kokosnuss",  it:"Noce di cocco",zh:"椰子", ja:"ヤシの実",  ko:"코코넛",  ru:"Кокос",     hi:"नारियल",    tr:"Hindistan cevizi",nl:"Kokosnoot",  pl:"Kokos",       sv:"Kokosnöt"  },
-      { en:"APRICOT",  es:"Albaricoque", fr:"Abricot",       ar:"مشمش",     pt:"Damasco",   de:"Aprikose",   it:"Albicocca",   zh:"杏子",  ja:"あんず",    ko:"살구",    ru:"Абрикос",   hi:"खुबानी",    tr:"Kayısı",         nl:"Abrikoos",    pl:"Morela",      sv:"Aprikos"   },
-      { en:"AVOCADO",  es:"Aguacate",    fr:"Avocat",        ar:"أفوكادو",  pt:"Abacate",   de:"Avocado",    it:"Avocado",     zh:"牛油果",ja:"アボカド",  ko:"아보카도", ru:"Авокадо",   hi:"एवोकाडो",   tr:"Avokado",        nl:"Avocado",     pl:"Awokado",     sv:"Avokado"   },
-      { en:"BERRY",    es:"Baya",        fr:"Baie",          ar:"توت",      pt:"Baga",      de:"Beere",      it:"Bacca",       zh:"浆果",  ja:"ベリー",    ko:"베리",    ru:"Ягода",     hi:"बेरी",      tr:"Böğürtlen",      nl:"Bes",         pl:"Jagoda",      sv:"Bär"       },
-      { en:"FIG",      es:"Higo",        fr:"Figue",         ar:"تين",      pt:"Figo",      de:"Feige",      it:"Fico",        zh:"无花果",ja:"いちじく",  ko:"무화과",  ru:"Инжир",     hi:"अंजीर",     tr:"İncir",          nl:"Vijg",        pl:"Figa",        sv:"Fikon"     },
+      { en:"MANGO",    es:"Mango",       fr:"Mangue",        ar:"مانجو",    pt:"Manga",      de:"Mango",      it:"Mango",       zh:"芒果",  ja:"マンゴー",  ko:"망고",    ru:"Манго",     hi:"आम",        tr:"Mango",          nl:"Mango",       pl:"Mango",       sv:"Mango"     },
+      { en:"GRAPE",    es:"Uva",         fr:"Raisin",        ar:"عنب",      pt:"Uva",        de:"Traube",     it:"Uva",         zh:"葡萄",  ja:"ぶどう",    ko:"포도",    ru:"Виноград",  hi:"अंगूर",     tr:"Üzüm",           nl:"Druif",       pl:"Winogrono",   sv:"Druva"     },
+      { en:"LEMON",    es:"Limón",       fr:"Citron",        ar:"ليمون",    pt:"Limão",      de:"Zitrone",    it:"Limone",      zh:"柠檬",  ja:"レモン",    ko:"레몬",    ru:"Лимон",     hi:"नींबू",     tr:"Limon",          nl:"Citroen",     pl:"Cytryna",     sv:"Citron"    },
+      { en:"PEACH",    es:"Melocotón",   fr:"Pêche",         ar:"خوخ",      pt:"Pêssego",    de:"Pfirsich",   it:"Pesca",       zh:"桃子",  ja:"もも",      ko:"복숭아",  ru:"Персик",    hi:"आड़ू",      tr:"Şeftali",        nl:"Perzik",      pl:"Brzoskwinia", sv:"Persika"   },
+      { en:"PEAR",     es:"Pera",        fr:"Poire",         ar:"كمثرى",    pt:"Pêra",       de:"Birne",      it:"Pera",        zh:"梨",    ja:"なし",      ko:"배",      ru:"Груша",     hi:"नाशपाती",   tr:"Armut",          nl:"Peer",        pl:"Gruszka",     sv:"Päron"     },
+      { en:"PLUM",     es:"Ciruela",     fr:"Prune",         ar:"برقوق",    pt:"Ameixa",     de:"Pflaume",    it:"Prugna",      zh:"李子",  ja:"すもも",    ko:"자두",    ru:"Слива",     hi:"बेर",       tr:"Erik",           nl:"Pruim",       pl:"Śliwka",      sv:"Plommon"   },
+      { en:"LIME",     es:"Lima",        fr:"Citron vert",   ar:"ليم",      pt:"Lima",       de:"Limette",    it:"Lime",        zh:"青柠",  ja:"ライム",    ko:"라임",    ru:"Лайм",      hi:"नीम्बू",    tr:"Misket limonu",  nl:"Limoen",      pl:"Limonka",     sv:"Lime"      },
+      { en:"KIWI",     es:"Kiwi",        fr:"Kiwi",          ar:"كيوي",     pt:"Kiwi",       de:"Kiwi",       it:"Kiwi",        zh:"猕猴桃",ja:"キウイ",    ko:"키위",    ru:"Киви",      hi:"कीवी",      tr:"Kivi",           nl:"Kiwi",        pl:"Kiwi",        sv:"Kiwi"      },
+      { en:"MELON",    es:"Melón",       fr:"Melon",         ar:"بطيخ",     pt:"Melão",      de:"Melone",     it:"Melone",      zh:"甜瓜",  ja:"メロン",    ko:"멜론",    ru:"Дыня",      hi:"खरबूजा",    tr:"Kavun",          nl:"Meloen",      pl:"Melon",       sv:"Melon"     },
+      { en:"CHERRY",   es:"Cereza",      fr:"Cerise",        ar:"كرز",      pt:"Cereja",     de:"Kirsche",    it:"Ciliegia",    zh:"樱桃",  ja:"さくらんぼ",ko:"체리",    ru:"Вишня",     hi:"चेरी",      tr:"Kiraz",          nl:"Kers",        pl:"Wiśnia",      sv:"Körsbär"   },
+      { en:"PAPAYA",   es:"Papaya",      fr:"Papaye",        ar:"بابايا",   pt:"Mamão",      de:"Papaya",     it:"Papaia",      zh:"木瓜",  ja:"パパイヤ",  ko:"파파야",  ru:"Папайя",    hi:"पपीता",     tr:"Papaya",         nl:"Papaja",      pl:"Papaja",      sv:"Papaya"    },
+      { en:"COCONUT",  es:"Coco",        fr:"Noix de coco",  ar:"جوز الهند",pt:"Coco",       de:"Kokosnuss",  it:"Cocco",       zh:"椰子",  ja:"ココナツ",  ko:"코코넛",  ru:"Кокос",     hi:"नारियल",    tr:"Hindistan cevizi",nl:"Kokosnoot",  pl:"Kokos",       sv:"Kokosnöt"  },
+      { en:"BANANA",   es:"Plátano",     fr:"Banane",        ar:"موزة",     pt:"Banana",     de:"Banane",     it:"Banana",      zh:"香蕉",  ja:"バナナ",    ko:"바나나",  ru:"Банан",     hi:"केला",      tr:"Muz",            nl:"Banaan",      pl:"Banan",       sv:"Banan"     },
+      { en:"ORANGE",   es:"Naranja",     fr:"Orange",        ar:"برتقال",   pt:"Laranja",    de:"Orange",     it:"Arancia",     zh:"橙子",  ja:"オレンジ",  ko:"오렌지",  ru:"Апельсин",  hi:"संतरा",     tr:"Portakal",       nl:"Sinaasappel", pl:"Pomarańcza",  sv:"Apelsin"   },
+      { en:"MELON",    es:"Sandía",      fr:"Pastèque",      ar:"بطيخ أحمر",pt:"Melancia",   de:"Wassermelone",it:"Anguria",    zh:"西瓜",  ja:"すいか",    ko:"수박",    ru:"Арбуз",     hi:"तरबूज़",    tr:"Karpuz",         nl:"Watermeloen", pl:"Arbuz",       sv:"Vattenmelon"},
+      { en:"APRICOT",  es:"Albaricoque", fr:"Abricot",       ar:"مشمش",     pt:"Damasco",    de:"Aprikose",   it:"Albicocca",   zh:"杏子",  ja:"あんず",    ko:"살구",    ru:"Абрикос",   hi:"खुबानी",    tr:"Kayısı",         nl:"Abrikoos",    pl:"Morela",      sv:"Aprikos"   },
+      { en:"FIG",      es:"Higo",        fr:"Figue",         ar:"تين",      pt:"Figo",       de:"Feige",      it:"Fico",        zh:"无花果",ja:"いちじく",  ko:"무화과",  ru:"Инжир",     hi:"अंजीर",     tr:"İncir",          nl:"Vijg",        pl:"Figa",        sv:"Fikon"     },
     ],
   },
 
-  // ────────────────── HOUSE ─────────────────────────────────────────────────
+  // ────────────────── FOOD ──────────────────────────────────────────────────
   {
-    name: "House", emoji:"1f3e0", icon: Home,
+    name: "Food", emoji:"1f35c", icon: Utensils,
     words: [
-      { en:"BED",      es:"Cama",        fr:"Lit",           ar:"سرير",     pt:"Cama",      de:"Bett",       it:"Letto",       zh:"床",    ja:"ベッド",    ko:"침대",    ru:"Кровать",   hi:"बिस्तर",    tr:"Yatak",          nl:"Bed",         pl:"Łóżko",       sv:"Säng"      },
-      { en:"SOFA",     es:"Sofá",        fr:"Canapé",        ar:"أريكة",    pt:"Sofá",      de:"Sofa",       it:"Divano",      zh:"沙发",  ja:"ソファ",    ko:"소파",    ru:"Диван",     hi:"सोफा",      tr:"Kanepe",         nl:"Sofa",        pl:"Sofa",        sv:"Soffa"     },
-      { en:"DOOR",     es:"Puerta",      fr:"Porte",         ar:"باب",      pt:"Porta",     de:"Tür",        it:"Porta",       zh:"门",    ja:"ドア",      ko:"문",      ru:"Дверь",     hi:"दरवाजा",    tr:"Kapı",           nl:"Deur",        pl:"Drzwi",       sv:"Dörr"      },
-      { en:"LAMP",     es:"Lámpara",     fr:"Lampe",         ar:"مصباح",    pt:"Lâmpada",   de:"Lampe",      it:"Lampada",     zh:"台灯",  ja:"ランプ",    ko:"램프",    ru:"Лампа",     hi:"दीपक",      tr:"Lamba",          nl:"Lamp",        pl:"Lampa",       sv:"Lampa"     },
-      { en:"BATH",     es:"Baño",        fr:"Bain",          ar:"حمام",     pt:"Banho",     de:"Bad",        it:"Bagno",       zh:"浴室",  ja:"お風呂",    ko:"욕조",    ru:"Ванна",     hi:"स्नान",     tr:"Banyo",          nl:"Bad",         pl:"Łazienka",    sv:"Bad"       },
-      { en:"ROOF",     es:"Techo",       fr:"Toit",          ar:"سقف",      pt:"Telhado",   de:"Dach",       it:"Tetto",       zh:"屋顶",  ja:"やね",      ko:"지붕",    ru:"Крыша",     hi:"छत",        tr:"Çatı",           nl:"Dak",         pl:"Dach",        sv:"Tak"       },
-      { en:"WALL",     es:"Pared",       fr:"Mur",           ar:"جدار",     pt:"Parede",    de:"Wand",       it:"Muro",        zh:"墙",    ja:"かべ",      ko:"벽",      ru:"Стена",     hi:"दीवार",     tr:"Duvar",          nl:"Muur",        pl:"Ściana",      sv:"Vägg"      },
-      { en:"FORK",     es:"Tenedor",     fr:"Fourchette",    ar:"شوكة",     pt:"Garfo",     de:"Gabel",      it:"Forchetta",   zh:"叉子",  ja:"フォーク",  ko:"포크",    ru:"Вилка",     hi:"काँटा",     tr:"Çatal",          nl:"Vork",        pl:"Widelec",     sv:"Gaffel"    },
-      { en:"SPOON",    es:"Cuchara",     fr:"Cuillère",      ar:"ملعقة",    pt:"Colher",    de:"Löffel",     it:"Cucchiaio",   zh:"汤匙",  ja:"スプーン",  ko:"숟가락",  ru:"Ложка",     hi:"चम्मच",     tr:"Kaşık",          nl:"Lepel",       pl:"Łyżka",       sv:"Sked"      },
-      { en:"CHAIR",    es:"Silla",       fr:"Chaise",        ar:"كرسي",     pt:"Cadeira",   de:"Stuhl",      it:"Sedia",       zh:"椅子",  ja:"いす",      ko:"의자",    ru:"Стул",      hi:"कुर्सी",    tr:"Sandalye",       nl:"Stoel",       pl:"Krzesło",     sv:"Stol"      },
-      { en:"TABLE",    es:"Mesa",        fr:"Table",         ar:"طاولة",    pt:"Mesa",      de:"Tisch",      it:"Tavolo",      zh:"桌子",  ja:"テーブル",  ko:"탁자",    ru:"Стол",      hi:"मेज",       tr:"Masa",           nl:"Tafel",       pl:"Stół",        sv:"Bord"      },
-      { en:"CLOCK",    es:"Reloj",       fr:"Horloge",       ar:"ساعة",     pt:"Relógio",   de:"Uhr",        it:"Orologio",    zh:"时钟",  ja:"とけい",    ko:"시계",    ru:"Часы",      hi:"घड़ी",      tr:"Saat",           nl:"Klok",        pl:"Zegar",       sv:"Klocka"    },
-      { en:"STOVE",    es:"Estufa",      fr:"Cuisinière",    ar:"موقد",     pt:"Fogão",     de:"Herd",       it:"Fornello",    zh:"炉子",  ja:"コンロ",    ko:"스토브",  ru:"Плита",     hi:"चूल्हा",   tr:"Soba",           nl:"Fornuis",     pl:"Kuchenka",    sv:"Spis"      },
-      { en:"TOWEL",    es:"Toalla",      fr:"Serviette",     ar:"منشفة",    pt:"Toalha",    de:"Handtuch",   it:"Asciugamano", zh:"毛巾",  ja:"タオル",    ko:"수건",    ru:"Полотенце", hi:"तौलिया",    tr:"Havlu",          nl:"Handdoek",    pl:"Ręcznik",     sv:"Handduk"   },
-      { en:"WINDOW",   es:"Ventana",     fr:"Fenêtre",       ar:"نافذة",    pt:"Janela",    de:"Fenster",    it:"Finestra",    zh:"窗户",  ja:"まど",      ko:"창문",    ru:"Окно",      hi:"खिड़की",   tr:"Pencere",        nl:"Raam",        pl:"Okno",        sv:"Fönster"   },
-      { en:"MIRROR",   es:"Espejo",      fr:"Miroir",        ar:"مرآة",     pt:"Espelho",   de:"Spiegel",    it:"Specchio",    zh:"镜子",  ja:"かがみ",    ko:"거울",    ru:"Зеркало",   hi:"दर्पण",     tr:"Ayna",           nl:"Spiegel",     pl:"Lustro",      sv:"Spegel"    },
-      { en:"PILLOW",   es:"Almohada",    fr:"Oreiller",      ar:"وسادة",    pt:"Travesseiro",de:"Kissen",    it:"Cuscino",     zh:"枕头",  ja:"まくら",    ko:"베개",    ru:"Подушка",   hi:"तकिया",     tr:"Yastık",         nl:"Kussen",      pl:"Poduszka",    sv:"Kudde"     },
-      { en:"CARPET",   es:"Alfombra",    fr:"Tapis",         ar:"سجادة",    pt:"Tapete",    de:"Teppich",    it:"Tappeto",     zh:"地毯",  ja:"カーペット",ko:"카펫",    ru:"Ковёр",     hi:"कालीन",     tr:"Halı",           nl:"Tapijt",      pl:"Dywan",       sv:"Matta"     },
-      { en:"SHELF",    es:"Estante",     fr:"Étagère",       ar:"رف",       pt:"Prateleira",de:"Regal",      it:"Scaffale",    zh:"架子",  ja:"たな",      ko:"선반",    ru:"Полка",     hi:"अलमारी",   tr:"Raf",            nl:"Plank",       pl:"Półka",       sv:"Hylla"     },
-      { en:"STAIRS",   es:"Escalera",    fr:"Escalier",      ar:"درج",      pt:"Escada",    de:"Treppe",     it:"Scale",       zh:"楼梯",  ja:"かいだん",  ko:"계단",    ru:"Лестница",  hi:"सीढ़ी",    tr:"Merdiven",       nl:"Trap",        pl:"Schody",      sv:"Trappa"    },
+      { en:"SOUP",     es:"Sopa",        fr:"Soupe",         ar:"حساء",     pt:"Sopa",       de:"Suppe",      it:"Zuppa",       zh:"汤",    ja:"スープ",    ko:"수프",    ru:"Суп",       hi:"सूप",       tr:"Çorba",          nl:"Soep",        pl:"Zupa",        sv:"Soppa"     },
+      { en:"RICE",     es:"Arroz",       fr:"Riz",           ar:"أرز",      pt:"Arroz",      de:"Reis",       it:"Riso",        zh:"米饭",  ja:"ごはん",    ko:"밥",      ru:"Рис",       hi:"चावल",      tr:"Pirinç",         nl:"Rijst",       pl:"Ryż",         sv:"Ris"       },
+      { en:"BREAD",    es:"Pan",         fr:"Pain",          ar:"خبز",      pt:"Pão",        de:"Brot",       it:"Pane",        zh:"面包",  ja:"パン",      ko:"빵",      ru:"Хлеб",      hi:"रोटी",      tr:"Ekmek",          nl:"Brood",       pl:"Chleb",       sv:"Bröd"      },
+      { en:"PIZZA",    es:"Pizza",       fr:"Pizza",         ar:"بيتزا",    pt:"Pizza",      de:"Pizza",      it:"Pizza",       zh:"披萨",  ja:"ピザ",      ko:"피자",    ru:"Пицца",     hi:"पिज़्ज़ा",  tr:"Pizza",          nl:"Pizza",       pl:"Pizza",       sv:"Pizza"     },
+      { en:"PASTA",    es:"Pasta",       fr:"Pâtes",         ar:"معكرونة",  pt:"Macarrão",   de:"Nudeln",     it:"Pasta",       zh:"意面",  ja:"パスタ",    ko:"파스타",  ru:"Паста",     hi:"पास्ता",    tr:"Makarna",        nl:"Pasta",       pl:"Makaron",     sv:"Pasta"     },
+      { en:"CAKE",     es:"Pastel",      fr:"Gâteau",        ar:"كعكة",     pt:"Bolo",       de:"Kuchen",     it:"Torta",       zh:"蛋糕",  ja:"ケーキ",    ko:"케이크",  ru:"Торт",      hi:"केक",       tr:"Pasta",          nl:"Taart",       pl:"Ciasto",      sv:"Tårta"     },
+      { en:"MILK",     es:"Leche",       fr:"Lait",          ar:"حليب",     pt:"Leite",      de:"Milch",      it:"Latte",       zh:"牛奶",  ja:"ぎゅうにゅう",ko:"우유",  ru:"Молоко",    hi:"दूध",       tr:"Süt",            nl:"Melk",        pl:"Mleko",       sv:"Mjölk"     },
+      { en:"JUICE",    es:"Jugo",        fr:"Jus",           ar:"عصير",     pt:"Suco",       de:"Saft",       it:"Succo",       zh:"果汁",  ja:"ジュース",  ko:"주스",    ru:"Сок",       hi:"जूस",       tr:"Meyve suyu",     nl:"Sap",         pl:"Sok",         sv:"Juice"     },
+      { en:"SALAD",    es:"Ensalada",    fr:"Salade",        ar:"سلطة",     pt:"Salada",     de:"Salat",      it:"Insalata",    zh:"沙拉",  ja:"サラダ",    ko:"샐러드",  ru:"Салат",     hi:"सलाद",      tr:"Salata",         nl:"Salade",      pl:"Sałatka",     sv:"Sallad"    },
+      { en:"CHEESE",   es:"Queso",       fr:"Fromage",       ar:"جبن",      pt:"Queijo",     de:"Käse",       it:"Formaggio",   zh:"奶酪",  ja:"チーズ",    ko:"치즈",    ru:"Сыр",       hi:"पनीर",      tr:"Peynir",         nl:"Kaas",        pl:"Ser",         sv:"Ost"       },
+      { en:"BUTTER",   es:"Mantequilla", fr:"Beurre",        ar:"زبدة",     pt:"Manteiga",   de:"Butter",     it:"Burro",       zh:"黄油",  ja:"バター",    ko:"버터",    ru:"Масло",     hi:"मक्खन",     tr:"Tereyağı",       nl:"Boter",       pl:"Masło",       sv:"Smör"      },
+      { en:"SUGAR",    es:"Azúcar",      fr:"Sucre",         ar:"سكر",      pt:"Açúcar",     de:"Zucker",     it:"Zucchero",    zh:"糖",    ja:"さとう",    ko:"설탕",    ru:"Сахар",     hi:"चीनी",      tr:"Şeker",          nl:"Suiker",      pl:"Cukier",      sv:"Socker"    },
+      { en:"HONEY",    es:"Miel",        fr:"Miel",          ar:"عسل",      pt:"Mel",        de:"Honig",      it:"Miele",       zh:"蜂蜜",  ja:"はちみつ",  ko:"꿀",      ru:"Мёд",       hi:"शहद",       tr:"Bal",            nl:"Honing",      pl:"Miód",        sv:"Honung"    },
+      { en:"EGG",      es:"Huevo",       fr:"Œuf",           ar:"بيضة",     pt:"Ovo",        de:"Ei",         it:"Uovo",        zh:"鸡蛋",  ja:"たまご",    ko:"달걀",    ru:"Яйцо",      hi:"अंडा",      tr:"Yumurta",        nl:"Ei",          pl:"Jajko",       sv:"Ägg"       },
+      { en:"STEAK",    es:"Filete",      fr:"Steak",         ar:"شريحة لحم",pt:"Bife",       de:"Steak",      it:"Bistecca",    zh:"牛排",  ja:"ステーキ",  ko:"스테이크", ru:"Стейк",    hi:"स्टेक",     tr:"Biftek",         nl:"Biefstuk",    pl:"Stek",        sv:"Biff"      },
     ],
   },
 
-  // ────────────────── NATURE ────────────────────────────────────────────────
+  // ────────────────── HOME ──────────────────────────────────────────────────
+  {
+    name: "Home", emoji:"1f3e0", icon: Home,
+    words: [
+      { en:"DOOR",     es:"Puerta",      fr:"Porte",         ar:"باب",      pt:"Porta",      de:"Tür",        it:"Porta",       zh:"门",    ja:"ドア",      ko:"문",      ru:"Дверь",     hi:"दरवाजा",    tr:"Kapı",           nl:"Deur",        pl:"Drzwi",       sv:"Dörr"      },
+      { en:"ROOF",     es:"Techo",       fr:"Toit",          ar:"سقف",      pt:"Telhado",    de:"Dach",       it:"Tetto",       zh:"屋顶",  ja:"やね",      ko:"지붕",    ru:"Крыша",     hi:"छत",        tr:"Çatı",           nl:"Dak",         pl:"Dach",        sv:"Tak"       },
+      { en:"WALL",     es:"Pared",       fr:"Mur",           ar:"جدار",     pt:"Parede",     de:"Wand",       it:"Muro",        zh:"墙",    ja:"かべ",      ko:"벽",      ru:"Стена",     hi:"दीवार",     tr:"Duvar",          nl:"Muur",        pl:"Ściana",      sv:"Vägg"      },
+      { en:"FLOOR",    es:"Suelo",       fr:"Sol",           ar:"أرضية",    pt:"Chão",       de:"Boden",      it:"Pavimento",   zh:"地板",  ja:"ゆか",      ko:"바닥",    ru:"Пол",       hi:"फर्श",      tr:"Zemin",          nl:"Vloer",       pl:"Podłoga",     sv:"Golv"      },
+      { en:"CHAIR",    es:"Silla",       fr:"Chaise",        ar:"كرسي",     pt:"Cadeira",    de:"Stuhl",      it:"Sedia",       zh:"椅子",  ja:"いす",      ko:"의자",    ru:"Стул",      hi:"कुर्सी",    tr:"Sandalye",       nl:"Stoel",       pl:"Krzesło",     sv:"Stol"      },
+      { en:"TABLE",    es:"Mesa",        fr:"Table",         ar:"طاولة",    pt:"Mesa",       de:"Tisch",      it:"Tavolo",      zh:"桌子",  ja:"テーブル",  ko:"탁자",    ru:"Стол",      hi:"मेज़",      tr:"Masa",           nl:"Tafel",       pl:"Stół",        sv:"Bord"      },
+      { en:"LAMP",     es:"Lámpara",     fr:"Lampe",         ar:"مصباح",    pt:"Lâmpada",    de:"Lampe",      it:"Lampada",     zh:"灯",    ja:"ランプ",    ko:"램프",    ru:"Лампа",     hi:"दीपक",      tr:"Lamba",          nl:"Lamp",        pl:"Lampa",       sv:"Lampa"     },
+      { en:"SOFA",     es:"Sofá",        fr:"Canapé",        ar:"أريكة",    pt:"Sofá",       de:"Sofa",       it:"Divano",      zh:"沙发",  ja:"ソファ",    ko:"소파",    ru:"Диван",     hi:"सोफ़ा",     tr:"Kanepe",         nl:"Bank",        pl:"Sofa",        sv:"Soffa"     },
+      { en:"BED",      es:"Cama",        fr:"Lit",           ar:"سرير",     pt:"Cama",       de:"Bett",       it:"Letto",       zh:"床",    ja:"ベッド",    ko:"침대",    ru:"Кровать",   hi:"बिस्तर",    tr:"Yatak",          nl:"Bed",         pl:"Łóżko",       sv:"Säng"      },
+      { en:"CLOCK",    es:"Reloj",       fr:"Horloge",       ar:"ساعة حائط",pt:"Relógio",    de:"Uhr",        it:"Orologio",    zh:"时钟",  ja:"とけい",    ko:"시계",    ru:"Часы",      hi:"घड़ी",      tr:"Saat",           nl:"Klok",        pl:"Zegar",       sv:"Klocka"    },
+      { en:"MIRROR",   es:"Espejo",      fr:"Miroir",        ar:"مرآة",     pt:"Espelho",    de:"Spiegel",    it:"Specchio",    zh:"镜子",  ja:"かがみ",    ko:"거울",    ru:"Зеркало",   hi:"दर्पण",     tr:"Ayna",           nl:"Spiegel",     pl:"Lustro",      sv:"Spegel"    },
+      { en:"WINDOW",   es:"Ventana",     fr:"Fenêtre",       ar:"نافذة",    pt:"Janela",     de:"Fenster",    it:"Finestra",    zh:"窗户",  ja:"まど",      ko:"창문",    ru:"Окно",      hi:"खिड़की",    tr:"Pencere",        nl:"Raam",        pl:"Okno",        sv:"Fönster"   },
+      { en:"BOOK",     es:"Libro",       fr:"Livre",         ar:"كتاب",     pt:"Livro",      de:"Buch",       it:"Libro",       zh:"书",    ja:"ほん",      ko:"책",      ru:"Книга",     hi:"किताब",     tr:"Kitap",          nl:"Boek",        pl:"Książka",     sv:"Bok"       },
+      { en:"PILLOW",   es:"Almohada",    fr:"Oreiller",      ar:"وسادة",    pt:"Travesseiro",de:"Kissen",     it:"Cuscino",     zh:"枕头",  ja:"まくら",    ko:"베개",    ru:"Подушка",   hi:"तकिया",     tr:"Yastık",         nl:"Kussen",      pl:"Poduszka",    sv:"Kudde"     },
+    ],
+  },
+
+  // ────────────────── NATURE ─────────────────────────────────────────────────
   {
     name: "Nature", emoji:"1f33f", icon: Leaf,
     words: [
-      { en:"SUN",      es:"Sol",         fr:"Soleil",        ar:"شمس",      pt:"Sol",       de:"Sonne",      it:"Sole",        zh:"太阳",  ja:"たいよう",  ko:"태양",    ru:"Солнце",    hi:"सूरज",      tr:"Güneş",          nl:"Zon",         pl:"Słońce",      sv:"Sol"       },
-      { en:"MOON",     es:"Luna",        fr:"Lune",          ar:"قمر",      pt:"Lua",       de:"Mond",       it:"Luna",        zh:"月亮",  ja:"つき",      ko:"달",      ru:"Луна",      hi:"चाँद",      tr:"Ay",             nl:"Maan",        pl:"Księżyc",     sv:"Måne"      },
-      { en:"RAIN",     es:"Lluvia",      fr:"Pluie",         ar:"مطر",      pt:"Chuva",     de:"Regen",      it:"Pioggia",     zh:"雨",    ja:"あめ",      ko:"비",      ru:"Дождь",     hi:"बारिश",     tr:"Yağmur",         nl:"Regen",       pl:"Deszcz",      sv:"Regn"      },
-      { en:"TREE",     es:"Árbol",       fr:"Arbre",         ar:"شجرة",     pt:"Árvore",    de:"Baum",       it:"Albero",      zh:"树",    ja:"き",        ko:"나무",    ru:"Дерево",    hi:"पेड़",      tr:"Ağaç",           nl:"Boom",        pl:"Drzewo",      sv:"Träd"      },
-      { en:"LEAF",     es:"Hoja",        fr:"Feuille",       ar:"ورقة",     pt:"Folha",     de:"Blatt",      it:"Foglia",      zh:"叶子",  ja:"は",        ko:"잎",      ru:"Лист",      hi:"पत्ता",     tr:"Yaprak",         nl:"Blad",        pl:"Liść",        sv:"Blad"      },
-      { en:"ROCK",     es:"Roca",        fr:"Rocher",        ar:"صخرة",     pt:"Pedra",     de:"Fels",       it:"Roccia",      zh:"岩石",  ja:"いわ",      ko:"바위",    ru:"Скала",     hi:"चट्टान",    tr:"Kaya",           nl:"Rots",        pl:"Skała",       sv:"Klippa"    },
-      { en:"WAVE",     es:"Ola",         fr:"Vague",         ar:"موجة",     pt:"Onda",      de:"Welle",      it:"Onda",        zh:"海浪",  ja:"なみ",      ko:"파도",    ru:"Волна",     hi:"लहर",       tr:"Dalga",          nl:"Golf",        pl:"Fala",        sv:"Våg"       },
-      { en:"SNOW",     es:"Nieve",       fr:"Neige",         ar:"ثلج",      pt:"Neve",      de:"Schnee",     it:"Neve",        zh:"雪",    ja:"ゆき",      ko:"눈",      ru:"Снег",      hi:"बर्फ",      tr:"Kar",            nl:"Sneeuw",      pl:"Śnieg",       sv:"Snö"       },
-      { en:"STAR",     es:"Estrella",    fr:"Étoile",        ar:"نجمة",     pt:"Estrela",   de:"Stern",      it:"Stella",      zh:"星星",  ja:"ほし",      ko:"별",      ru:"Звезда",    hi:"तारा",      tr:"Yıldız",         nl:"Ster",        pl:"Gwiazda",     sv:"Stjärna"   },
-      { en:"WIND",     es:"Viento",      fr:"Vent",          ar:"ريح",      pt:"Vento",     de:"Wind",       it:"Vento",       zh:"风",    ja:"かぜ",      ko:"바람",    ru:"Ветер",     hi:"हवा",       tr:"Rüzgar",         nl:"Wind",        pl:"Wiatr",       sv:"Vind"      },
-      { en:"LAKE",     es:"Lago",        fr:"Lac",           ar:"بحيرة",    pt:"Lago",      de:"See",        it:"Lago",        zh:"湖",    ja:"みずうみ",  ko:"호수",    ru:"Озеро",     hi:"झील",       tr:"Göl",            nl:"Meer",        pl:"Jezioro",     sv:"Sjö"       },
-      { en:"RIVER",    es:"Río",         fr:"Rivière",       ar:"نهر",      pt:"Rio",       de:"Fluss",      it:"Fiume",       zh:"河流",  ja:"かわ",      ko:"강",      ru:"Река",      hi:"नदी",       tr:"Nehir",          nl:"Rivier",      pl:"Rzeka",       sv:"Flod"      },
-      { en:"CLOUD",    es:"Nube",        fr:"Nuage",         ar:"سحابة",    pt:"Nuvem",     de:"Wolke",      it:"Nuvola",      zh:"云",    ja:"くも",      ko:"구름",    ru:"Облако",    hi:"बादल",      tr:"Bulut",          nl:"Wolk",        pl:"Chmura",      sv:"Moln"      },
-      { en:"FLOWER",   es:"Flor",        fr:"Fleur",         ar:"زهرة",     pt:"Flor",      de:"Blume",      it:"Fiore",       zh:"花",    ja:"はな",      ko:"꽃",      ru:"Цветок",    hi:"फूल",       tr:"Çiçek",          nl:"Bloem",       pl:"Kwiat",       sv:"Blomma"    },
-      { en:"FOREST",   es:"Bosque",      fr:"Forêt",         ar:"غابة",     pt:"Floresta",  de:"Wald",       it:"Foresta",     zh:"森林",  ja:"もり",      ko:"숲",      ru:"Лес",       hi:"जंगल",      tr:"Orman",          nl:"Bos",         pl:"Las",         sv:"Skog"      },
-      { en:"DESERT",   es:"Desierto",    fr:"Désert",        ar:"صحراء",    pt:"Deserto",   de:"Wüste",      it:"Deserto",     zh:"沙漠",  ja:"さばく",    ko:"사막",    ru:"Пустыня",   hi:"रेगिस्तान", tr:"Çöl",            nl:"Woestijn",    pl:"Pustynia",    sv:"Öken"      },
-      { en:"MOUNTAIN", es:"Montaña",     fr:"Montagne",      ar:"جبل",      pt:"Montanha",  de:"Berg",       it:"Montagna",    zh:"山",    ja:"やま",      ko:"산",      ru:"Гора",      hi:"पहाड़",     tr:"Dağ",            nl:"Berg",        pl:"Góra",        sv:"Berg"      },
-      { en:"VOLCANO",  es:"Volcán",      fr:"Volcan",        ar:"بركان",    pt:"Vulcão",    de:"Vulkan",     it:"Vulcano",     zh:"火山",  ja:"かざん",    ko:"화산",    ru:"Вулкан",    hi:"ज्वालामुखी",tr:"Yanardağ",       nl:"Vulkaan",     pl:"Wulkan",      sv:"Vulkan"    },
-      { en:"RAINBOW",  es:"Arcoíris",    fr:"Arc-en-ciel",   ar:"قوس قزح",  pt:"Arco-íris", de:"Regenbogen", it:"Arcobaleno",  zh:"彩虹",  ja:"にじ",      ko:"무지개",  ru:"Радуга",    hi:"इंद्रधनुष", tr:"Gökkuşağı",      nl:"Regenboog",   pl:"Tęcza",       sv:"Regnbåge"  },
-      { en:"BEACH",    es:"Playa",       fr:"Plage",         ar:"شاطئ",     pt:"Praia",     de:"Strand",     it:"Spiaggia",    zh:"海滩",  ja:"ビーチ",    ko:"해변",    ru:"Пляж",      hi:"समुद्र तट", tr:"Plaj",           nl:"Strand",      pl:"Plaża",       sv:"Strand"    },
+      { en:"TREE",     es:"Árbol",       fr:"Arbre",         ar:"شجرة",     pt:"Árvore",     de:"Baum",       it:"Albero",      zh:"树",    ja:"き",        ko:"나무",    ru:"Дерево",    hi:"पेड़",      tr:"Ağaç",           nl:"Boom",        pl:"Drzewo",      sv:"Träd"      },
+      { en:"LEAF",     es:"Hoja",        fr:"Feuille",       ar:"ورقة",     pt:"Folha",      de:"Blatt",      it:"Foglia",      zh:"叶子",  ja:"は",        ko:"잎",      ru:"Лист",      hi:"पत्ती",     tr:"Yaprak",         nl:"Blad",        pl:"Liść",        sv:"Löv"       },
+      { en:"RIVER",    es:"Río",         fr:"Rivière",       ar:"نهر",      pt:"Rio",        de:"Fluss",      it:"Fiume",       zh:"河流",  ja:"かわ",      ko:"강",      ru:"Река",      hi:"नदी",       tr:"Nehir",          nl:"Rivier",      pl:"Rzeka",       sv:"Flod"      },
+      { en:"OCEAN",    es:"Océano",      fr:"Océan",         ar:"محيط",     pt:"Oceano",     de:"Ozean",      it:"Oceano",      zh:"海洋",  ja:"うみ",      ko:"바다",    ru:"Океан",     hi:"महासागर",   tr:"Okyanus",        nl:"Oceaan",      pl:"Ocean",       sv:"Hav"       },
+      { en:"CLOUD",    es:"Nube",        fr:"Nuage",         ar:"سحابة",    pt:"Nuvem",      de:"Wolke",      it:"Nuvola",      zh:"云",    ja:"くも",      ko:"구름",    ru:"Облако",    hi:"बादल",      tr:"Bulut",          nl:"Wolk",        pl:"Chmura",      sv:"Moln"      },
+      { en:"RAIN",     es:"Lluvia",      fr:"Pluie",         ar:"مطر",      pt:"Chuva",      de:"Regen",      it:"Pioggia",     zh:"雨",    ja:"あめ",      ko:"비",      ru:"Дождь",     hi:"बारिश",     tr:"Yağmur",         nl:"Regen",       pl:"Deszcz",      sv:"Regn"      },
+      { en:"SNOW",     es:"Nieve",       fr:"Neige",         ar:"ثلج",      pt:"Neve",       de:"Schnee",     it:"Neve",        zh:"雪",    ja:"ゆき",      ko:"눈",      ru:"Снег",      hi:"बर्फ",      tr:"Kar",            nl:"Sneeuw",      pl:"Śnieg",       sv:"Snö"       },
+      { en:"WIND",     es:"Viento",      fr:"Vent",          ar:"ريح",      pt:"Vento",      de:"Wind",       it:"Vento",       zh:"风",    ja:"かぜ",      ko:"바람",    ru:"Ветер",     hi:"हवा",       tr:"Rüzgar",         nl:"Wind",        pl:"Wiatr",       sv:"Vind"      },
+      { en:"STONE",    es:"Piedra",      fr:"Pierre",        ar:"حجر",      pt:"Pedra",      de:"Stein",      it:"Pietra",      zh:"石头",  ja:"いし",      ko:"돌",      ru:"Камень",    hi:"पत्थर",     tr:"Taş",            nl:"Steen",       pl:"Kamień",      sv:"Sten"      },
+      { en:"SAND",     es:"Arena",       fr:"Sable",         ar:"رمل",      pt:"Areia",      de:"Sand",       it:"Sabbia",      zh:"沙子",  ja:"すな",      ko:"모래",    ru:"Песок",     hi:"रेत",       tr:"Kum",            nl:"Zand",        pl:"Piasek",      sv:"Sand"      },
+      { en:"MOON",     es:"Luna",        fr:"Lune",          ar:"قمر",      pt:"Lua",        de:"Mond",       it:"Luna",        zh:"月亮",  ja:"つき",      ko:"달",      ru:"Луна",      hi:"चाँद",      tr:"Ay",             nl:"Maan",        pl:"Księżyc",     sv:"Måne"      },
+      { en:"STAR",     es:"Estrella",    fr:"Étoile",        ar:"نجمة",     pt:"Estrela",    de:"Stern",      it:"Stella",      zh:"星星",  ja:"ほし",      ko:"별",      ru:"Звезда",    hi:"तारा",      tr:"Yıldız",         nl:"Ster",        pl:"Gwiazda",     sv:"Stjärna"   },
+      { en:"SUN",      es:"Sol",         fr:"Soleil",        ar:"شمس",      pt:"Sol",        de:"Sonne",      it:"Sole",        zh:"太阳",  ja:"たいよう",  ko:"태양",    ru:"Солнце",    hi:"सूरज",      tr:"Güneş",          nl:"Zon",         pl:"Słońce",      sv:"Sol"       },
+      { en:"FIRE",     es:"Fuego",       fr:"Feu",           ar:"نار",      pt:"Fogo",       de:"Feuer",      it:"Fuoco",       zh:"火",    ja:"ひ",        ko:"불",      ru:"Огонь",     hi:"आग",        tr:"Ateş",           nl:"Vuur",        pl:"Ogień",       sv:"Eld"       },
     ],
   },
 ];
 
-// ─── Selector de idioma ────────────────────────────────────────────────────
-const LANG_LABELS = {
-  es: "Español 🇪🇸",
-  fr: "Français 🇫🇷",
-  ar: "العربية 🇸🇦",
-  pt: "Português 🇧🇷",
-  de: "Deutsch 🇩🇪",
-  it: "Italiano 🇮🇹",
-  zh: "中文 🇨🇳",
-  ja: "日本語 🇯🇵",
-  ko: "한국어 🇰🇷",
-  ru: "Русский 🇷🇺",
-  hi: "हिंदी 🇮🇳",
-  tr: "Türkçe 🇹🇷",
-  nl: "Nederlands 🇳🇱",
-  pl: "Polski 🇵🇱",
-  sv: "Svenska 🇸🇪",
-};
-
 // Idiomas con dirección RTL
-const RTL_LANGS = new Set(["ar"]);const GRID_SIZE = 10;
+const RTL_LANGS = new Set(["ar"]);
+const GRID_SIZE = 10;
 
 // ─── Traducciones de interfaz ──────────────────────────────────────────────
-// Uso: getTranslation("newPuzzle", lang)
 const UI_STRINGS = {
   newPuzzle: {
     es:"Nuevo puzzle",    fr:"Nouveau puzzle",  ar:"لعبة جديدة",
@@ -239,79 +248,257 @@ const UI_STRINGS = {
     nl:"Hoe te spelen", pl:"Jak grać",        sv:"Hur man spelar",
   },
 };
-// ─── Función de traducción ──────────────────────────────────────────────
 function getTranslation(key, langCode) {
   const translations = UI_STRINGS[key];
   if (!translations) return key;
   return translations[langCode] || translations["es"] || key;
 }
-// ─── Grid builder ──────────────────────────────────────────────────────────
+
+// ─── Grid builder ─────────────────────────────────────────────────────────
 function buildGrid(words) {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const grid = Array.from({ length: GRID_SIZE }, () =>
-    Array(GRID_SIZE).fill("")
-  );
-  const placed = []; // { word, cells: [{r,c}] }
-
-  const DIRS = [
-    [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1],
-  ];
+  const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(""));
+  const placed = [];
+  const DIRS = [[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
 
   for (const wordObj of words) {
-    const word = wordObj.en;
+    const word = wordObj.en.toUpperCase().replace(/\s+/g,"");
     let success = false;
-    let tries = 0;
-
-    while (!success && tries < 200) {
-      tries++;
+    for (let attempt = 0; attempt < 80 && !success; attempt++) {
       const [dr, dc] = DIRS[Math.floor(Math.random() * DIRS.length)];
-      const r = Math.floor(Math.random() * GRID_SIZE);
-      const c = Math.floor(Math.random() * GRID_SIZE);
+      const r0 = Math.floor(Math.random() * GRID_SIZE);
+      const c0 = Math.floor(Math.random() * GRID_SIZE);
       const cells = [];
-      let valid = true;
-
+      let ok = true;
       for (let i = 0; i < word.length; i++) {
-        const nr = r + dr * i;
-        const nc = c + dc * i;
-        if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) { valid = false; break; }
-        if (grid[nr][nc] !== "" && grid[nr][nc] !== word[i]) { valid = false; break; }
-        cells.push({ r: nr, c: nc });
+        const r = r0 + dr * i, c = c0 + dc * i;
+        if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) { ok = false; break; }
+        if (grid[r][c] !== "" && grid[r][c] !== word[i]) { ok = false; break; }
+        cells.push({ r, c });
       }
-
-      if (valid) {
+      if (ok) {
         cells.forEach(({ r, c }, i) => { grid[r][c] = word[i]; });
         placed.push({ word: wordObj, cells });
         success = true;
       }
     }
   }
-
-  // Fill remaining with random letters
   for (let r = 0; r < GRID_SIZE; r++)
     for (let c = 0; c < GRID_SIZE; c++)
-      if (!grid[r][c]) grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
-
+      if (grid[r][c] === "") grid[r][c] = letters[Math.floor(Math.random() * 26)];
   return { grid, placed };
 }
 
-// ─── Confetti burst ────────────────────────────────────────────────────────
+// ─── Confetti ──────────────────────────────────────────────────────────────
 function Confetti({ active }) {
-  const pieces = Array.from({ length: 20 }, (_, i) => ({
-    id: i, x: Math.random() * 100,
-    color: [C.blue,C.red,C.yellow,C.green,C.magenta,C.cyan][i%6],
-    delay: Math.random()*0.4, size: Math.random()*10+7,
+  const ps = Array.from({ length: 22 }, (_, i) => ({
+    id: i, x: Math.random() * 100, delay: Math.random() * .4, size: Math.random() * 10 + 8,
+    color: ["#F9A825","#E53935","#43A047","#1565C0","#D81B60","#00ACC1"][i % 6],
   }));
   if (!active) return null;
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {pieces.map((p) => (
+      {ps.map(p => (
         <motion.div key={p.id} className="absolute rounded-sm top-0"
           style={{ left:`${p.x}%`, width:p.size, height:p.size, background:p.color }}
           initial={{ y:-20, opacity:1, rotate:0 }}
-          animate={{ y:"110vh", opacity:0, rotate:720 }}
+          animate={{ y:"106vh", opacity:0, rotate:720 }}
           transition={{ duration:1.5+Math.random(), delay:p.delay, ease:"easeIn" }}
         />
       ))}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CUSTOM DROPDOWN — Category picker
+// ══════════════════════════════════════════════════════════════════════════
+function PackDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const sel = PACKS[value];
+
+  useEffect(() => {
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const Icon = sel.icon;
+
+  return (
+    <div ref={ref} style={{ position:"relative", zIndex:40 }}>
+      <motion.button
+        whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:"flex", alignItems:"center", gap:8, padding:"10px 18px",
+          borderRadius:999, border:"2.5px solid white",
+          background:"rgba(255,255,255,0.92)", backdropFilter:"blur(8px)",
+          boxShadow:`0 4px 20px ${C.blue}22`, cursor:"pointer",
+          fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700,
+          fontSize:14, color:C.blue, whiteSpace:"nowrap",
+          minWidth:170, justifyContent:"space-between",
+        }}
+      >
+        <span style={{ display:"flex", alignItems:"center", gap:7 }}>
+          <Icon size={14} style={{ flexShrink:0 }}/>
+          <EmojiSvg code={sel.emoji} size={18}/>
+          <span>{sel.name}</span>
+        </span>
+        <motion.span animate={{ rotate:open?180:0 }} transition={{ duration:0.2 }}
+          style={{ display:"flex" }}>
+          <ChevronDown size={13}/>
+        </motion.span>
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity:0, y:-8, scale:0.97 }}
+            animate={{ opacity:1, y:0, scale:1 }}
+            exit={{ opacity:0, y:-8, scale:0.97 }}
+            transition={{ duration:0.15 }}
+            style={{
+              position:"absolute", top:"calc(100% + 8px)", left:"50%",
+              transform:"translateX(-50%)", width:210,
+              background:"white", borderRadius:18,
+              border:`2px solid ${C.blue}18`,
+              boxShadow:`0 16px 48px ${C.blue}20`,
+              overflow:"hidden", maxHeight:320, overflowY:"auto",
+              scrollbarWidth:"thin",
+            }}
+          >
+            <div style={{
+              padding:"8px 14px 6px", borderBottom:`1.5px solid ${C.blueSoft}`,
+              fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700,
+              fontSize:10, color:C.blue, letterSpacing:"0.08em",
+              textTransform:"uppercase", display:"flex", alignItems:"center", gap:5,
+            }}>
+              <Search size={10}/> Category
+            </div>
+            {PACKS.map((p, i) => {
+              const PIcon = p.icon;
+              const isA = value === i;
+              return (
+                <button key={i} onClick={() => { onChange(i); setOpen(false); }}
+                  style={{
+                    display:"flex", alignItems:"center", gap:9, width:"100%",
+                    padding:"9px 14px", border:"none",
+                    background: isA ? C.blueSoft : "transparent",
+                    cursor:"pointer",
+                    fontFamily:"var(--font-body,'Nunito',sans-serif)",
+                    fontWeight: isA ? 700 : 500, fontSize:13,
+                    color: isA ? C.blue : "#374151", textAlign:"left",
+                    borderLeft: isA ? `3px solid ${C.blue}` : "3px solid transparent",
+                  }}
+                  onMouseEnter={e => { if (!isA) e.currentTarget.style.background = C.blueSoft + "60"; }}
+                  onMouseLeave={e => { if (!isA) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <EmojiSvg code={p.emoji} size={18}/>
+                  <span style={{ flex:1 }}>{p.name}</span>
+                  {isA && <span style={{ width:6, height:6, borderRadius:"50%", background:C.blue, flexShrink:0 }}/>}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CUSTOM DROPDOWN — Language picker
+// ══════════════════════════════════════════════════════════════════════════
+function LangDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const sel = LANGUAGES.find(l => l.code === value) || LANGUAGES[0];
+
+  useEffect(() => {
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position:"relative", zIndex:40 }}>
+      <motion.button
+        whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:"flex", alignItems:"center", gap:8, padding:"10px 18px",
+          borderRadius:999, border:"2.5px solid white",
+          background:"rgba(255,255,255,0.92)", backdropFilter:"blur(8px)",
+          boxShadow:`0 4px 20px ${C.green}22`, cursor:"pointer",
+          fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700,
+          fontSize:14, color:C.green, whiteSpace:"nowrap",
+          minWidth:170, justifyContent:"space-between",
+        }}
+      >
+        <span style={{ display:"flex", alignItems:"center", gap:7 }}>
+          <Globe size={14} style={{ flexShrink:0 }}/>
+          <span style={{ fontSize:18, lineHeight:1 }}>{sel.flag}</span>
+          <span>{sel.label}</span>
+        </span>
+        <motion.span animate={{ rotate:open?180:0 }} transition={{ duration:0.2 }}
+          style={{ display:"flex" }}>
+          <ChevronDown size={13}/>
+        </motion.span>
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity:0, y:-8, scale:0.97 }}
+            animate={{ opacity:1, y:0, scale:1 }}
+            exit={{ opacity:0, y:-8, scale:0.97 }}
+            transition={{ duration:0.15 }}
+            style={{
+              position:"absolute", top:"calc(100% + 8px)", left:"50%",
+              transform:"translateX(-50%)", width:215,
+              background:"white", borderRadius:18,
+              border:`2px solid ${C.green}18`,
+              boxShadow:`0 16px 48px ${C.green}20`,
+              overflow:"hidden", maxHeight:320, overflowY:"auto",
+              scrollbarWidth:"thin",
+            }}
+          >
+            <div style={{
+              padding:"8px 14px 6px", borderBottom:`1.5px solid ${C.greenSoft}`,
+              fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700,
+              fontSize:10, color:C.green, letterSpacing:"0.08em",
+              textTransform:"uppercase", display:"flex", alignItems:"center", gap:5,
+            }}>
+              <Globe size={10}/> Translation language
+            </div>
+            {LANGUAGES.map(l => {
+              const isA = l.code === value;
+              return (
+                <button key={l.code} onClick={() => { onChange(l.code); setOpen(false); }}
+                  style={{
+                    display:"flex", alignItems:"center", gap:9, width:"100%",
+                    padding:"8px 14px", border:"none",
+                    background: isA ? C.greenSoft : "transparent",
+                    cursor:"pointer",
+                    fontFamily:"var(--font-body,'Nunito',sans-serif)",
+                    fontWeight: isA ? 700 : 500, fontSize:13,
+                    color: isA ? C.green : "#374151", textAlign:"left",
+                    borderLeft: isA ? `3px solid ${C.green}` : "3px solid transparent",
+                  }}
+                  onMouseEnter={e => { if (!isA) e.currentTarget.style.background = C.greenSoft + "80"; }}
+                  onMouseLeave={e => { if (!isA) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <span style={{ fontSize:18, lineHeight:1, flexShrink:0 }}>{l.flag}</span>
+                  <span style={{ flex:1 }}>{l.label}</span>
+                  {isA && <span style={{ width:6, height:6, borderRadius:"50%", background:C.green, flexShrink:0 }}/>}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -327,7 +514,6 @@ export default function WordSearch() {
   const [confetti,  setConfetti]  = useState(false);
   const [won,       setWon]       = useState(false);
 
-  // ── pack y startGame — declarados UNA sola vez ────────────────────────
   const pack = PACKS[packIdx];
 
   const startGame = useCallback((pIdx = packIdx) => {
@@ -343,7 +529,6 @@ export default function WordSearch() {
 
   const handleReset = () => { startGame(); };
 
-  // ── Lógica de selección ───────────────────────────────────────────────
   const checkSelection = (sel) => {
     if (!gameData || sel.length < 2) return;
     const selKey = sel.map(c => `${c.r},${c.c}`).join("|");
@@ -405,22 +590,20 @@ export default function WordSearch() {
     setSelection([]);
   };
 
-  // ── UI ─────────────────────────────────────────────────────────────────
+  // ── UI ────────────────────────────────────────────────────────────────────
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <WordSearchBg />
-      <Confetti active={confetti} />
+      <WordSearchBg/>
+      <Confetti active={confetti}/>
 
       <div className="relative z-10">
         {/* Header */}
         <div className="text-center py-10 px-4">
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring" }}
-            className="mb-4"
+            initial={{ scale:0.8, opacity:0 }} animate={{ scale:1, opacity:1 }}
+            transition={{ type:"spring" }} className="mb-4"
           >
-            <h1 style={{ lineHeight: 1.2 }}>
+            <h1 style={{ lineHeight:1.2 }}>
               <BubbleTitle color="#E11D48" size={54}>Word Hunt</BubbleTitle>
             </h1>
           </motion.div>
@@ -429,64 +612,20 @@ export default function WordSearch() {
           </p>
         </div>
 
-        {/* Controls — dropdowns for category + language */}
-        <div className="flex justify-center gap-3 px-4 mb-6">
-
-          {/* Category dropdown */}
-          <div className="relative">
-            <select
-              value={packIdx}
-              onChange={e => setPackIdx(Number(e.target.value))}
-              className="appearance-none font-display text-sm font-bold pl-4 pr-9 py-2.5 rounded-2xl border-2 cursor-pointer outline-none"
-              style={{
-                background:  "white",
-                borderColor: C.blue,
-                color:       C.blue,
-                boxShadow:   `0 4px 14px ${C.blue}22`,
-              }}
-            >
-              {PACKS.map((p, i) => (
-                <option key={i} value={i}>{p.name}</option>
-              ))}
-            </select>
-            {/* chevron */}
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-              style={{ color: C.blue, fontSize: 10 }}>▼</span>
-          </div>
-
-          {/* Language dropdown */}
-          <div className="relative">
-            <select
-              value={lang}
-              onChange={e => setLang(e.target.value)}
-              className="appearance-none font-display text-sm font-bold pl-4 pr-9 py-2.5 rounded-2xl border-2 cursor-pointer outline-none"
-              style={{
-                background:  "white",
-                borderColor: C.green,
-                color:       C.green,
-                boxShadow:   `0 4px 14px ${C.green}22`,
-              }}
-            >
-              {Object.entries(LANG_LABELS).map(([code, label]) => (
-                <option key={code} value={code}>{label}</option>
-              ))}
-            </select>
-            {/* chevron */}
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-              style={{ color: C.green, fontSize: 10 }}>▼</span>
-          </div>
-
+        {/* ── Controls — custom dropdowns ────────────────────────────── */}
+        <div className="flex justify-center gap-3 px-4 mb-6 flex-wrap">
+          <PackDropdown value={packIdx} onChange={idx => setPackIdx(idx)}/>
+          <LangDropdown value={lang}    onChange={code => setLang(code)}/>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 pb-20">
           {won && (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale:0.8, opacity:0 }} animate={{ scale:1, opacity:1 }}
               className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
               style={{
-                background: `linear-gradient(135deg, ${C.green}, #2E7D32)`,
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                background:`linear-gradient(135deg, ${C.green}, #2E7D32)`,
+                display:"flex", alignItems:"center", justifyContent:"center", gap:8,
               }}
             >
               <Trophy size={22} strokeWidth={2}/> {getTranslation("wellDone", lang)}
@@ -498,7 +637,7 @@ export default function WordSearch() {
             <div>
               <div
                 className="grid gap-1 p-3 rounded-3xl shadow-xl border-4 border-white select-none"
-                style={{ gridTemplateColumns: `repeat(${GRID_SIZE},1fr)`, background: C.blueSoft }}
+                style={{ gridTemplateColumns:`repeat(${GRID_SIZE},1fr)`, background:C.blueSoft }}
                 onMouseLeave={handleCellEnd}
                 onTouchEnd={handleCellEnd}
               >
@@ -507,7 +646,7 @@ export default function WordSearch() {
                     <motion.div
                       key={`${r}-${c}`}
                       className="aspect-square flex items-center justify-center rounded-lg font-display text-sm cursor-pointer transition-all"
-                      style={{ background: "white", color: C.blue, fontSize: "clamp(11px,2vw,16px)", ...getCellStyle(r, c) }}
+                      style={{ background:"white", color:C.blue, fontSize:"clamp(11px,2vw,16px)", ...getCellStyle(r, c) }}
                       onMouseDown={()  => handleCellStart(r, c)}
                       onMouseEnter={() => handleCellEnter(r, c)}
                       onMouseUp={handleCellEnd}
@@ -521,10 +660,10 @@ export default function WordSearch() {
 
               <div className="mt-4 flex justify-center">
                 <motion.button
-                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                  whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
                   onClick={handleReset}
                   className="flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-md"
-                  style={{ background: C.red }}
+                  style={{ background:C.red }}
                 >
                   <RotateCcw size={16}/> {getTranslation("newPuzzle", lang)}
                 </motion.button>
@@ -533,8 +672,9 @@ export default function WordSearch() {
 
             {/* Word list */}
             <div>
-              <h3 className="font-display text-sm font-bold mb-2 flex items-center gap-1.5" style={{ color: C.blue }}>
-                <Search size={13}/> {getTranslation("findWords", lang)} <span className="text-xs font-normal opacity-70">({found.length}/{pack.words.length})</span>
+              <h3 className="font-display text-sm font-bold mb-2 flex items-center gap-1.5" style={{ color:C.blue }}>
+                <Search size={13}/> {getTranslation("findWords", lang)}
+                <span className="text-xs font-normal opacity-70">({found.length}/{pack.words.length})</span>
               </h3>
               <div className="grid grid-cols-2 gap-1.5">
                 {gameData && gameData.placed.map(({ word }, wi) => {
@@ -543,22 +683,18 @@ export default function WordSearch() {
                   return (
                     <motion.div
                       key={wi}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: wi * 0.04 }}
+                      initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
+                      transition={{ delay:wi * 0.04 }}
                       className="flex items-center gap-2 px-2.5 py-2 rounded-xl border-2 transition-all"
-                      style={{
-                        background:  isFound ? col.bg : "white",
-                        borderColor: isFound ? col.border : "#E2E8F0",
-                      }}
+                      style={{ background:isFound ? col.bg : "white", borderColor:isFound ? col.border : "#E2E8F0" }}
                     >
                       {isFound
-                        ? <CheckCircle size={13} style={{ color: col.text, flexShrink: 0 }}/>
+                        ? <CheckCircle size={13} style={{ color:col.text, flexShrink:0 }}/>
                         : <div className="w-3 h-3 rounded-full border-2 border-slate-300 flex-shrink-0"/>
                       }
                       <div className="flex-1 min-w-0">
                         <div className="font-display text-sm leading-tight truncate"
-                          style={{ color: isFound ? col.text : C.blue }}>
+                          style={{ color:isFound ? col.text : C.blue }}>
                           {isFound ? word.en : "?".repeat(word.en.length)}
                         </div>
                         <div className="font-body text-xs text-slate-400 leading-tight truncate"
@@ -566,15 +702,15 @@ export default function WordSearch() {
                           {word[lang]}
                         </div>
                       </div>
-                      {isFound && <Star size={11} style={{ color: col.text, flexShrink: 0 }}/>}
+                      {isFound && <Star size={11} style={{ color:col.text, flexShrink:0 }}/>}
                     </motion.div>
                   );
                 })}
               </div>
 
               {/* Instructions */}
-              <div className="mt-6 rounded-3xl p-4 border-2 border-white shadow-sm" style={{ background: C.yellowSoft }}>
-                <p className="font-display text-sm mb-1" style={{ color: C.yellow }}>
+              <div className="mt-6 rounded-3xl p-4 border-2 border-white shadow-sm" style={{ background:C.yellowSoft }}>
+                <p className="font-display text-sm mb-1" style={{ color:C.yellow }}>
                   {getTranslation("howToPlay", lang)}
                 </p>
                 <p className="font-body text-xs text-slate-600">
