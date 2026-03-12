@@ -8,7 +8,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Rocket, BookOpen, Puzzle, Star } from "lucide-react";
-import { BubbleTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 const SPRING = { type: "spring", stiffness: 280, damping: 22 };
