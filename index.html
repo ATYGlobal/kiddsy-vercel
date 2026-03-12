@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- ══════════════════════════════════════════════════════════
+         CONTENT SECURITY POLICY (CSP) - CORREGIDA
+    ══════════════════════════════════════════════════════════ -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https://cdnjs.cloudflare.com https://*.unsplash.com https:;
+      connect-src 'self' https://kiddsy-vercel.onrender.com ws: wss:;
+      frame-src 'none';
+      base-uri 'self';
+      form-action 'self';
+    ">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Kiddsy — Magical bilingual storybooks for families learning English together" />
