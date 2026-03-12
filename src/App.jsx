@@ -303,9 +303,7 @@ export default function App() {
                 <StoryReader story={activeStory} lang={lang} onBack={() => setView("library")}/>
               </motion.div>
             ) : null}
-            
-          </AnimatePresence>
-          return (
+            return (
             <div className="min-h-screen relative kiddsy-bg-drift" style={{
               background: "linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 25%, #FFF3E0 50%, #FFFDE7 75%, #F3E5F5 100%)",
             }}>
@@ -333,6 +331,7 @@ export default function App() {
               </div>
             </div>
           );
+          </AnimatePresence>
         </main>
         <Footer onNav={handleNav} lang={lang}/>
       </div>
