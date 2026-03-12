@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Puzzle, Brain, RotateCcw } from "lucide-react";
 import { CATEGORY_TILES, GameStickerTile, StickerBadge } from "../components/KiddsyIcons.jsx";
+import { GamesBg } from "../components/PageBg.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 // ── CartoonTitle ──────────────────────────────────────────────────────────
 function CartoonTitle({ children, fill = "#1565C0", stroke = "#BBDEFB", size = 44 }) {
