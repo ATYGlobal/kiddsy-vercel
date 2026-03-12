@@ -206,7 +206,17 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const diff     = DIFFICULTIES.find(d => d.size === gridSize) || DIFFICULTIES[0];
   const GRID_PX  = gridSize <= 4 ? 300 : 360;
   const teaserLangs = LANGUAGES.filter(l => l.code !== lang && l.code !== "en").slice(0, 3);
-
+  useEffect(() => {
+    const preloadImages = () => {
+      CATEGORIES.forEach(cat => {
+        cat.items.forEach(item => {
+          const img = new Image();
+          img.src = item.img;
+        });
+      });
+    };
+    preloadImages();
+  }, []);
   // ── Shuffle / reset ───────────────────────────────────────────────────
   const reset = useCallback((gSize = gridSize) => {
     setTiles(buildPuzzle(gSize));
@@ -478,22 +488,31 @@ return (
               <img src={item.img} alt="" className="hidden" onLoad={() => setImgLoaded(true)}/>
 
               {/* Loading placeholder */}
-              {!imgLoaded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-                  style={{ background:(item.color || "#eee") + "22" }}>
-                  {(() => { const CatIcon = cat.icon; return (
-                    <motion.div animate={{ scale:[1,1.15,1], opacity:[0.5,1,0.5] }}
-                      transition={{ duration:1.4, repeat:Infinity, ease:"easeInOut" }}
-                      style={{ color:item.color || accent }}>
-                      <CatIcon size={48} strokeWidth={1.5}/>
+                {!imgLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                    style={{ background:(item.color || "#eee") + "22" }}>
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 10, -10, 0]
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <EmojiSvg code={cat.emoji} size={48} />
                     </motion.div>
-                  ); })()}
-                  <span style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
-                    Loading photo…
-                  </span>
-                </div>
-              )}
-
+                    <span style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
+                      Cargando imagen...
+                    </span>
+                    <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden mt-2">
+                      <motion.div
+                        className="h-full"
+                        style={{ background: accent }}
+                        animate={{ width: ["0%", "100%"] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                    </div>
+                  </div>
+                )}
               {/* Puzzle tiles */}
               {imgLoaded && (
                 <div style={{
