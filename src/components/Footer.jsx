@@ -12,7 +12,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Heart, Shield, Sparkles, CheckCircle, Star, BookOpen } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ── Paleta ────────────────────────────────────────────────────────────────

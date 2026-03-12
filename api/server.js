@@ -61,49 +61,67 @@ function buildSystemPrompt(langCode, childName = "the child", stylePrompt = "") 
 CORE RULES:
 1. Always write educational, age-appropriate content with simple, positive language.
 2. Every story must have EXACTLY 8 pages for a premium experience.
-3. Total word count must be between 200 and 300 words.
-4. Naturally include at least 2 words from this vocabulary: ${vocabSample}.
-5. Keep sentences short (max 12 words per sentence in English).
-6. NARRATIVE STRUCTURE:
-   - Pages 1-2: Beginning (Introduce ${childName} and a magical setting).
-   - Pages 3-6: Middle/Conflict (A challenge requiring courage or curiosity).
-   - Pages 7-8: Ending & Emotional Closure (Problem solved, returning to safety with a heartwarming final sentence).
+3. Total word count must be between 400 and 500 words (approx 50-60 words per page).
+4. Naturally include at least 3 words from this vocabulary: ${vocabSample}.
+5. Vary sentence length: 8-15 words per sentence. Mix short and medium sentences for rhythm.
+
+NARRATIVE STRUCTURE (8 pages):
+   - Pages 1-2: INTRODUCTION (15% of story)
+     • Page 1: Introduce ${childName} and their world/setting. Establish normalcy.
+     • Page 2: Present the call to adventure — something unusual or magical appears.
+   
+   - Pages 3-6: JOURNEY & CHALLENGES (60% of story)
+     • Page 3: First encounter with the magical element. Curiosity and discovery.
+     • Page 4: Rising action — a small problem or obstacle appears.
+     • Page 5: The challenge grows — requires courage, kindness, or clever thinking.
+     • Page 6: The climax — facing the biggest challenge, moment of doubt then courage.
+   
+   - Pages 7-8: RESOLUTION & RETURN (25% of story)
+     • Page 7: Problem solved, the magical moment. Joy and relief.
+     • Page 8: Return home/closure. A heartwarming final sentence that leaves the child smiling.
+
+EMOTIONAL ELEMENTS:
+   - Include at least one moment of wonder/magic
+   - Include one moment of mild tension that resolves positively
+   - End with warmth, love, or a gentle lesson about kindness/courage/curiosity
 
 LANGUAGE RULES:
 - The "en" field is clear, simple English.
 - The "${langCode}" field is the ${langName} translation.${rtlNote}
 - NEVER mix languages within the same field.
+- Use dialogue occasionally (1-2 lines per story) to bring characters to life.
 
 SVG RULES:
 - Each "image_svg" must be a self-contained <svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'> element.
 - Use ONLY basic SVG shapes: rect, circle, ellipse, polygon, path.
 - CRITICAL: Use ONLY single quotes (') for SVG attributes (e.g., fill='red') to avoid breaking the JSON.
 - Keep SVG under 600 characters.
+- The SVG should illustrate the key moment of that page.
 
 DALLE PROMPT RULE:
-- "dalle_prompt" per page: describe the scene for that page vividly (who, where, what is happening).
-- Keep it under 200 characters. End with: "Children's book illustration, no text."${styleNote}
+- "dalle_prompt" per page: describe the scene vividly (who, where, what is happening, emotions).
+- Include style details: colors, lighting, composition.
+- Keep it under 200 characters. End with: "Children's book illustration, soft colors, no text."${styleNote}
 
 OUTPUT FORMAT — Respond ONLY with a valid JSON object. No markdown, no backticks, no preamble.
 
 JSON SCHEMA:
 {
-  "title": "Story title",
+  "title": "Story title (3-6 words, engaging)",
   "emoji": "🌟",
   "color": "from-blue-400 to-cyan-300",
   "pages": [
     {
-      "en": "English text (approx 30-35 words).",
+      "en": "English text (approx 50-60 words for this page).",
       "${langCode}": "${langName} text.",
       "image_svg": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>...</svg>",
-      "dalle_prompt": "Scene description. Children's book illustration, no text."
+      "dalle_prompt": "Vivid scene description. Children's book illustration, soft colors, no text."
     }
   ]
 }
 
 COLOR OPTIONS: "from-blue-400 to-cyan-300" | "from-green-400 to-emerald-300" | "from-pink-400 to-rose-300" | "from-orange-400 to-amber-300" | "from-purple-400 to-violet-300" | "from-yellow-400 to-amber-300"`;
 }
-
 // ── cleanJson ──────────────────────────────────────────────────────────────
 function cleanJson(raw = "") {
   if (!raw) return "";
