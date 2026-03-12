@@ -12,6 +12,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Heart, Shield, Sparkles, CheckCircle, Star, BookOpen } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 
 // ── Paleta ────────────────────────────────────────────────────────────────
@@ -750,17 +751,27 @@ export default function Footer({ onNav, lang = "es" }) {
 
         {/* ── Main nav links ──────────────────────────────────────────── */}
         <div style={{
-          display:        "flex",
-          flexWrap:       "wrap",
+          display: "flex",
+          flexWrap: "wrap",
           justifyContent: "center",
-          gap:            8,
-          marginBottom:   16,
+          gap: 16,
+          marginBottom: 16,
         }}>
-          <NavLink onClick={() => onNav("library")}   color={C.blue}    icon={BookOpen}>Stories</NavLink>
-          <NavLink onClick={() => onNav("games")}     color="#E53935"   icon={null}><EmojiSvg code="1f3ae" size={12} /> Games</NavLink>
-          <NavLink onClick={() => onNav("education")} color={C.orange}  icon={null}><EmojiSvg code="1f4d6" size={12} /> Learn ABC</NavLink>
-          <NavLink onClick={() => onNav("subscription")} color={C.yellow} icon={Heart}>Subscription</NavLink>
-          <NavLink onClick={() => onNav("collaborate")} color={C.magenta} icon={null}><EmojiSvg code="1f91d" size={12} /> Collaborate</NavLink>
+          <NavLink 
+            onClick={() => onNav("subscription")} 
+            color={C.blue}  
+            icon={Sparkles}
+          >
+            Subscription
+          </NavLink>
+          
+          <NavLink 
+            onClick={() => onNav("collaborate")} 
+            color={C.magenta}  
+            icon={Heart}
+          >
+            Collaborate
+          </NavLink>
         </div>
         {/* ── Climate badge ─────────────────────────────────────── */}
         <div style={{
