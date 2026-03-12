@@ -144,7 +144,7 @@ export function StoryBg() {
           {/* Wax */}
           <svg width={22} height={50} viewBox="0 0 22 50">
             <rect x="4" y="0" width="14" height="44" rx="7" fill="#FEF3C7" stroke="#FDE68A" strokeWidth="1.5"/>
-            <rect x="4" y="36" width="14" height="10" rx="0 0 7 7" fill="#FCD34D" opacity="0.4"/>
+            <rect x="4" y="36" width="14" height="10" rx="7" fill="#FCD34D" opacity="0.4"/>
             {/* Wick */}
             <line x1="11" y1="0" x2="11" y2="-8" stroke="#374151" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>

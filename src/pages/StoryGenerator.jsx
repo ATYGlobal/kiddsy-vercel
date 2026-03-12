@@ -833,7 +833,7 @@ function RecentStories({ onRead }) {
 // ════════════════════════════════════════════════════════════════════════════
 // StoryGenerator — main export
 // ════════════════════════════════════════════════════════════════════════════
-export default function StoryGenerator({ lang, onLangChange, onGenerated, onBack }) {
+export default function StoryGenerator({ lang = "es", onLangChange, onGenerated, onBack }) {
   const [activeStory, setActiveStory] = useState(null);
 
   const handleGenerated = (story, storyLang) => {

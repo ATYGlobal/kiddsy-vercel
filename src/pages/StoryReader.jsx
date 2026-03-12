@@ -64,7 +64,7 @@ export function StoryCoverCard({ story, onClick, index }) {
 // ════════════════════════════════════════════════════════════════════════════
 // StoryReader
 // ════════════════════════════════════════════════════════════════════════════
-export default function StoryReader({ story, lang, onBack }) {
+export default function StoryReader({ story, lang = "es", onBack }) {
   const [pageIdx,   setPageIdx]   = useState(0);
   const [direction, setDirection] = useState(1);
 
