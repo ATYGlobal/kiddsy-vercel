@@ -271,68 +271,34 @@ export default function App() {
         <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.blue}07` }}/>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.yellow}0F` }}/>
       </div>
-        return (
-                    <div className="min-h-screen relative kiddsy-bg-drift" style={{
-                      background: "linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 25%, #FFF3E0 50%, #FFFDE7 75%, #F3E5F5 100%)",
-                    }}>
-                      <KiddsyBgStyles/>
-                      <SwUpdateToast/>
-                      <StarField/>
 
-                      <div className="fixed inset-0 pointer-events-none z-0">
-                        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.blue}07` }}/>
-                        <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: `${C.yellow}0F` }}/>
-                      </div>
-
-                      <div className="relative z-10">
-                        
-                        {/* ── AÑADE LA NAVBAR AQUÍ ── */}
-                        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
-
-                        <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
-                          <AnimatePresence mode="wait">
-                            {/* ... resto del contenido ... */}
-                          </AnimatePresence>
-                        </main>
-                        
-                        <Footer onNav={handleNav} lang={lang}/>
-                      </div>
-                    </div>
-                  );
       <div className="relative z-10">
+        
+        {/* ── NAVBAR AÑADIDA ── */}
+        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
+
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
-
             {FULL_PAGES[view] ? (
               <motion.div key={view} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="-mx-4">
                 {FULL_PAGES[view]}
               </motion.div>
-            ) :
-
-            view === "generator" ? (
+            ) : view === "generator" ? (
               <motion.div key="generator" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <StoryGenerator 
-                  lang={lang} 
-                  onLangChange={setLang}
-                  onGenerated={handleGenerated}  // ← CORREGIDO
-                />
+                <StoryGenerator lang={lang} onLangChange={setLang} onGenerated={handleGenerated} />
               </motion.div>
-            ) :
-
-            view === "library" ? (
+            ) : view === "library" ? (
               <motion.div key="library" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={() => setView("generator")} isGuest={isGuest}/>
               </motion.div>
-            ) :
-
-            view === "reader" && activeStory ? (
+            ) : view === "reader" && activeStory ? (
               <motion.div key="reader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <StoryReader story={activeStory} lang={lang} onBack={() => setView("library")}/>
               </motion.div>
             ) : null}
-            
           </AnimatePresence>
         </main>
+        
         <Footer onNav={handleNav} lang={lang}/>
       </div>
     </div>
