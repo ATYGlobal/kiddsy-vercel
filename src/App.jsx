@@ -81,7 +81,7 @@ function StarField() {
 }
 
 // ── LibraryView ────────────────────────────────────────────────────────────
-function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
+function LibraryView({ stories, onSelectStory, onGenerate, isGuest, lang = "en" }) {
   console.log('🔍 LibraryView recibió lang:', lang);
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -310,7 +310,7 @@ export default function App() {
             ) : view === "library" ? (
               <motion.div key="library" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {console.log('🔍 Pasando lang a LibraryView:', lang)}
-                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={() => setView("generator")} isGuest={isGuest}/>
+                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={() => setView("generator")} isGuest={isGuest} lang={lang} />
               </motion.div>
             ) : view === "reader" && activeStory ? (
               <motion.div key="reader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>

@@ -692,6 +692,7 @@ function Divider() {
 // FOOTER
 // ═══════════════════════════════════════════════════════════════════════════
 export default function Footer({ onNav, lang = "es" }) {
+  console.log('🔍 Footer recibió lang:', lang);
   return (
     <footer style={{
       position:   "relative",
