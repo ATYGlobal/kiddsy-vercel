@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wand2, Sparkles } from "lucide-react";
+import { Wand2, Sparkles, BookOpen, Gamepad2, GraduationCap, Users, Library, Home } from "lucide-react";
 
 // ── Páginas ────────────────────────────────────────────────────────────────
 import HeroScreen from "./pages/HeroScreen";
@@ -19,7 +19,6 @@ import WordSearch from "./pages/WordSearch.jsx";
 import PuzzleMaster from "./pages/PuzzleMaster.jsx";
 
 // ── Componentes ────────────────────────────────────────────────────────────
-import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import SwUpdateToast from "./components/SwUpdateToast.jsx";
 import { StoryCoverCard } from "./pages/StoryReader.jsx";
@@ -101,6 +100,109 @@ function StarField() {
         >★</motion.div>
       ))}
     </div>
+  );
+}
+
+// ── NUEVO NAVBAR DE RESPALDO ───────────────────────────────────────────────
+function KiddsyNavbar({ currentView, onNavigate, lang, onLangChange }) {
+  const menuItems = [
+    { id: "library", label: "Library", icon: <Library size={20} /> },
+    { id: "games", label: "Games", icon: <Gamepad2 size={20} /> },
+    { id: "education", label: "Learn", icon: <GraduationCap size={20} /> },
+    { id: "mylibrary", label: "My Stories", icon: <BookOpen size={20} /> },
+    { id: "collaborate", label: "Team", icon: <Users size={20} /> },
+  ];
+
+  const handleNavClick = (viewId) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Navbar click:", viewId);
+    if (typeof onNavigate === 'function') {
+      onNavigate(viewId);
+    } else {
+      console.error("onNavigate no es una función");
+    }
+  };
+
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Home click");
+    if (typeof onNavigate === 'function') {
+      onNavigate("library");
+    }
+  };
+
+  return (
+    <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-yellow-100 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo / Home */}
+          <button
+            onClick={handleHomeClick}
+            className="flex items-center gap-2 font-display font-bold text-xl"
+            style={{ color: C.blue }}
+          >
+            <Home size={24} style={{ color: C.yellow }} />
+            <span>Kiddsy</span>
+          </button>
+
+          {/* Menu Items */}
+          <div className="hidden md:flex items-center gap-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={handleNavClick(item.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-display text-sm transition-all cursor-pointer
+                  ${currentView === item.id 
+                    ? 'bg-yellow-100 text-amber-800' 
+                    : 'hover:bg-amber-50 text-slate-600'}`}
+              >
+                <span style={{ color: currentView === item.id ? C.orange : C.blue }}>
+                  {item.icon}
+                </span>
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Language Selector */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onLangChange?.('es')}
+              className={`px-3 py-1 rounded-lg font-display text-sm cursor-pointer transition-all
+                ${lang === 'es' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'}`}
+            >
+              ES
+            </button>
+            <button
+              onClick={() => onLangChange?.('en')}
+              className={`px-3 py-1 rounded-lg font-display text-sm cursor-pointer transition-all
+                ${lang === 'en' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'}`}
+            >
+              EN
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className="md:hidden flex items-center justify-around py-2 border-t border-amber-100">
+          {menuItems.slice(0, 4).map((item) => (
+            <button
+              key={item.id}
+              onClick={handleNavClick(item.id)}
+              className={`flex flex-col items-center p-2 rounded-lg text-xs font-display cursor-pointer
+                ${currentView === item.id ? 'text-amber-800' : 'text-slate-500'}`}
+            >
+              <span style={{ color: currentView === item.id ? C.orange : C.blue }}>
+                {item.icon}
+              </span>
+              <span className="mt-1">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </nav>
   );
 }
 
@@ -342,7 +444,6 @@ function Collaborate() {
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
   const { user } = useAuth();
-  // CORREGIDO: Volvemos a "hero" como vista inicial
   const [view, setView] = useState("hero");
   const [lang, setLang] = useState(() => lsGet(LS_LANG, "es"));
   const [stories, setStories] = useState([]);
@@ -382,12 +483,14 @@ export default function App() {
   }, [user]);
 
   const handleSelectStory = (story) => {
+    console.log("Selecting story:", story?.title);
     setActiveStory(story);
     setView("reader");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGeneratedStory = (story, chosenLang) => {
+    console.log("Generated story:", story?.title);
     setLang(chosenLang);
     setStories(prev => [story, ...prev]);
     setActiveStory(story);
@@ -396,21 +499,24 @@ export default function App() {
   };
 
   const handleNavigation = (viewId) => {
+    console.log("Navigating to:", viewId);
     setView(viewId);
     setActiveStory(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGenerateClick = () => {
+    console.log("Generate clicked");
     setView("generator");
   };
 
   const handlePlayClick = () => {
+    console.log("Play clicked");
     setView("library");
     window.scrollTo({ top: 0 });
   };
 
-  // Si estamos en hero, mostramos solo HeroScreen sin Navbar ni Footer
+  // Si estamos en hero, mostramos solo HeroScreen
   if (view === "hero") {
     return <HeroScreen onPlay={handlePlayClick} />;
   }
@@ -512,15 +618,13 @@ export default function App() {
       </div>
 
       <div className="relative z-10">
-        {/* Navbar solo visible cuando no estamos en hero */}
-        {view !== "hero" && (
-          <Navbar 
-            currentView={view}
-            onNavigate={handleNavigation}
-            lang={lang}
-            onLangChange={setLang}
-          />
-        )}
+        {/* Usamos el nuevo KiddsyNavbar en lugar del importado */}
+        <KiddsyNavbar 
+          currentView={view}
+          onNavigate={handleNavigation}
+          lang={lang}
+          onLangChange={setLang}
+        />
         
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
@@ -535,10 +639,7 @@ export default function App() {
           </AnimatePresence>
         </main>
         
-        {/* Footer solo visible cuando no estamos en hero */}
-        {view !== "hero" && (
-          <Footer onNav={handleNavigation} lang={lang} />
-        )}
+        <Footer onNav={handleNavigation} lang={lang} />
       </div>
     </div>
   );
