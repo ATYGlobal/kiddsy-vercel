@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
-  Star, Loader, Trophy, Target, CheckCircle, Lock,
+  Star, Loader, Trophy, Target, CheckCircle, Lock, Puzzle,
 } from "lucide-react";
 import Pricing         from "../components/Pricing.jsx";
 import { PuzzleBg }   from "../components/PageBg.jsx";
