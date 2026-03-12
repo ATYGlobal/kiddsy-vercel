@@ -5,33 +5,32 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wand2, Sparkles } from "lucide-react";
-import { DemoBookShelf } from "./pages/StoryReader.jsx";
 
-// ── Páginas (Asegúrate de que TODOS estén en src/pages/) ──────────────────
-import HeroScreen     from "./pages/HeroScreen";
-import MyLibrary      from "./pages/MyLibrary";
+// ── Páginas ────────────────────────────────────────────────────────────────
+import HeroScreen    from "./pages/HeroScreen";
+import MyLibrary     from "./pages/MyLibrary.jsx";
 import StoryGenerator from "./pages/StoryGenerator";
-import StoryReader, { StoryCoverCard } from "./pages/StoryReader";
-import { AvisoLegal, Privacidad } from "./pages/LegalPages";
-import Subscription from "./pages/Subscription";
-import Games          from "./pages/Games";
-import Education      from "./pages/Education";
-import WordSearch     from "./pages/WordSearch";
-import PuzzleMaster   from "./pages/PuzzleMaster";
+import StoryReader, { StoryCoverCard } from "./pages/StoryReader.jsx";
+import { AvisoLegal, Privacidad } from "./pages/LegalPages.jsx";
+import Donation      from "./pages/Donation.jsx";
+import Games         from "./pages/Games.jsx";
+import Education     from "./pages/Education.jsx";
+import WordSearch    from "./pages/WordSearch.jsx";
+import PuzzleMaster  from "./pages/PuzzleMaster.jsx";
 
-// ── Componentes (Asegúrate de que TODOS estén en src/components/) ──────────
-import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar";
-import Footer         from "./components/Footer";
-import SwUpdateToast  from "./components/SwUpdateToast";
-import KiddsyTitle    from "./components/KiddsyTitle";
-import { StoryCoverIcon } from "./components/KiddsyIcons";
+// ── Componentes ────────────────────────────────────────────────────────────
+import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar.jsx";
+import Footer        from "./components/Footer.jsx";
+import SwUpdateToast from "./components/SwUpdateToast.jsx";
+import KiddsyTitle   from "./components/KiddsyTitle";
+import { StoryCoverIcon } from "./components/KiddsyIcons.jsx";
 
-// ── Utils (Asegúrate de que esté en src/utils/) ────────────────────────────
+// ── Utils ──────────────────────────────────────────────────────────────────
 import {
   LS_LANG, LS_STORIES,
   lsGet, lsSet,
   getGuestId, fetchUserStories, saveStory,
-} from "./utils/storage";
+} from "./utils/storage.js";
 
 // ── Auth stub (reemplaza con AuthContext cuando actives login) ─────────────
 function useAuth() {
@@ -81,50 +80,51 @@ function StarField() {
 }
 
 // ── LibraryView ────────────────────────────────────────────────────────────
-function LibraryView({ stories, onSelectStory, onGenerate, isGuest, lang = "en" }) {
-  console.log('🔍 LibraryView recibió lang:', lang);
+function LibraryView({ stories, onSelectStory, onGenerate, isGuest }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="text-center mb-10">
         <h2 className="font-display text-4xl mb-3" style={{ color: C.blue }}>Story Library</h2>
         <p className="font-body text-slate-500 text-lg">Pick a story or create your own! ✨</p>
       </div>
-      
       {isGuest && (
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", marginBottom: 20, borderRadius: 16, background: "linear-gradient(135deg,#FFF8E1,#FFF3E0)", border: "2px solid #FFE082", boxShadow: "0 2px 12px rgba(249,168,37,0.12)" }}>
-          <span style={{ fontSize: 24, flexShrink: 0 }}>👤</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: "var(--font-display,'Nunito',sans-serif)", fontWeight: 700, fontSize: 13, color: C.orange, margin: 0 }}>Using Guest Mode</p>
-            <p style={{ fontFamily: "var(--font-body,'Nunito',sans-serif)", fontSize: 12, color: "#92400E", margin: "2px 0 0", lineHeight: 1.4 }}>
-              Stories are saved on this device only. Create an account to sync across devices! 🌍
-            </p>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 16px", marginBottom: 18, borderRadius: 14,
+            background: "rgba(255,255,255,0.72)", backdropFilter: "blur(10px)",
+            border: "1.5px solid rgba(249,168,37,0.22)",
+            boxShadow: "0 2px 10px rgba(249,168,37,0.09)",
+          }}
+        >
+          <span style={{
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
+            textTransform: "uppercase", color: "#B45309",
+            fontFamily: "var(--font-display,'Nunito',sans-serif)",
+            opacity: 0.75, flexShrink: 0,
+          }}>Guest</span>
+          <div style={{ width: 1, height: 14, background: "#F9A82540", flexShrink: 0 }}/>
+          <p style={{
+            fontFamily: "var(--font-body,'Nunito',sans-serif)",
+            fontSize: 12, color: "#78350F", margin: 0, lineHeight: 1.4, opacity: 0.82,
+          }}>
+            Stories saved on this device only.{" "}
+            <span style={{ fontWeight: 700, color: C.orange }}>Sign in</span>{" "}
+            to sync across devices 🌍
+          </p>
         </motion.div>
       )}
-      
       <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onGenerate}
         className="w-full mb-8 py-5 rounded-4xl text-white font-display text-xl shadow-xl border-4 border-white flex items-center justify-center gap-3"
         style={{ background: `linear-gradient(135deg,${C.yellow},#FF8F00)`, boxShadow: "0 12px 36px rgba(249,168,37,0.35)" }}
       ><Wand2 size={24}/> Create a Personalized Story ✨ <Sparkles size={20}/></motion.button>
-      
-      {/* ── ESTANTE DE CUENTOS DE DEMO ── */}
-      <div className="mb-8">
-        <h3 className="font-display text-2xl mb-4 text-center" style={{ color: C.blue }}>
-          ✨ Try these magical stories ✨
-        </h3>
-        <DemoBookShelf lang={lang} onRead={story => onSelectStory(story)} />
-      </div>
-      
-      {/* ── TUS CUENTOS GUARDADOS ── */}
-      <h3 className="font-display text-2xl mb-4" style={{ color: C.blue }}>
-        📚 Your Library
-      </h3>
-      
       {stories.length === 0 ? (
         <div className="text-center py-16 text-slate-400 font-body">
           <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-5xl mb-3">📡</motion.div>
-          <p>No stories yet. Create your first one! ✨</p>
+          <p>Connecting to the story server…</p>
+          <p className="text-xs mt-1 opacity-60">Make sure the API server is running on port 10000</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -210,14 +210,13 @@ function Collaborate() {
 export default function App() {
   const { user } = useAuth();
   const [view,        setView]        = useState("hero");
-  const [lang,        setLang]        = useState(() => lsGet(LS_LANG, "en"));
+  const [lang,        setLang]        = useState(() => lsGet(LS_LANG, "es"));
   const [stories,     setStories]     = useState([]);
   const [activeStory, setActiveStory] = useState(null);
 
   const isGuest = !user;
 
   useEffect(() => { lsSet(LS_LANG, lang); }, [lang]);
-  console.log('🔍 Lang inicial:', lang, 'Tipo:', typeof lang);
 
   // Cargar cuentos estáticos del API
   useEffect(() => {
@@ -268,12 +267,11 @@ export default function App() {
     games:           <Games/>,
     wordsearch:      <WordSearch/>,
     animals:         <PuzzleMaster/>,
-    puzzles:         <PuzzleMaster/>,  
     education:       <Education/>,
     "legal":         <AvisoLegal onNav={handleNav}/>,
     "aviso-legal":   <AvisoLegal onNav={handleNav}/>,
     "privacidad":    <Privacidad onNav={handleNav}/>,
-    subscription: <Subscription/>,
+    donate:          <Donation/>,
     collaborate:     <Collaborate/>,
     mylibrary:       <MyLibrary onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory}/>,
   };
@@ -292,34 +290,35 @@ export default function App() {
       </div>
 
       <div className="relative z-10">
-        
-        {/* ── NAVBAR AÑADIDA ── */}
-        {console.log('🔍 Pasando lang a Navbar:', lang)}
-        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
-
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
+
             {FULL_PAGES[view] ? (
               <motion.div key={view} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="-mx-4">
                 {FULL_PAGES[view]}
               </motion.div>
-            ) : view === "generator" ? (
+            ) :
+
+            view === "generator" ? (
               <motion.div key="generator" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <StoryGenerator lang={lang} onLangChange={setLang} onGenerated={handleGenerated} />
+                <StoryGenerator lang={lang} onLangChange={setLang} onBack={() => setView("home")}/>
               </motion.div>
-            ) : view === "library" ? (
+            ) :
+
+            view === "library" ? (
               <motion.div key="library" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                {console.log('🔍 Pasando lang a LibraryView:', lang)}
-                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={() => setView("generator")} isGuest={isGuest} lang={lang} />
+                <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={() => setView("generator")} isGuest={isGuest}/>
               </motion.div>
-            ) : view === "reader" && activeStory ? (
+            ) :
+
+            view === "reader" && activeStory ? (
               <motion.div key="reader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <StoryReader story={activeStory} lang={lang} onBack={() => setView("library")}/>
               </motion.div>
             ) : null}
+
           </AnimatePresence>
         </main>
-        
         <Footer onNav={handleNav} lang={lang}/>
       </div>
     </div>
