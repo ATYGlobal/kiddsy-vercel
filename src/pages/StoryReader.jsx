@@ -52,7 +52,7 @@ export function BookCard({ story, onClick, index = 0 }) {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, type: "spring", stiffness: 180 }}
-      whileHover={{ y: -10, rotateY: -6 }}
+      whileHover={{ y: -12, scale: 1.02, rotateY: -4 }}
       whileTap={{ scale: 0.96 }}
       className="relative text-left focus:outline-none"
       style={{ perspective: "600px", transformStyle: "preserve-3d" }}
@@ -110,9 +110,17 @@ export function BookCard({ story, onClick, index = 0 }) {
             )}
 
             {/* Demo badge */}
-            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-white font-display"
-              style={{ fontSize: 9, fontWeight: 800, background: accent.primary + "CC", backdropFilter: "blur(4px)" }}>
-              FREE
+            <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2.5 py-1 rounded-full"
+              style={{
+                background: "rgba(255,255,255,0.20)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.45)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+              }}>
+              <Sparkles size={8} color="#fff"/>
+              <span style={{ fontSize: 9, fontWeight: 800,
+                fontFamily: "var(--font-display,'Nunito',sans-serif)",
+                color: "#fff", letterSpacing: "0.06em" }}>FREE</span>
             </div>
 
             {/* Hover overlay — read button */}
@@ -327,10 +335,10 @@ export default function StoryReader({ story, lang = "en", onBack }) {
   };
 
   const pageVariants = {
-    enter:  d => ({ x: d > 0 ? "60%" : "-60%", opacity: 0, rotateY: d > 0 ? 15 : -15, scale: 0.92 }),
-    center:      { x: "0%",  opacity: 1, rotateY: 0, scale: 1 },
-    exit:   d => ({ x: d > 0 ? "-60%" : "60%", opacity: 0, rotateY: d > 0 ? -15 : 15, scale: 0.92 }),
-  };
+  enter:  d => ({ x: d > 0 ? 48 : -48, opacity: 0, scale: 0.97 }),
+  center:      { x: 0, opacity: 1, scale: 1 },
+  exit:   d => ({ x: d > 0 ? -48 : 48, opacity: 0, scale: 0.97 }),
+};
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto">
@@ -358,13 +366,13 @@ export default function StoryReader({ story, lang = "en", onBack }) {
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div key={pageIdx} custom={direction} variants={pageVariants}
             initial="enter" animate="center" exit="exit"
-            transition={{ type: "spring", stiffness: 240, damping: 28 }}
-            style={{ transformStyle: "preserve-3d" }}
+            transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <div className={`bg-gradient-to-br ${story.color || "from-blue-400 to-cyan-300"} p-[5px] rounded-4xl`}
               style={{ boxShadow: `0 24px 60px ${accent.primary}40, 0 8px 20px rgba(0,0,0,0.15)` }}
             >
-              <div className="relative bg-gradient-to-b from-amber-50 to-orange-50 rounded-4xl overflow-hidden">
+              <div className="relative rounded-4xl overflow-hidden"
+                style={{ background: "linear-gradient(160deg, #FEFCF7 0%, #FEF9F2 60%, #FDF4E7 100%)" }}>
                 {/* Spine shadow */}
                 <div className="absolute left-0 inset-y-0 w-6 opacity-10"
                   style={{ background: `linear-gradient(90deg, ${accent.primary}60, transparent)` }}/>
@@ -404,8 +412,15 @@ export default function StoryReader({ story, lang = "en", onBack }) {
                       )}
 
                       {/* ── English text ───────────────────────────── */}
-                      <p className="text-xl md:text-2xl text-gray-800 leading-relaxed mb-5"
-                        style={{ fontFamily: '"Comic Neue","Nunito",cursive' }}>
+                     <p style={{
+                        fontSize: "clamp(1.15rem, 2.5vw, 1.45rem)",
+                        lineHeight: 1.78,
+                        color: "#1E293B",
+                        fontFamily: "'Nunito', 'Quicksand', system-ui, sans-serif",
+                        fontWeight: 600,
+                        marginBottom: "1.25rem",
+                        letterSpacing: "0.01em",
+                      }}>
                         {page.en}
                       </p>
 
@@ -476,16 +491,21 @@ export default function StoryReader({ story, lang = "en", onBack }) {
       </div>
 
       {/* Page dots */}
-      <div className="flex justify-center gap-1.5 mt-5">
-        {story.pages.map((_, i) => (
-          <motion.button key={i}
-            onClick={() => { setDirection(i > pageIdx ? 1 : -1); setPageIdx(i); }}
-            animate={{ scale: i === pageIdx ? 1.3 : 1, opacity: i === pageIdx ? 1 : 0.35 }}
-            className="w-2 h-2 rounded-full"
-            style={{ background: accent.primary }}
-          />
-        ))}
-      </div>
+        <div className="flex justify-center gap-2 mt-5">
+          {story.pages.map((_, i) => (
+            <motion.button key={i}
+              onClick={() => { setDirection(i > pageIdx ? 1 : -1); setPageIdx(i); }}
+              animate={{
+                width:   i === pageIdx ? 20 : 8,
+                opacity: i === pageIdx ? 1 : 0.3,
+                scale:   i === pageIdx ? 1 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 22 }}
+              style={{ height: 8, borderRadius: 4, background: accent.primary,
+                border: "none", cursor: "pointer", padding: 0 }}
+            />
+          ))}
+        </div>
     </motion.div>
   );
 }

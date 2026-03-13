@@ -91,15 +91,33 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest, lang = "en" 
       </div>
       
       {isGuest && (
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", marginBottom: 20, borderRadius: 16, background: "linear-gradient(135deg,#FFF8E1,#FFF3E0)", border: "2px solid #FFE082", boxShadow: "0 2px 12px rgba(249,168,37,0.12)" }}>
-          <span style={{ fontSize: 24, flexShrink: 0 }}>👤</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: "var(--font-display,'Nunito',sans-serif)", fontWeight: 700, fontSize: 13, color: C.orange, margin: 0 }}>Using Guest Mode</p>
-            <p style={{ fontFamily: "var(--font-body,'Nunito',sans-serif)", fontSize: 12, color: "#92400E", margin: "2px 0 0", lineHeight: 1.4 }}>
-              Stories are saved on this device only. Create an account to sync across devices! 🌍
-            </p>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "9px 16px", marginBottom: 18, borderRadius: 12,
+            background: "rgba(255,255,255,0.75)", backdropFilter: "blur(10px)",
+            border: "1.5px solid rgba(249,168,37,0.25)",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+          }}
+        >
+          <span style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+            textTransform: "uppercase", color: "#B45309",
+            fontFamily: "var(--font-display,'Nunito',sans-serif)",
+            opacity: 0.8, flexShrink: 0,
+          }}>Guest</span>
+          <div style={{ width: 1, height: 14, background: "#F9A82550", flexShrink: 0 }}/>
+          <p style={{
+            fontFamily: "var(--font-body,'Nunito',sans-serif)",
+            fontSize: 12, color: "#78350F", margin: 0,
+            lineHeight: 1.4, opacity: 0.80,
+          }}>
+            Stories saved on this device.{" "}
+            <span style={{ fontWeight: 700, color: C.orange }}>Sign in</span>{" "}
+            to sync across devices 🌍
+          </p>
         </motion.div>
       )}
       
