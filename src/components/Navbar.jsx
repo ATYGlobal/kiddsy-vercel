@@ -26,8 +26,7 @@ import { GameStickerTile } from "./KiddsyIcons.jsx";
 import { NAV_TRANSLATIONS } from "../data/navbarTranslations.js";
 import { LANGUAGES, getLang } from "../utils/langConfig.js";
 
-export { LANGUAGES, getLang };
-
+// ── Brand colours ─────────────────────────────────────────────────────────
 const C = {
   blue:      "#1565C0",
   blueSoft:  "#E3F2FD",
@@ -39,6 +38,8 @@ const C = {
   cyan:      "#00ACC1",
   orange:    "#E65100",
 };
+
+export { LANGUAGES, getLang };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── LANGUAGE PICKER ──────────────────────────────────────────────────────
