@@ -13,13 +13,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, BookOpen, Play, Sparkles } from "
 import { getLang } from "../utils/langConfig.js";
 import { StoryCoverIcon } from "../components/KiddsyIcons.jsx";
 import { DEMO_STORIES } from "../data/demoStories.js";
-
-const C = {
-  blue:    "#1565C0", blueSoft: "#E3F2FD",
-  yellow:  "#F9A825", green:    "#43A047",
-  magenta: "#D81B60", orange:   "#E65100",
-  purple:  "#7B1FA2", teal:     "#00838F",
-};
+import { C } from "../utils/designConfig.js";
 
 // ── Story accent colours ──────────────────────────────────────────────────
 function getStoryAccent(colorClass = "") {

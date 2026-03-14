@@ -17,11 +17,8 @@ import SlidingPuzzle from "../components/SlidingPuzzle.jsx";
 import MemoryMatch from "../components/MemoryMatch.jsx";     
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont.jsx";
+import { C } from "../utils/designConfig.js";
 
-const C = {
-  blue:"#1565C0",   blueSoft:"#E3F2FD",
-  magenta:"#D81B60",magentaSoft:"#FCE4EC",
-};
 const SPRING = { type:"spring", stiffness:380, damping:16 };
 
 const GAME_TABS = [

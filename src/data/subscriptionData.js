@@ -18,16 +18,7 @@ import {
   Crown, Infinity, Gift, Puzzle,
 } from "lucide-react";
 
-// ─── Brand palette (local — no circular dep) ─────────────────────────────
-const C = {
-  blue:    "#1565C0",
-  red:     "#E53935",
-  yellow:  "#FDD835",
-  green:   "#43A047",
-  magenta: "#D81B60",
-  cyan:    "#00ACC1",
-  orange:  "#E65100",
-};
+import { C } from "../utils/designConfig.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Subscription plans

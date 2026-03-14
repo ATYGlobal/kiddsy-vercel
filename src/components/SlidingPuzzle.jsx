@@ -7,10 +7,7 @@ import { RotateCcw } from "lucide-react";
 import { CATEGORY_TILES, GameStickerTile } from "./KiddsyIcons.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 
-const C = {
-  green: "#43A047",
-  red: "#E53935",
-};
+import { C } from "../utils/designConfig.js";
 
 const SPRING = { type: "spring", stiffness: 380, damping: 16 };
 

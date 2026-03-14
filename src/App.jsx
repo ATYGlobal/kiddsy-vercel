@@ -26,6 +26,7 @@ import Footer         from "./components/Footer";
 import SwUpdateToast  from "./components/SwUpdateToast";
 import KiddsyTitle    from "./components/KiddsyTitle";
 import { StoryCoverIcon } from "./components/KiddsyIcons";
+import { C } from "../utils/designConfig.js";
 
 // ── Utils (Asegúrate de que esté en src/utils/) ────────────────────────────
 import {
@@ -39,12 +40,7 @@ function useAuth() {
   return { user: null, isAuthenticated: false, loading: false, logout: () => {} };
 }
 
-// ── Colores (usados en LibraryView y Collaborate locales) ──────────────────
-const C = {
-  blue: "#1565C0", blueSoft: "#E3F2FD", red: "#E53935",
-  yellow: "#F9A825", green: "#43A047", greenSoft: "#E8F5E9",
-  magenta: "#D81B60", cyan: "#00ACC1", orange: "#E65100",
-};
+
 
 // ── Fondo animado ──────────────────────────────────────────────────────────
 function KiddsyBgStyles() {

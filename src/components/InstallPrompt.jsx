@@ -15,11 +15,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Smartphone } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
-const C = {
-  blue:   "#1565C0",
-  yellow: "#F9A825",
-};
+import { C } from "../utils/designConfig.js";
 
 // Detectar iOS
 function isIOS() {

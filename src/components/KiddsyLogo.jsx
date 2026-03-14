@@ -20,13 +20,7 @@
 
 import { motion } from "framer-motion";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
-const C = {
-  blue:    "#1565C0",
-  blueSoft:"#E3F2FD",
-  red:     "#E53935",
-  yellow:  "#F9A825",
-};
+import { C } from "../utils/designConfig.js";
 
 const SIZE_MAP = {
   sm: { icon: "w-8 h-8 rounded-xl",  text: "text-xl",  sub: "text-xs"  },

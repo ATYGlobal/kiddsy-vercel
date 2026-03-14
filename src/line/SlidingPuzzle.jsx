@@ -10,16 +10,8 @@ import { motion } from "framer-motion";
 import { Puzzle, Brain, RotateCcw, Wrench } from "lucide-react";
 import { CATEGORY_TILES, GameStickerTile } from "../components/KiddsyIcons.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
+import { C } from "../utils/designConfig.js";
 
-const C = {
-  blue:"#1565C0",   blueSoft:"#E3F2FD",
-  red:"#E53935",
-  yellow:"#F9A825",
-  green:"#43A047",  greenSoft:"#E8F5E9",
-  magenta:"#D81B60",
-  orange:"#E65100", orangeSoft:"#FFF3E0",
-  cyan:"#00ACC1",
-};
 const SPRING = { type:"spring", stiffness:380, damping:16 };
 
 // ─── Confetti ────────────────────────────────────────────────────────────────
