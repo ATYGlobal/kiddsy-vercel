@@ -26,7 +26,7 @@ import Footer         from "./components/Footer";
 import SwUpdateToast  from "./components/SwUpdateToast";
 import KiddsyTitle    from "./components/KiddsyTitle";
 import { StoryCoverIcon } from "./components/KiddsyIcons";
-import { C } from "../utils/designConfig.js";
+import { C } from "./utils/designConfig.js";
 
 // ── Utils (Asegúrate de que esté en src/utils/) ────────────────────────────
 import {
