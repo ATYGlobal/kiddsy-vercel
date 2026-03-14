@@ -17,10 +17,8 @@ import { BubbleTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg        from "../utils/EmojiSvg.jsx";
 import CartoonTitle from "../components/CartoonTitle.jsx";
 
-import {
-  C, LANGUAGES, DIFFICULTIES,
-  ANIMALS, CITIES, NATURE, MONUMENTS, PREMIUM_CATS,
-} from "../data/puzzleMasterData.js";
+import { LANGUAGES, getLang } from "../utils/langConfig.js";
+
 
 import { buildPuzzle, isSolved, speak } from "../utils/puzzleHelpers.js";
 
@@ -182,7 +180,7 @@ function StarRow({ count = 1, size = 12, color = "#F9A825" }) {
 // ════════════════════════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
 // ════════════════════════════════════════════════════════════════════════════
-export default function PuzzleMaster({ lang:propLang, onLangChange }) {
+export default function PuzzleMaster({ lang = "en", onLangChange }) {
   // ── Estados ───────────────────────────────────────────────────────────
   const [catId,          setCatId]          = useState("animals");
   const [showPricing,    setShowPricing]    = useState(false);
@@ -194,12 +192,11 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const [dragOver,       setDragOver]       = useState(null);
   const [won,            setWon]            = useState(false);
   const [confetti,       setConfetti]       = useState(false);
-  const [localLang,      setLocalLang]      = useState("en");
   const [moves,          setMoves]          = useState(0);
   const [imgLoaded,      setImgLoaded]      = useState(false);
+  
+  const setLang = v => onLangChange?.(v);
 
-  const lang    = propLang || localLang;
-  const setLang = v => { setLocalLang(v); onLangChange?.(v); };
 
   const cat      = CATEGORIES.find(c => c.id === catId) || CATEGORIES[0];
   const item     = cat.items[itemIdx] || cat.items[0];

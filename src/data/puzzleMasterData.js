@@ -16,24 +16,7 @@ export const C = {
 };
 
 // ── 16 idiomas ────────────────────────────────────────────────────────────
-export const LANGUAGES = [
-  { code:"es", label:"Español",    flagCode:"1f1ea-1f1f8", dir:"ltr", voice:"es-ES" },
-  { code:"fr", label:"Français",   flagCode:"1f1f7-1f1fa", dir:"ltr", voice:"fr-FR" },
-  { code:"ar", label:"العربية",    flagCode:"1f1f8-1f1e6", dir:"rtl", voice:"ar-SA" },
-  { code:"de", label:"Deutsch",    flagCode:"1f1e9-1f1ea", dir:"ltr", voice:"de-DE" },
-  { code:"it", label:"Italiano",   flagCode:"1f1ee-1f1f9", dir:"ltr", voice:"it-IT" },
-  { code:"pt", label:"Português",  flagCode:"1f1f5-1f1f9", dir:"ltr", voice:"pt-BR" },
-  { code:"ru", label:"Русский",    flagCode:"1f1f7-1f1fa", dir:"ltr", voice:"ru-RU" },
-  { code:"zh", label:"中文",        flagCode:"1f1ee-1f1f3", dir:"ltr", voice:"zh-CN" },
-  { code:"ja", label:"日本語",      flagCode:"1f1ef-1f1f5", dir:"ltr", voice:"ja-JP" },
-  { code:"ko", label:"한국어",      flagCode:"1f1f0-1f1f7", dir:"ltr", voice:"ko-KR" },
-  { code:"bn", label:"বাংলা",      flagCode:"1f1e7-1f1e9", dir:"ltr", voice:"bn-BD" },
-  { code:"hi", label:"हिंदी",      flagCode:"1f1ee-1f1f3", dir:"ltr", voice:"hi-IN" },
-  { code:"nl", label:"Nederlands", flagCode:"1f1f3-1f1f1", dir:"ltr", voice:"nl-NL" },
-  { code:"pl", label:"Polski",     flagCode:"1f1f5-1f1f1", dir:"ltr", voice:"pl-PL" },
-  { code:"no", label:"Norsk",      flagCode:"1f1f3-1f1f4", dir:"ltr", voice:"nb-NO" },
-  { code:"sv", label:"Svenska",    flagCode:"1f1f8-1f1ea", dir:"ltr", voice:"sv-SE" },
-];
+export { LANGUAGES, getLang } from "../utils/langConfig.js";
 
 // ── Dificultades ──────────────────────────────────────────────────────────
 export const DIFFICULTIES = [

@@ -29,7 +29,7 @@ const GAME_TABS = [
   { id:"memory", label:"Memory Match", Icon:Brain,  color:C.magenta, bg:C.magentaSoft },
 ];
 
-export default function Games() {
+export default function Games({ lang = "en", onLangChange }) {
   const [activeGame, setActiveGame] = useState("puzzle");
   const active = GAME_TABS.find(g=>g.id===activeGame);
 

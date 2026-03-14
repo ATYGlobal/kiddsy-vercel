@@ -674,8 +674,8 @@ function SuccessScreen({ plan, onDismiss }) {
 // ═══════════════════════════════════════════════════════════════════════════
 // Main export
 // ═══════════════════════════════════════════════════════════════════════════
-export default function Subscription() {
-  const [billing,      setBilling]      = useState("monthly");
+export default function Subscription({ lang = "en", onLangChange }) {
+    const [billing,      setBilling]      = useState("monthly");
   const [selectedPlan, setSelectedPlan] = useState(SUBSCRIPTIONS[1]);
   const [checkout,     setCheckout]     = useState(null); // { plan, price, billing }
   const [success,      setSuccess]      = useState(null); // plan that was purchased

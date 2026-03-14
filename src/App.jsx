@@ -20,7 +20,8 @@ import WordSearch     from "./pages/WordSearch";
 import PuzzleMaster   from "./pages/PuzzleMaster";
 
 // ── Componentes (Asegúrate de que TODOS estén en src/components/) ──────────
-import Navbar, { LANGUAGES, getLang, LanguagePicker } from "./components/Navbar";
+import Navbar, { LanguagePicker } from "./components/Navbar.jsx";
+import { detectLang, getLang, LANGUAGES } from "./utils/langConfig.js";
 import Footer         from "./components/Footer";
 import SwUpdateToast  from "./components/SwUpdateToast";
 import KiddsyTitle    from "./components/KiddsyTitle";
@@ -283,17 +284,17 @@ export default function App() {
   }
 
   const FULL_PAGES = {
-    games:           <Games/>,
-    wordsearch:      <WordSearch/>,
-    animals:         <PuzzleMaster/>,
-    puzzles:         <PuzzleMaster/>,  
-    education:       <Education/>,
-    "legal":         <AvisoLegal onNav={handleNav}/>,
-    "aviso-legal":   <AvisoLegal onNav={handleNav}/>,
-    "privacidad":    <Privacidad onNav={handleNav}/>,
-    subscription:    <Subscription/>,
-    collaborate:     <Collaborate/>,
-    mylibrary:       <MyLibrary onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory}/>,
+    games:           <Games lang={lang} onLangChange={setLang}/>,
+    wordsearch:      <WordSearch lang={lang} onLangChange={setLang}/>,
+    animals:         <PuzzleMaster lang={lang} onLangChange={setLang}/>,
+    puzzles:         <PuzzleMaster lang={lang} onLangChange={setLang}/>,  
+    education:       <Education lang={lang} onLangChange={setLang}/>,
+    "legal":         <AvisoLegal onNav={handleNav} lang={lang}/>,
+    "aviso-legal":   <AvisoLegal onNav={handleNav} lang={lang}/>,
+    "privacidad":    <Privacidad onNav={handleNav} lang={lang}/>,
+    subscription:    <Subscription lang={lang} onLangChange={setLang}/>,
+    collaborate:     <Collaborate lang={lang} onLangChange={setLang}/>,
+    mylibrary:       <MyLibrary onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory} lang={lang} onLangChange={setLang}/>,
   };
 
   return (

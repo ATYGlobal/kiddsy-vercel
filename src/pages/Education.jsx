@@ -8,7 +8,7 @@ import { Volume2, Globe, ChevronDown, BookOpen, Hash, MessageCircle } from "luci
 import { LearnBg }      from "../components/PageBg.jsx";
 import { RainbowTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg          from "../utils/EmojiSvg.jsx";
-import { C, LANGUAGES, ALPHABET, NUMBERS, COMMON_WORDS } from "../data/educationData.js";
+import { LANGUAGES, getLang } from "../utils/langConfig.js";
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function speak(text,voice="en-US"){
@@ -250,17 +250,12 @@ const TABS = [
 ];
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
-export default function Education({ lang:propLang, onLangChange }){
+export default function Education({ lang = "en", onLangChange }) {
+  const setLang = v => onLangChange?.(v);
   const [tab,setTab]         = useState("letters");
-  const [localLang,setLocalLang]=useState("en");
   const [active,setActive]   = useState(null);
   const [confetti,setConfetti]=useState(false);
   const [learned,setLearned] = useState({letters:new Set(),numbers:new Set(),words:new Set()});
-
-  const lang    = propLang||localLang;
-  const setLang = v=>{ setLocalLang(v); onLangChange?.(v); };
-  const langMeta = LANGUAGES.find(l=>l.code===lang)||LANGUAGES[0];
-
   const tabColor = TABS.find(t=>t.id===tab)?.color || C.orange;
 
   const handleCardClick=(item,key)=>{

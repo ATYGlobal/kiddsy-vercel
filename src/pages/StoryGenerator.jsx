@@ -19,7 +19,8 @@ import {
   Play, Loader,
 } from "lucide-react";
 
-import { getLang, LanguagePicker }      from "../components/Navbar.jsx";
+import { LanguagePicker }    from "../components/Navbar.jsx";
+import { getLang }           from "../utils/langConfig.js";
 import { StoryCoverIcon }               from "../components/KiddsyIcons.jsx";
 import { StoryBg }                      from "../components/PageBg.jsx";
 import { BubbleTitle }                  from "../components/KiddsyFont.jsx";
@@ -210,7 +211,7 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style, isF
 // ════════════════════════════════════════════════════════════════════════════
 // StoryForm — full form with style + voice picker
 // ════════════════════════════════════════════════════════════════════════════
-function StoryForm({ lang, onLangChange, onGenerated, planId = "free", onUpgrade }) {
+function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", onUpgrade }) {
   const [childName,          setChildName]          = useState(() => lsGet(LS_NAME, ""));
   const [theme,              setTheme]              = useState("");
   const [customTheme,        setCustomTheme]        = useState("");
@@ -692,7 +693,7 @@ function RecentStories({ onRead }) {
 // ════════════════════════════════════════════════════════════════════════════
 // StoryGenerator — main export
 // ════════════════════════════════════════════════════════════════════════════
-export default function StoryGenerator({ lang, onLangChange, onGenerated, onBack, planId = "free", onUpgrade }) {
+export default function StoryGenerator({ lang = "en", onLangChange, onGenerated, onBack, planId = "free", onUpgrade }) {
   const [activeStory, setActiveStory] = useState(null);
 
   const handleGenerated = (story, storyLang) => {
@@ -723,16 +724,16 @@ export default function StoryGenerator({ lang, onLangChange, onGenerated, onBack
             />
           ) : (
             <>
-              <StoryForm
-                lang={lang}
-                onLangChange={onLangChange}
-                onGenerated={handleGenerated}
-                planId={planId || "free"}
-                onUpgrade={onUpgrade}
-              />
-              <RecentStories onRead={setActiveStory}/>
-            </>
-          )}
+              <StoryForm 
+              lang={lang} 
+              onLangChange={onLangChange} 
+              onGenerated={handleGenerated} 
+              onBack={onBack}
+              planId={planId}
+              onUpgrade={onUpgrade}
+            />
+          </>
+        )}
         </div>
       </div>
     </div>

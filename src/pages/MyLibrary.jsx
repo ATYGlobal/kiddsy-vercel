@@ -278,7 +278,7 @@ function StoryCard({ story, onRead, onPuzzle, onDelete, index }) {
 }
 
 // ── MyLibrary ─────────────────────────────────────────────────────────────────
-export default function MyLibrary({ onCreateStory, onReadStory }) {
+export default function MyLibrary({ onCreateStory, onReadStory, lang = "es", onLangChange }) {
   const [stories, setStories]         = useState([]);
   const [loading, setLoading]         = useState(true);
   const [puzzleStory, setPuzzleStory] = useState(null);

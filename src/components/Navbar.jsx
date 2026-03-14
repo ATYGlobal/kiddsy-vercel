@@ -24,8 +24,10 @@ import EmojiSvg from "../utils/EmojiSvg.jsx";
 import Games from "../pages/Games.jsx";
 import { GameStickerTile } from "./KiddsyIcons.jsx";
 import { NAV_TRANSLATIONS } from "../data/navbarTranslations.js";
+import { LANGUAGES, getLang } from "../utils/langConfig.js";
 
-// ── Paleta local (copia de App.jsx para evitar dependencia circular) ────────
+export { LANGUAGES, getLang };
+
 const C = {
   blue:      "#1565C0",
   blueSoft:  "#E3F2FD",
@@ -37,32 +39,6 @@ const C = {
   cyan:      "#00ACC1",
   orange:    "#E65100",
 };
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ─── LANGUAGES + getLang ──────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
-export const LANGUAGES = [
-  { code:"es", name:"Español",   flag:"🇪🇸", flagCode:"1f1ea-1f1f8", dir:"ltr" },
-  { code:"fr", name:"Français",  flag:"🇫🇷", flagCode:"1f1eb-1f1f7", dir:"ltr" },
-  { code:"ar", name:"العربية",   flag:"🇸🇦", flagCode:"1f1f8-1f1e6", dir:"rtl" },
-  { code:"de", name:"Deutsch",   flag:"🇩🇪", flagCode:"1f1e9-1f1ea", dir:"ltr" },
-  { code:"it", name:"Italiano",  flag:"🇮🇹", flagCode:"1f1ee-1f1f9", dir:"ltr" },
-  { code:"pt", name:"Português", flag:"🇧🇷", flagCode:"1f1e7-1f1f7", dir:"ltr" },
-  { code:"ru", name:"Русский",   flag:"🇷🇺", flagCode:"1f1f7-1f1fa", dir:"ltr" },
-  { code:"zh", name:"中文(简体)", flag:"🇨🇳", flagCode:"1f1e8-1f1f3", dir:"ltr" },
-  { code:"ja", name:"日本語",     flag:"🇯🇵", flagCode:"1f1ef-1f1f5", dir:"ltr" },
-  { code:"ko", name:"한국어",     flag:"🇰🇷", flagCode:"1f1f0-1f1f7", dir:"ltr" },
-  { code:"bn", name:"বাংলা",    flag:"🇧🇩", flagCode:"1f1e7-1f1e9", dir:"ltr" },
-  { code:"hi", name:"हिंदी",    flag:"🇮🇳", flagCode:"1f1ee-1f1f3", dir:"ltr" },
-  { code:"nl", name:"Nederlands",flag:"🇳🇱", flagCode:"1f1f3-1f1f1", dir:"ltr" },
-  { code:"pl", name:"Polski",    flag:"🇵🇱", flagCode:"1f1f5-1f1f1", dir:"ltr" },
-  { code:"no", name:"Norsk",     flag:"🇳🇴", flagCode:"1f1f3-1f1f4", dir:"ltr" },
-  { code:"sv", name:"Svenska",   flag:"🇸🇪", flagCode:"1f1f8-1f1ea", dir:"ltr" },
-];
-
-export function getLang(code) {
-  return LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── LANGUAGE PICKER ──────────────────────────────────────────────────────

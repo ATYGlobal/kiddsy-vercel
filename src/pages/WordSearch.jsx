@@ -10,9 +10,7 @@ import { RotateCcw, Trophy, CheckCircle, Star, Search, Globe, ChevronDown,
 import { WordSearchBg } from "../components/PageBg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-import {
-  FlagImg, detectLang, WORD_SEARCH_LANGS,
-} from "../components/KiddsyIcons.jsx";
+import { LANGUAGES as WORD_SEARCH_LANGS, detectLang, getLang } from "../utils/langConfig.js";
 
 const C = {
   blue:       "#1565C0",
@@ -487,9 +485,8 @@ function LangDropdown({ value, onChange }) {
 }
 
 // ─── Main WordSearch component ─────────────────────────────────────────────
-export default function WordSearch() {
+export default function WordSearch({ lang = "en", onLangChange }) {
   const [packIdx,   setPackIdx]   = useState(0);
-  const [lang,      setLang]      = useState(detectLang);
   const [gameData,  setGameData]  = useState(null);
   const [selecting, setSelecting] = useState(false);
   const [selection, setSelection] = useState([]);
@@ -601,7 +598,7 @@ export default function WordSearch() {
         {/* ── Controls — custom dropdowns ────────────────────────────── */}
         <div className="flex justify-center gap-3 px-4 mb-6 flex-wrap">
           <PackDropdown value={packIdx} onChange={idx => setPackIdx(idx)}/>
-          <LangDropdown value={lang}    onChange={code => setLang(code)}/>
+          <LangDropdown value={lang}    onChange={code => onLangChange?.(code)}/>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 pb-20">

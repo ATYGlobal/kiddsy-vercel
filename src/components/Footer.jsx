@@ -691,8 +691,7 @@ function Divider() {
 // ═══════════════════════════════════════════════════════════════════════════
 // FOOTER
 // ═══════════════════════════════════════════════════════════════════════════
-export default function Footer({ onNav, lang = "es" }) {
-  console.log('🔍 Footer recibió lang:', lang);
+export default function Footer({ onNav, lang = "en" }) {
   return (
     <footer style={{
       position:   "relative",

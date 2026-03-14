@@ -10,7 +10,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, BookOpen, Play, Sparkles } from "lucide-react";
-import { getLang } from "../components/Navbar.jsx";
+import { getLang } from "../utils/langConfig.js";
 import { StoryCoverIcon } from "../components/KiddsyIcons.jsx";
 import { DEMO_STORIES } from "../data/demoStories.js";
 
@@ -171,7 +171,7 @@ export function BookCard({ story, onClick, index = 0 }) {
 // ════════════════════════════════════════════════════════════════════════════
 // DemoBookShelf — estante de cuentos de muestra
 // ════════════════════════════════════════════════════════════════════════════
-export function DemoBookShelf({ lang = "es", onRead }) {
+export function DemoBookShelf({ lang = "en", onRead }) {
   return (
     <div className="w-full">
       {/* Section header */}
@@ -306,9 +306,7 @@ export default function StoryReader({ story, lang = "en", onBack }) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
-    utt.lang  = lang === "es" ? "es-ES" : lang === "fr" ? "fr-FR"
-              : lang === "de" ? "de-DE" : lang === "pt" ? "pt-PT"
-              : lang === "it" ? "it-IT" : lang === "ar" ? "ar-SA" : "en-US";
+    utt.lang  = langMeta.voice ?? "en-US";
     utt.rate  = 0.92;
     utt.pitch = 1.05;
     window.speechSynthesis.speak(utt);

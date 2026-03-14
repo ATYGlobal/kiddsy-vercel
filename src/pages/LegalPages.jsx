@@ -15,7 +15,8 @@ import {
   FileText, Shield, ArrowLeft, Baby, Lock,
   Eye, Globe, Mail, AlertCircle,
 } from "lucide-react";
-import { LEGAL_T, detectLang } from "../data/legalTranslations.js";
+import { LEGAL_T } from "../data/legalTranslations.js";
+import { getLang } from "../utils/langConfig.js";
 
 // ── Paleta ────────────────────────────────────────────────────────────────
 const C = {
@@ -43,13 +44,6 @@ const COLOR_MAP = {
 const FF = "var(--font-display,'Nunito',sans-serif)";
 const FB = "var(--font-body,'Nunito',sans-serif)";
 
-// ── Hook: idioma activo ───────────────────────────────────────────────────
-function useLegalT() {
-  return useMemo(() => {
-    const code = detectLang();
-    return LEGAL_T[code] ?? LEGAL_T.en;
-  }, []);
-}
 
 // ── Shared UI components ──────────────────────────────────────────────────
 function PageHeader({ icon: Icon, iconColor, iconBg, title, subtitle }) {
@@ -138,8 +132,8 @@ function InfoBanner({ icon: Icon, color, bg, children }) {
 // ════════════════════════════════════════════════════════════════════════════
 // AVISO LEGAL — i18n
 // ════════════════════════════════════════════════════════════════════════════
-export function AvisoLegal({ onNav }) {
-  const t = useLegalT();
+export function AvisoLegal({ onNav, lang = "en" }) {
+  const t = LEGAL_T[lang] ?? LEGAL_T.en;
 
   return (
     <div
@@ -205,8 +199,8 @@ export function AvisoLegal({ onNav }) {
 // ════════════════════════════════════════════════════════════════════════════
 // PRIVACIDAD — i18n
 // ════════════════════════════════════════════════════════════════════════════
-export function Privacidad({ onNav }) {
-  const t = useLegalT();
+export function Privacidad({ onNav, lang = "en" }) {
+  const t = LEGAL_T[lang] ?? LEGAL_T.en;
 
   return (
     <div
