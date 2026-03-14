@@ -23,7 +23,7 @@ import {
   Globe, Eye, Music, Hammer, Wrench, Rocket, Sparkles,
   GraduationCap, BookOpen, ShoppingBag, Bus, Activity, Wand2, Puzzle,
 } from "lucide-react";
-
+import { C } from "../utils/designConfig.js";
 
 // ─── Sticker spring animation ─────────────────────────────────────────────
 const SPRING = { type: "spring", stiffness: 420, damping: 14 };

@@ -16,10 +16,8 @@ import { PuzzleBg }   from "../components/PageBg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg        from "../utils/EmojiSvg.jsx";
 import CartoonTitle from "../components/CartoonTitle.jsx";
-
+import { C } from "../utils/designConfig.js";
 import { LANGUAGES, getLang } from "../utils/langConfig.js";
-
-
 import { buildPuzzle, isSolved, speak } from "../utils/puzzleHelpers.js";
 
 // CATEGORIES aquí porque necesita los iconos de lucide-react

@@ -19,7 +19,7 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 import { motion } from "framer-motion";
-
+import { C } from "../utils/designConfig.js";
 // ── Font face injection (loads once) ─────────────────────────────────────
 const FONT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@700;800&display=swap');

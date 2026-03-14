@@ -9,6 +9,7 @@ import { LearnBg }      from "../components/PageBg.jsx";
 import { RainbowTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg          from "../utils/EmojiSvg.jsx";
 import { LANGUAGES, getLang } from "../utils/langConfig.js";
+import { C } from "../utils/designConfig.js";
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function speak(text,voice="en-US"){
