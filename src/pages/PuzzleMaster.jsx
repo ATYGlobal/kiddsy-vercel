@@ -316,20 +316,14 @@ return (
 
         {/* A: Categoría */}
         <DD minW={150} maxH={280} accent={accent}
-          trigger={(() => {
-            const CatIcon = cat.icon;
-            return <><CatIcon size={15} strokeWidth={2}/><span>{cat.label}</span></>;
-          })()}
+        trigger={<><EmojiSvg code={cat.emoji} size={18}/><span>{cat.label}</span></>}
         >
           {close => [
             <DHeader key="hdr">Category</DHeader>,
             ...CATEGORIES.map(c => (
               <DRow key={c.id} active={catId === c.id} accent={c.color}
                 onClick={() => switchCat(c.id, close)}>
-                {(() => { const CIcon = c.icon; return (
-                  <CIcon size={16} strokeWidth={2}
-                    style={{ flexShrink:0, color: catId===c.id ? c.color : "#64748B" }}/>
-                ); })()}
+                <EmojiSvg code={c.emoji} size={18} style={{ flexShrink:0 }}/>
                 <span style={{ fontWeight:700 }}>{c.label}</span>
                 {c.premium
                   ? <Lock size={12} strokeWidth={2.5} style={{ marginLeft:"auto", color:"#94A3B8" }}/>
@@ -342,17 +336,14 @@ return (
 
         {/* B: Ítem */}
         <DD minW={190} maxH={360} accent={accent}
-          trigger={(() => {
-            const CatIcon = cat.icon;
-            return (
-              <>
-                <Thumb item={item} size={24} FallbackIcon={CatIcon}/>
-                <span style={{ maxWidth:120, overflow:"hidden", textOverflow:"ellipsis" }}>
-                  {item[lang] || item.name}
-                </span>
-              </>
-            );
-          })()}
+          trigger={(
+            <>
+              <Thumb item={item} size={24} FallbackIcon={() => <EmojiSvg code={cat.emoji} size={22}/>}/>
+              <span style={{ maxWidth:120, overflow:"hidden", textOverflow:"ellipsis" }}>
+                {item[lang] || item.name}
+              </span>
+            </>
+          )}
         >
           {close => [
             <DHeader key="hdr">{cat.label} ({cat.items.length})</DHeader>,
@@ -392,8 +383,7 @@ return (
 
         {/* D: Idioma */}
         <DD minW={150} accent={C.blue}
-          trigger={<><Globe size={13}/><span style={{ fontSize:15 }}>{langMeta.flag}</span><span>{langMeta.label}</span></>}
-        >
+          trigger={<><Globe size={13}/><EmojiSvg code={langMeta.flagCode} size={18}/><span>{langMeta.label}</span></>}        >
           {close => [
             <DHeader key="hdr">Language</DHeader>,
             ...LANGUAGES.map(l => (
@@ -575,8 +565,7 @@ return (
               }}>
                 {imgLoaded
                   ? <img src={item.img} alt={item.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                  : (() => { const CatIcon = cat.icon; return <CatIcon size={26} strokeWidth={1.5} style={{ color:item.color||"#94A3B8" }}/>; })()
-                }
+                  : <EmojiSvg code={item.emoji} size={28}/>                }
               </div>
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
                 Reference image
@@ -594,8 +583,7 @@ return (
                 padding:"3px 10px", borderRadius:999, background:accent + "18", marginBottom:6,
                 fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, fontWeight:600, color:accent,
               }}>
-                {(() => { const CatIcon = cat.icon; return <CatIcon size={11} strokeWidth={2} style={{ display:"inline", verticalAlign:"middle", marginRight:3 }}/>; })()} {cat.label}
-              </div>
+              <EmojiSvg code={cat.emoji} size={14} style={{ display:"inline", verticalAlign:"middle", marginRight:3 }}/> {cat.label}              </div>
               <h3 style={{
                 fontFamily:"var(--font-display,'Nunito',sans-serif)",
                 fontWeight:800, fontSize:26, color:accent, margin:0, lineHeight:1.2,
