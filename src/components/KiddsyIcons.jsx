@@ -4,12 +4,16 @@
  * Zero-dependency vector icon system. No external images.
  *
  * Exports:
+ *  FlagImg              — crisp flag <img> via flagcdn.com
+ *  detectLang()         — reads navigator.language → supported lang code (default "es")
+ *  WORD_SEARCH_LANGS    — language list for WordSearch dropdown
  *  StickerBadge         — wraps any Lucide icon in sticker style + spring bounce
  *  Svg* (8 components)  — hand-crafted SVG cartoon characters
  *  ANIMAL_CONFIGS       — 25 animals → { Render, color, bg }
  *  CATEGORY_TILES       — 25 icon tiles per category (animals/fruits/space/tools)
  *  STORY_ICON_MAP       — emoji → { Icon, gradient } for story covers
  *  StoryCoverIcon       — ready-to-use story cover badge
+ *  GameStickerTile      — tile for sliding puzzle + memory match games
  */
 
 import { motion } from "framer-motion";
@@ -19,6 +23,55 @@ import {
   Globe, Eye, Music, Hammer, Wrench, Rocket, Sparkles,
   GraduationCap, BookOpen, ShoppingBag, Bus, Activity, Wand2, Puzzle,
 } from "lucide-react";
+// ── FlagImg — crisp flag images via flagcdn.com ──────────────────────────────
+export const FlagImg = ({ code, size = 20 }) => {
+  if (!code) return null;
+  const fc = code.toLowerCase();
+  return (
+    <img
+      src={`https://flagcdn.com/w${size * 2}/${fc}.png`}
+      width={size}
+      height={Math.round(size * 0.75)}
+      alt={code}
+      style={{
+        borderRadius: 3,
+        display: "inline-block",
+        objectFit: "cover",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+        verticalAlign: "middle",
+        flexShrink: 0,
+      }}
+      onError={e => { e.target.style.display = "none"; }}
+    />
+  );
+};
+
+// ── detectLang — reads navigator.language, maps to supported codes ────────────
+// Returns "es" as default (Kiddsy is an English-learning app, native lang = es most users)
+export function detectLang() {
+  const nav = (navigator.language || navigator.userLanguage || "es").slice(0, 2).toLowerCase();
+  const supported = ["es","fr","ar","pt","de","it","zh","ja","ko","ru","hi","tr","nl","pl","sv"];
+  return supported.includes(nav) ? nav : "es";
+}
+
+// ── WORD_SEARCH_LANGS — language list for the WordSearch dropdown ─────────────
+export const WORD_SEARCH_LANGS = [
+  { code:"es", label:"Español",    flagCode:"es" },
+  { code:"fr", label:"Français",   flagCode:"fr" },
+  { code:"ar", label:"العربية",    flagCode:"sa", rtl:true },
+  { code:"pt", label:"Português",  flagCode:"br" },
+  { code:"de", label:"Deutsch",    flagCode:"de" },
+  { code:"it", label:"Italiano",   flagCode:"it" },
+  { code:"zh", label:"中文",        flagCode:"cn" },
+  { code:"ja", label:"日本語",      flagCode:"jp" },
+  { code:"ko", label:"한국어",      flagCode:"kr" },
+  { code:"ru", label:"Русский",    flagCode:"ru" },
+  { code:"hi", label:"हिंदी",      flagCode:"in" },
+  { code:"tr", label:"Türkçe",     flagCode:"tr" },
+  { code:"nl", label:"Nederlands", flagCode:"nl" },
+  { code:"pl", label:"Polski",     flagCode:"pl" },
+  { code:"sv", label:"Svenska",    flagCode:"se" },
+];
 
 // ─── Sticker spring animation ─────────────────────────────────────────────
 const SPRING = { type: "spring", stiffness: 420, damping: 14 };

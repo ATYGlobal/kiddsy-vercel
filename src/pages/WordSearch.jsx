@@ -3,15 +3,16 @@
  * Bilingual word search: find English words hidden in a grid
  * Words come from the story vocabulary + alphabet module
  */
-import { LibraryBg } from "../components/PageBg";
-import { BubbleTitle } from "../components/KiddsyFont";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { WordSearchBg } from "../components/PageBg.jsx";
-import CartoonTitle from "../components/CartoonTitle.jsx";
 import { RotateCcw, Trophy, CheckCircle, Star, Search, Globe, ChevronDown,
          Cat, Palette, Apple, Home, Leaf, Utensils } from "lucide-react";
+import { WordSearchBg } from "../components/PageBg.jsx";
+import { BubbleTitle } from "../components/KiddsyFont";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
+import {
+  FlagImg, detectLang, WORD_SEARCH_LANGS,
+} from "../components/KiddsyIcons.jsx";
 
 const C = {
   blue:       "#1565C0",
@@ -38,24 +39,7 @@ const WORD_COLORS = [
   { bg: "#E1BEE7", border: "#8E24AA", text: "#4A148C" },
 ];
 
-// ─── Language metadata (replaces flat LANG_LABELS) ─────────────────────────
-const LANGUAGES = [
-  { code:"es", label:"Español",    flag:"🇪🇸" },
-  { code:"fr", label:"Français",   flag:"🇫🇷" },
-  { code:"ar", label:"العربية",    flag:"🇸🇦", rtl:true },
-  { code:"pt", label:"Português",  flag:"🇧🇷" },
-  { code:"de", label:"Deutsch",    flag:"🇩🇪" },
-  { code:"it", label:"Italiano",   flag:"🇮🇹" },
-  { code:"zh", label:"中文",        flag:"🇨🇳" },
-  { code:"ja", label:"日本語",      flag:"🇯🇵" },
-  { code:"ko", label:"한국어",      flag:"🇰🇷" },
-  { code:"ru", label:"Русский",    flag:"🇷🇺" },
-  { code:"hi", label:"हिंदी",      flag:"🇮🇳" },
-  { code:"tr", label:"Türkçe",     flag:"🇹🇷" },
-  { code:"nl", label:"Nederlands", flag:"🇳🇱" },
-  { code:"pl", label:"Polski",     flag:"🇵🇱" },
-  { code:"sv", label:"Svenska",    flag:"🇸🇪" },
-];
+// ─── WORD_SEARCH_LANGS, detectLang, FlagImg → imported from KiddsyIcons.jsx ──────────
 
 // ─── Word packs ────────────────────────────────────────────────────────────
 const PACKS = [
@@ -342,8 +326,7 @@ function PackDropdown({ value, onChange }) {
         }}
       >
         <span style={{ display:"flex", alignItems:"center", gap:7 }}>
-          <Icon size={14} style={{ flexShrink:0 }}/>
-          <EmojiSvg code={sel.emoji} size={18}/>
+          <EmojiSvg code={sel.emoji} size={20}/>
           <span>{sel.name}</span>
         </span>
         <motion.span animate={{ rotate:open?180:0 }} transition={{ duration:0.2 }}
@@ -414,7 +397,7 @@ function PackDropdown({ value, onChange }) {
 function LangDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const sel = LANGUAGES.find(l => l.code === value) || LANGUAGES[0];
+  const sel = WORD_SEARCH_LANGS.find(l => l.code === value) || WORD_SEARCH_LANGS[0];
 
   useEffect(() => {
     const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -439,7 +422,7 @@ function LangDropdown({ value, onChange }) {
       >
         <span style={{ display:"flex", alignItems:"center", gap:7 }}>
           <Globe size={14} style={{ flexShrink:0 }}/>
-          <span style={{ fontSize:18, lineHeight:1 }}>{sel.flag}</span>
+          <FlagImg code={sel.flagCode} size={20}/>
           <span>{sel.label}</span>
         </span>
         <motion.span animate={{ rotate:open?180:0 }} transition={{ duration:0.2 }}
@@ -473,7 +456,7 @@ function LangDropdown({ value, onChange }) {
             }}>
               <Globe size={10}/> Translation language
             </div>
-            {LANGUAGES.map(l => {
+            {WORD_SEARCH_LANGS.map(l => {
               const isA = l.code === value;
               return (
                 <button key={l.code} onClick={() => { onChange(l.code); setOpen(false); }}
@@ -490,7 +473,7 @@ function LangDropdown({ value, onChange }) {
                   onMouseEnter={e => { if (!isA) e.currentTarget.style.background = C.greenSoft + "80"; }}
                   onMouseLeave={e => { if (!isA) e.currentTarget.style.background = "transparent"; }}
                 >
-                  <span style={{ fontSize:18, lineHeight:1, flexShrink:0 }}>{l.flag}</span>
+                  <FlagImg code={l.flagCode} size={20}/>
                   <span style={{ flex:1 }}>{l.label}</span>
                   {isA && <span style={{ width:6, height:6, borderRadius:"50%", background:C.green, flexShrink:0 }}/>}
                 </button>
@@ -506,7 +489,7 @@ function LangDropdown({ value, onChange }) {
 // ─── Main WordSearch component ─────────────────────────────────────────────
 export default function WordSearch() {
   const [packIdx,   setPackIdx]   = useState(0);
-  const [lang,      setLang]      = useState("en");
+  const [lang,      setLang]      = useState(detectLang);
   const [gameData,  setGameData]  = useState(null);
   const [selecting, setSelecting] = useState(false);
   const [selection, setSelection] = useState([]);
@@ -517,7 +500,10 @@ export default function WordSearch() {
   const pack = PACKS[packIdx];
 
   const startGame = useCallback((pIdx = packIdx) => {
-    const data = buildGrid(PACKS[pIdx].words);
+    // Pick 12 random words so all fit reliably in the 10×10 grid
+    const pool    = [...PACKS[pIdx].words];
+    const picked  = pool.sort(() => Math.random() - 0.5).slice(0, 12);
+    const data = buildGrid(picked);
     setGameData(data);
     setFound([]);
     setSelection([]);
@@ -674,7 +660,7 @@ export default function WordSearch() {
             <div>
               <h3 className="font-display text-sm font-bold mb-2 flex items-center gap-1.5" style={{ color:C.blue }}>
                 <Search size={13}/> {getTranslation("findWords", lang)}
-                <span className="text-xs font-normal opacity-70">({found.length}/{pack.words.length})</span>
+                <span className="text-xs font-normal opacity-70">({found.length}/{gameData?.placed.length ?? 0})</span>
               </h3>
               <div className="grid grid-cols-2 gap-1.5">
                 {gameData && gameData.placed.map(({ word }, wi) => {
