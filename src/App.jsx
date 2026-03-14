@@ -311,9 +311,10 @@ export default function App() {
 
       <div className="relative z-10">
         
-        {/* ── NAVBAR AÑADIDA ── */}
-        {console.log('🔍 Pasando lang a Navbar:', lang)}
-        <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
+        {/* ── NAVBAR (Se oculta en el modo lectura) ── */}
+        {view !== "reader" && (
+          <Navbar view={view} onNav={handleNav} lang={lang} onLangChange={setLang} />
+        )}
 
         <main className="max-w-4xl mx-auto px-4 py-8 pb-20">
           <AnimatePresence mode="wait">
@@ -327,7 +328,6 @@ export default function App() {
               </motion.div>
             ) : view === "library" ? (
               <motion.div key="library" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                {console.log('🔍 Pasando lang a LibraryView:', lang)}
                 <LibraryView stories={stories} onSelectStory={handleSelectStory} onGenerate={() => setView("generator")} isGuest={isGuest} lang={lang}/>
               </motion.div>
             ) : view === "reader" && activeStory ? (
@@ -338,7 +338,8 @@ export default function App() {
           </AnimatePresence>
         </main>
         
-        <Footer onNav={handleNav} lang={lang}/>
+        {/* ── FOOTER (Se oculta en el modo lectura) ── */}
+        {view !== "reader" && <Footer onNav={handleNav} lang={lang}/>}
       </div>
     </div>
   );

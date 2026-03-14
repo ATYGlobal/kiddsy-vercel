@@ -232,8 +232,21 @@ export default function Navbar({ view, onNav, lang, onLangChange }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
+  // Diccionario a prueba de fallos (elimina los /tlibrary feos)
+  const FALLBACK_LABELS = {
+    library: "Stories", mylibrary: "My Library", games: "Games",
+    wordsearch: "Word Search", puzzles: "Puzzles", education: "Learn ABC",
+    legal: "Help & FAQ", subscription: "Support Us", collaborate: "Collaborate"
+  };
+
   const t = (key) => {
-    return NAV_TRANSLATIONS[key]?.[lang] || NAV_TRANSLATIONS[key]?.en || key;
+    // 1. Intenta buscar la traducción
+    // 2. Si falla, usa nuestro Fallback limpio
+    // 3. Si todo falla, usa la llave pero en mayúscula
+    return NAV_TRANSLATIONS?.[key]?.[lang] 
+        || NAV_TRANSLATIONS?.[key]?.en 
+        || FALLBACK_LABELS[key] 
+        || key.charAt(0).toUpperCase() + key.slice(1);
   };
   // Close "more" dropdown on outside click
   useEffect(() => {
