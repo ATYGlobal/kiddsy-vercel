@@ -13,22 +13,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Heart, Shield, Sparkles, CheckCircle, Star, BookOpen } from "lucide-react";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
-// ── Paleta ────────────────────────────────────────────────────────────────
-const C = {
-  blue:       "#1565C0",
-  blueSoft:   "#E3F2FD",
-  blueMid:    "#1976D2",
-  yellow:     "#F9A825",
-  yellowSoft: "#FFFDE7",
-  orange:     "#E65100",
-  green:      "#43A047",
-  greenSoft:  "#E8F5E9",
-  magenta:    "#D81B60",
-  cyan:       "#00ACC1",
-  slate:      "#64748B",
-  slateLight: "#94A3B8",
-};
+import { C } from "../utils/designConfig.js";
 
 const FF = "var(--font-display,'Nunito',ui-rounded,sans-serif)";
 const FB = "var(--font-body,'Nunito',sans-serif)";

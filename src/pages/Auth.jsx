@@ -8,21 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, CheckCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
-// ─── Logo import — replace path with your actual logo ─────────────────────
-// import logoUrl from "../assets/Kiddsy_Loop_Logo.png";
-
-// ─── Brand palette (from logo) ─────────────────────────────────────────────
-const C = {
-  blue:    "#1565C0",
-  blueMid: "#1976D2",
-  blueSoft:"#E3F2FD",
-  red:     "#E53935",
-  yellow:  "#F9A825",
-  green:   "#43A047",
-  magenta: "#D81B60",
-  fb:      "#1877F2",  // Facebook blue
-};
+import { C } from "../utils/designConfig.js";
 
 // ─── Animated background bubbles ──────────────────────────────────────────
 function MagicBubbles() {

@@ -30,7 +30,7 @@ import {
   IMPACT_STATS, STRIPE_APPEARANCE,
 } from "../data/subscriptionData.js";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
+import { C } from "../utils/designConfig.js";
 
 
 // ── Stripe imports ─────────────────────────────────────────────────────────
@@ -47,16 +47,7 @@ if (!stripePublishableKey) {
   console.warn("⚠️ Stripe publishable key not configured. Payment buttons will be disabled.");
 }
 
-// ─── Brand palette ─────────────────────────────────────────────────────────
-const C = {
-  blue:    "#1565C0",
-  red:     "#E53935",
-  yellow:  "#FDD835",
-  green:   "#43A047",
-  magenta: "#D81B60",
-  cyan:    "#00ACC1",
-  orange:  "#E65100",
-};
+
 
 
 // ─── API helper ─────────────────────────────────────────────────────────────

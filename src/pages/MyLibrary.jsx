@@ -17,18 +17,7 @@ import {
 } from "lucide-react";
 import CartoonTitle from "../components/CartoonTitle.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
-const C = {
-  blue:       "#1565C0",
-  blueSoft:   "#E3F2FD",
-  red:        "#E53935",
-  redSoft:    "#FFEBEE",
-  yellow:     "#F9A825",
-  green:      "#43A047",
-  greenSoft:  "#E8F5E9",
-  magenta:    "#D81B60",
-  magentaSoft:"#FCE4EC",
-};
+import { C } from "../utils/designConfig.js";
 
 // ── localStorage helpers ────────────────────────────────────────────────────
 const LS_STORIES = "kiddsy_guestStories";

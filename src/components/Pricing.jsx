@@ -12,19 +12,7 @@ import {
   X, Lock, Sparkles, Zap, Heart,
   Puzzle, BookOpen, Star, Crown, Infinity,
 } from "lucide-react";
-
-const C = {
-  blue:       "#1565C0",
-  blueSoft:   "#E3F2FD",
-  yellow:     "#F9A825",
-  yellowSoft: "#FFFDE7",
-  green:      "#43A047",
-  greenSoft:  "#E8F5E9",
-  magenta:    "#D81B60",
-  magentaSoft:"#FCE4EC",
-  orange:     "#E65100",
-  orangeSoft: "#FFF3E0",
-};
+import { C } from "../utils/designConfig.js";
 
 const FF = "var(--font-display,'Nunito',sans-serif)";
 const FB = "var(--font-body,'Nunito',sans-serif)";
