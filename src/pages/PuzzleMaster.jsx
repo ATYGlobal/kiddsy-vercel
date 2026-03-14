@@ -3,10 +3,11 @@
  * Solo UI + estado. Datos → src/data/puzzleMasterData.js
  * Helpers → src/utils/puzzleHelpers.js
  */
+console.log("PuzzleMaster se está renderizando");
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  RotateCcw, Volume2, ChevronDown, ChevronLeft, ChevronRight,
+  RotateCcw, Volume2, ChevronDown,
   Globe, Grid, Cat, Building2, Leaf, Landmark,
   Star, Loader, Trophy, Target, CheckCircle, Lock, Puzzle,
 } from "lucide-react";
@@ -14,7 +15,6 @@ import Pricing         from "../components/Pricing.jsx";
 import { PuzzleBg }   from "../components/PageBg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg        from "../utils/EmojiSvg.jsx";
-import { FlagImg }     from "../components/KiddsyIcons.jsx";
 import CartoonTitle from "../components/CartoonTitle.jsx";
 
 import {
@@ -194,10 +194,9 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const [dragOver,       setDragOver]       = useState(null);
   const [won,            setWon]            = useState(false);
   const [confetti,       setConfetti]       = useState(false);
-  const [localLang,      setLocalLang]      = useState("es");
+  const [localLang,      setLocalLang]      = useState("en");
   const [moves,          setMoves]          = useState(0);
   const [imgLoaded,      setImgLoaded]      = useState(false);
-  const [imgError,       setImgError]       = useState(false);
 
   const lang    = propLang || localLang;
   const setLang = v => { setLocalLang(v); onLangChange?.(v); };
@@ -223,7 +222,7 @@ export default function PuzzleMaster({ lang:propLang, onLangChange }) {
   const reset = useCallback((gSize = gridSize) => {
     setTiles(buildPuzzle(gSize));
     setSelected(null); setDragOver(null);
-    setWon(false); setMoves(0); setImgLoaded(false); setImgError(false);
+    setWon(false); setMoves(0); setImgLoaded(false);
   }, [gridSize]);
 
   useEffect(() => { reset(gridSize); }, [itemIdx, catId, gridSize]);
@@ -317,14 +316,20 @@ return (
 
         {/* A: Categoría */}
         <DD minW={150} maxH={280} accent={accent}
-          trigger={<><EmojiSvg code={cat.emoji} size={18}/><span>{cat.label}</span></>}
+          trigger={(() => {
+            const CatIcon = cat.icon;
+            return <><CatIcon size={15} strokeWidth={2}/><span>{cat.label}</span></>;
+          })()}
         >
           {close => [
             <DHeader key="hdr">Category</DHeader>,
             ...CATEGORIES.map(c => (
               <DRow key={c.id} active={catId === c.id} accent={c.color}
                 onClick={() => switchCat(c.id, close)}>
-                <EmojiSvg code={c.emoji} size={18} style={{ flexShrink:0 }}/>
+                {(() => { const CIcon = c.icon; return (
+                  <CIcon size={16} strokeWidth={2}
+                    style={{ flexShrink:0, color: catId===c.id ? c.color : "#64748B" }}/>
+                ); })()}
                 <span style={{ fontWeight:700 }}>{c.label}</span>
                 {c.premium
                   ? <Lock size={12} strokeWidth={2.5} style={{ marginLeft:"auto", color:"#94A3B8" }}/>
@@ -337,14 +342,17 @@ return (
 
         {/* B: Ítem */}
         <DD minW={190} maxH={360} accent={accent}
-          trigger={(
-            <>
-              <Thumb item={item} size={24} FallbackIcon={() => <EmojiSvg code={cat.emoji} size={22}/>}/>
-              <span style={{ maxWidth:120, overflow:"hidden", textOverflow:"ellipsis" }}>
-                {item[lang] || item.name}
-              </span>
-            </>
-          )}
+          trigger={(() => {
+            const CatIcon = cat.icon;
+            return (
+              <>
+                <Thumb item={item} size={24} FallbackIcon={CatIcon}/>
+                <span style={{ maxWidth:120, overflow:"hidden", textOverflow:"ellipsis" }}>
+                  {item[lang] || item.name}
+                </span>
+              </>
+            );
+          })()}
         >
           {close => [
             <DHeader key="hdr">{cat.label} ({cat.items.length})</DHeader>,
@@ -384,14 +392,14 @@ return (
 
         {/* D: Idioma */}
         <DD minW={150} accent={C.blue}
-          trigger={<><Globe size={13}/><FlagImg code={langMeta.flagCode} size={20}/><span>{langMeta.label}</span></>}
+          trigger={<><Globe size={13}/><span style={{ fontSize:15 }}>{langMeta.flag}</span><span>{langMeta.label}</span></>}
         >
           {close => [
             <DHeader key="hdr">Language</DHeader>,
             ...LANGUAGES.map(l => (
               <DRow key={l.code} active={lang === l.code} accent={C.blue}
                 onClick={() => { setLang(l.code); close(); }}>
-                <FlagImg code={l.flagCode} size={18}/>
+                <span style={{ fontSize:16, flexShrink:0 }}><EmojiSvg code={l.flagCode} size={16} /></span>
                 <span>{l.label}</span>
               </DRow>
             )),
@@ -475,93 +483,37 @@ return (
               )}
             </AnimatePresence>
 
-            {/* ── Prev / Next item navigation ──────────────────────── */}
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
-              <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.94 }}
-                onClick={() => { const prev = (itemIdx - 1 + cat.items.length) % cat.items.length; setItemIdx(prev); setImgLoaded(false); setImgError(false); }}
-                style={{
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  width:34, height:34, borderRadius:"50%", border:"2.5px solid white",
-                  background:"rgba(255,255,255,0.85)", boxShadow:"0 2px 8px rgba(0,0,0,0.1)",
-                  cursor:"pointer", color:accent,
-                }}
-              ><ChevronLeft size={16}/></motion.button>
-
-              <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700,
-                fontSize:12, color:"#94A3B8", minWidth:60, textAlign:"center" }}>
-                {itemIdx + 1} / {cat.items.length}
-              </span>
-
-              <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.94 }}
-                onClick={() => { const next = (itemIdx + 1) % cat.items.length; setItemIdx(next); setImgLoaded(false); setImgError(false); }}
-                style={{
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  width:34, height:34, borderRadius:"50%", border:"2.5px solid white",
-                  background:"rgba(255,255,255,0.85)", boxShadow:"0 2px 8px rgba(0,0,0,0.1)",
-                  cursor:"pointer", color:accent,
-                }}
-              ><ChevronRight size={16}/></motion.button>
-            </div>
-
             {/* Grid container */}
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white"
               style={{ width:GRID_PX, height:GRID_PX, background:C.greenSoft }}>
+              <img src={item.img} alt="" className="hidden" onLoad={() => setImgLoaded(true)}/>
 
-              {/* Preload trigger — useEffect is more reliable than hidden img onLoad */}
-              {(() => {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useEffect(() => {
-                  setImgLoaded(false);
-                  setImgError(false);
-                  const img = new window.Image();
-                  img.onload  = () => setImgLoaded(true);
-                  img.onerror = () => setImgError(true);
-                  img.src = item.img;
-                  return () => { img.onload = null; img.onerror = null; };
-                }, [item.img]);
-                return null;
-              })()}
-
-              {/* Loading / error placeholder */}
-              {!imgLoaded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-                  style={{ background:(item.color || "#eee") + "22" }}>
-                  {imgError ? (
-                    <>
-                      <EmojiSvg code={cat.emoji} size={48}/>
-                      <span style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
-                        Image not available
-                      </span>
-                      <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.95 }}
-                        onClick={() => { setImgLoaded(false); setImgError(false); const img = new window.Image(); img.onload = () => setImgLoaded(true); img.onerror = () => setImgError(true); img.src = item.img; }}
-                        style={{ padding:"5px 14px", borderRadius:999, border:"none",
-                          background:accent, color:"white",
-                          fontFamily:"var(--font-display,'Nunito',sans-serif)",
-                          fontWeight:700, fontSize:11, cursor:"pointer", marginTop:4 }}
-                      >Retry</motion.button>
-                    </>
-                  ) : (
-                    <>
+              {/* Loading placeholder */}
+                {!imgLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                    style={{ background:(item.color || "#eee") + "22" }}>
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 10, -10, 0]
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <EmojiSvg code={cat.emoji} size={48} />
+                    </motion.div>
+                    <span style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
+                      Cargando imagen...
+                    </span>
+                    <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden mt-2">
                       <motion.div
-                        animate={{ scale:[1,1.18,1], rotate:[0,8,-8,0] }}
-                        transition={{ duration:1.4, repeat:Infinity }}
-                      >
-                        <EmojiSvg code={cat.emoji} size={48}/>
-                      </motion.div>
-                      <span style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
-                        Loading image…
-                      </span>
-                      <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden mt-2">
-                        <motion.div className="h-full" style={{ background:accent }}
-                          animate={{ width:["0%","100%"] }}
-                          transition={{ duration:1.8, repeat:Infinity }}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
+                        className="h-full"
+                        style={{ background: accent }}
+                        animate={{ width: ["0%", "100%"] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                    </div>
+                  </div>
+                )}
               {/* Puzzle tiles */}
               {imgLoaded && (
                 <div style={{
@@ -623,7 +575,7 @@ return (
               }}>
                 {imgLoaded
                   ? <img src={item.img} alt={item.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                  : <EmojiSvg code={cat.emoji} size={28}/>
+                  : (() => { const CatIcon = cat.icon; return <CatIcon size={26} strokeWidth={1.5} style={{ color:item.color||"#94A3B8" }}/>; })()
                 }
               </div>
               <p style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, color:"#94A3B8" }}>
@@ -642,7 +594,7 @@ return (
                 padding:"3px 10px", borderRadius:999, background:accent + "18", marginBottom:6,
                 fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:11, fontWeight:600, color:accent,
               }}>
-                <EmojiSvg code={cat.emoji} size={14} style={{ display:"inline", verticalAlign:"middle", marginRight:3 }}/> {cat.label}
+                {(() => { const CatIcon = cat.icon; return <CatIcon size={11} strokeWidth={2} style={{ display:"inline", verticalAlign:"middle", marginRight:3 }}/>; })()} {cat.label}
               </div>
               <h3 style={{
                 fontFamily:"var(--font-display,'Nunito',sans-serif)",
@@ -668,7 +620,7 @@ return (
                 paddingBottom:10, borderBottom:"1.5px solid #F0FFF4", marginBottom:8,
               }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <FlagImg code={langMeta.flagCode} size={24}/>
+                  <span style={{ fontSize:22 }}><EmojiSvg code={langMeta.flagCode} size={22} /></span>
                   <div>
                     <div style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:10, color:"#94A3B8", textTransform:"uppercase", letterSpacing:"0.06em" }}>
                       {langMeta.label}
@@ -712,7 +664,7 @@ return (
               {teaserLangs.map(l => (
                 <div key={l.code} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"6px 0", borderBottom:"1px solid #F8FAFC" }}>
                   <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-                    <FlagImg code={l.flagCode} size={16}/>
+                    <span style={{ fontSize:15 }}><EmojiSvg code={l.flagCode} size={15} /></span>
                     <div>
                       <div style={{ fontFamily:"var(--font-body,'Nunito',sans-serif)", fontSize:9, color:"#CBD5E1" }}>{l.label}</div>
                       <div style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:600, fontSize:13, color:"#64748B", direction:l.dir }}>
