@@ -28,8 +28,33 @@ const GAME_TABS = [
 ];
 
 export default function Games({ lang = "en" }) {
+  // 1. Estado para controlar qué juego se ve
   const [activeGame, setActiveGame] = useState("puzzle");
-  const active = GAME_TABS.find(g=>g.id===activeGame);
+
+  // 2. Configuración de animación
+  const a5 = {
+    type: "spring",
+    stiffness: 380,
+    damping: 16
+  };
+
+  // 3. Lista de juegos (ahora dentro para que 'lang' funcione)
+  const sy = [
+    { 
+      id: "puzzle", 
+      label: Ae("games.tab.puzzle", lang), 
+      Icon: Zt, 
+      color: k.blue, 
+      bg: k.blueSoft 
+    },
+    { 
+      id: "memory", 
+      label: Ae("games.tab.memory", lang), 
+      Icon: cS, 
+      color: k.magenta, 
+      bg: k.magentaSoft 
+    }
+  ];
 
   return (
     <div className="relative min-h-screen overflow-hidden">
