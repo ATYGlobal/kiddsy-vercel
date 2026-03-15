@@ -10,7 +10,6 @@ import { RainbowTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg          from "../utils/EmojiSvg.jsx";
 import { LANGUAGES, getLang } from "../utils/langConfig.js";
 import { C } from "../utils/designConfig.js";
-import { motion, AnimatePresence } from "framer-motion";
 import { StoryCoverCard } from "./StoryReader.jsx"; // Ajusta la ruta si es necesario
 
 // ── Speech ────────────────────────────────────────────────────────────────────
@@ -263,6 +262,7 @@ export default function Education({ lang = "en", onLangChange, stories = [], onS
   const tabColor = TABS.find(t=>t.id===tab)?.color || C.orange;
 
   const handleCardClick=(item,key)=>{
+    if (tab === "stories") return;
     const isSame = active && (active.letter===item.letter||active.n===item.n||active.en===item.en);
     setActive(isSame?null:item);
     if (!isSame){
@@ -310,20 +310,32 @@ return (
         </motion.div>
 
         <p className="font-display text-slate-700 text-lg font-medium bg-white/50 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
-          Learn English with <EmojiSvg code={langMeta.flagCode} size={18} /> {langMeta.label} translations! <EmojiSvg code="1f30d" size={16} />
+          Learn English with <EmojiSvg code={langMeta?.flagCode || "1f1fa-1f1f8"} size={18} /> {langMeta?.label || "Spanish"} translations! <EmojiSvg code="1f30d" size={16} />
         </p>
       </div>
+      
       {/* Top controls */}
       <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:10,padding:"0 16px 20px"}}>
         {/* Tabs */}
         <div className="flex bg-white/80 rounded-full p-1 shadow-sm gap-1">
-          {TABS.map(t=>{
-            const Icon=t.icon;
-            return <button key={t.id} onClick={()=>{setTab(t.id);setActive(null);}}
-              className="flex items-center gap-2 px-4 py-2 rounded-full font-display text-sm transition-all"
-              style={{background:tab===t.id?t.color:"transparent",color:tab===t.id?"white":"#6B7280"}}>
-              <Icon size={14}/>{t.label}
-            </button>;
+          {TABS.map(t => {
+            const Icon = t.icon;
+            return (
+              <button 
+                key={t.id} 
+                onClick={() => {
+                  setTab(t.id);
+                  setActive(null);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full font-display text-sm transition-all"
+                style={{
+                  background: tab === t.id ? t.color : "transparent",
+                  color: tab === t.id ? "white" : "#6B7280"
+                }}
+              >
+                <Icon size={14}/>{t.label}
+              </button>
+            );
           })}
         </div>
         {/* Language picker */}
@@ -333,100 +345,148 @@ return (
       {/* Progress bar */}
       <div className="max-w-4xl mx-auto px-4 mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="font-display text-sm" style={{color:tabColor}}>
+          <span className="font-display text-sm" style={{color: tabColor}}>
             Progress: {totalLearned} / {totalItems}
           </span>
-          {totalLearned===totalItems&&totalItems>0&&
-            <span className="font-display text-sm text-white px-3 py-1 rounded-full" style={{background:tabColor}}>
+          {totalLearned === totalItems && totalItems > 0 && (
+            <span className="font-display text-sm text-white px-3 py-1 rounded-full" style={{background: tabColor}}>
               <EmojiSvg code="2b50" size={12} /> All done!
-            </span>}
+            </span>
+          )}
         </div>
-        <div className="h-3 rounded-full overflow-hidden" style={{background:`${tabColor}20`}}>
-          <motion.div className="h-full rounded-full"
-            style={{background:tabColor}}
-            initial={{width:0}}
-            animate={{width:`${totalItems>0?(totalLearned/totalItems)*100:0}%`}}
-            transition={{duration:0.5,ease:"easeOut"}}/>
+        <div className="h-3 rounded-full overflow-hidden" style={{background: `${tabColor}20`}}>
+          <motion.div 
+            className="h-full rounded-full"
+            style={{background: tabColor}}
+            initial={{width: 0}}
+            animate={{width: `${totalItems > 0 ? (totalLearned / totalItems) * 100 : 0}%`}}
+            transition={{duration: 0.5, ease: "easeOut"}}
+          />
         </div>
       </div>
 
+      {/* Grid principal - siempre 3 columnas en lg */}
       <div className="max-w-4xl mx-auto px-4 pb-24">
         <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* Cards grid */}
-          <div className={`${active?"lg:col-span-2":"lg:col-span-3"}`}>
+          
+          {/* Columna/s de tarjetas */}
+          <div className={`
+            ${(active && tab !== "stories") ? "lg:col-span-2" : "lg:col-span-3"}
+          `}>
             <AnimatePresence mode="wait">
-              <motion.div key={tab}
-                initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}
-                transition={{duration:0.2}}>
-                  {tab === "stories" && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {stories.length === 0 ? (
-                        <div className="col-span-full text-center py-16 text-slate-400 font-body">
-                          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-5xl mb-3">📚</motion.div>
-                          <p>Your story card will arrive soon!✨</p>
-                        </div>
-                      ) : (
-                        stories.map((story, i) => (
-                          <StoryCoverCard
-                            key={story.id}
-                            story={story}
-                            index={i}
-                            onClick={() => onSelectStory(story)}
-                          />
-                        ))
-                      )}
-                    </div>
-                  )}
-                {tab==="letters"&&(
+              <motion.div 
+                key={tab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Alphabet */}
+                {tab === "letters" && (
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                    {ALPHABET.map(item=>(
-                      <LetterCard key={item.letter} item={item} lang={lang} langMeta={langMeta}
-                        active={active?.letter===item.letter}
-                        onClick={()=>handleCardClick(item,item.letter)}/>
+                    {ALPHABET.map(item => (
+                      <LetterCard 
+                        key={item.letter}
+                        item={item}
+                        lang={lang}
+                        langMeta={langMeta}
+                        active={active?.letter === item.letter}
+                        onClick={() => handleCardClick(item, item.letter)}
+                      />
                     ))}
                   </div>
                 )}
-                {tab==="numbers"&&(
+
+                {/* Numbers */}
+                {tab === "numbers" && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                    {NUMBERS.map(item=>(
-                      <NumberCard key={item.n} item={item} lang={lang} langMeta={langMeta}
-                        active={active?.n===item.n}
-                        onClick={()=>handleCardClick(item,item.n)}/>
+                    {NUMBERS.map(item => (
+                      <NumberCard 
+                        key={item.n}
+                        item={item}
+                        lang={lang}
+                        langMeta={langMeta}
+                        active={active?.n === item.n}
+                        onClick={() => handleCardClick(item, item.n)}
+                      />
                     ))}
                   </div>
                 )}
-                {tab==="words"&&(
+
+                {/* Words */}
+                {tab === "words" && (
                   <div className="grid sm:grid-cols-2 gap-3">
-                    {COMMON_WORDS.map(item=>(
-                      <WordCard key={item.en} item={item} lang={lang} langMeta={langMeta}
-                        active={active?.en===item.en}
-                        onClick={()=>handleCardClick(item,item.en)}/>
+                    {COMMON_WORDS.map(item => (
+                      <WordCard 
+                        key={item.en}
+                        item={item}
+                        lang={lang}
+                        langMeta={langMeta}
+                        active={active?.en === item.en}
+                        onClick={() => handleCardClick(item, item.en)}
+                      />
                     ))}
+                  </div>
+                )}
+
+                {/* STORIES - SIN panel de detalle */}
+                {tab === "stories" && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {stories.length === 0 ? (
+                      <div className="col-span-full text-center py-16 text-slate-400 font-body">
+                        <motion.div 
+                          animate={{ y: [0, -8, 0] }} 
+                          transition={{ duration: 2, repeat: Infinity }} 
+                          className="text-5xl mb-3"
+                        >
+                          📚
+                        </motion.div>
+                        <p>No stories yet. Create your first one in the Library! ✨</p>
+                      </div>
+                    ) : (
+                      stories.map((story, i) => (
+                        <StoryCoverCard
+                          key={story.id}
+                          story={story}
+                          index={i}
+                          onClick={() => onSelectStory(story)}
+                        />
+                      ))
+                    )}
                   </div>
                 )}
               </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Detail panel */}
+          {/* Detail panel - SOLO visible si hay active Y NO estamos en stories */}
           <AnimatePresence>
-            {active&&(
+            {active && tab !== "stories" && (
               <div className="lg:col-span-1">
-                <DetailPanel item={active} lang={lang} langMeta={langMeta} type={tab}
-                  onClose={()=>setActive(null)}/>
+                <DetailPanel 
+                  item={active} 
+                  lang={lang} 
+                  langMeta={langMeta} 
+                  type={tab}
+                  onClose={() => setActive(null)}
+                />
               </div>
             )}
           </AnimatePresence>
         </div>
-
-        {/* Tip */}
-        <div className="mt-8 rounded-3xl p-4 border-2 border-white shadow-sm text-center" style={{background:C.yellowSoft}}>
-          <p className="font-body text-sm text-slate-600">
-            <EmojiSvg code="1f4a1" size={14} /> Tap any card to see all 16 language translations + hear the pronunciation!
-          </p>
-        </div>
       </div>
+      
+      {/* Tip - Solo mostrar si no estamos en stories */}
+      {tab !== "stories" && (
+        <div className="max-w-4xl mx-auto px-4 mt-8">
+          <div className="rounded-3xl p-4 border-2 border-white shadow-sm text-center" style={{background: C.yellowSoft}}>
+            <p className="font-body text-sm text-slate-600">
+              <EmojiSvg code="1f4a1" size={14} /> Tap any card to see all 16 language translations + hear the pronunciation!
+            </p>
+          </div>
+        </div>
+      )}
+      
     </div>
   </div>
 );
