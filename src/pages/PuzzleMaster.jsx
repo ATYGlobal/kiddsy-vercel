@@ -11,6 +11,11 @@ import {
   Globe, Grid, Cat, Building2, Leaf, Landmark,
   Star, Loader, Trophy, Target, CheckCircle, Lock, Puzzle,
 } from "lucide-react";
+import { 
+  ANIMALS, CITIES, NATURE, MONUMENTS, 
+  C as j // Mapeamos C como 'j' para que tu código de colores funcione
+} from "../data/puzzleMasterData.js";
+import { t as Te } from "../utils/uiStrings.js";
 import Pricing         from "../components/Pricing.jsx";
 import { PuzzleBg }   from "../components/PageBg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont.jsx";
