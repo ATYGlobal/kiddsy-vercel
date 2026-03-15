@@ -557,3 +557,12 @@ export function GameStickerTile({ tile, size = 68, isBlank, isSelected, isMatche
     </motion.div>
   );
 }
+// Al final de src/components/KiddsyIcons.jsx
+export const FlagImg = ({ code, size = 20 }) => (
+  <img
+    src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+    width={size}
+    alt={code}
+    style={{ borderRadius: 4, objectFit: 'cover' }}
+  />
+);
