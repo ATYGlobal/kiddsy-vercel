@@ -28,6 +28,7 @@ import KiddsyTitle                      from "../components/KiddsyTitle";
 import useQuota                         from "../hooks/useQuota.js";
 import { QuotaBadge, QuotaWall }        from "../components/QuotaUI.jsx";
 import StoryReader,  { StoryCoverCard } from "../pages/StoryReader.jsx";
+import EmojiSvg                          from "../utils/EmojiSvg.jsx";
 import { C } from "../utils/designConfig.js";
 import { t } from "../utils/uiStrings.js";
 
@@ -146,7 +147,18 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style, isF
           style={{ left: `${p.x}%`, top: `${p.y}%` }}
           animate={{ y:[0,-30,0], opacity:[0.4,0.9,0.4], scale:[0.9,1.2,0.9] }}
           transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
-        >{p.emoji}</motion.span>
+        >
+          <EmojiSvg code={
+            p.emoji === "✨" ? "2728" :
+            p.emoji === "📖" ? "1f4d6" :
+            p.emoji === "🌟" ? "1f31f" :
+            p.emoji === "🪄" ? "1fa84" :
+            p.emoji === "💫" ? "1f4ab" :
+            p.emoji === "🌈" ? "1f308" :
+            p.emoji === "⭐" ? "2b50" :
+            p.emoji === "🎨" ? "1f3a8" : "2728"
+          } size={24} />
+        </motion.span>
       ))}
 
       <motion.div
@@ -171,9 +183,19 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style, isF
       <div className="flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-display"
         style={{ background:`${accent.primary}18`, color:accent.text }}>
         {isFree ? (
-          <><span>📝</span> Text story · no illustrations</>
+          <>
+            <EmojiSvg code="1f4dd" size={16} /> Text story · no illustrations
+          </>
         ) : (
-          <><span>{styleObj.icon}</span> {styleObj.label} <span className="text-xs opacity-60">+ DALL·E 3</span></>
+          <>
+            <EmojiSvg code={
+              styleObj.icon === "💧" ? "1f4a7" :
+              styleObj.icon === "🖼️" ? "1f5bc" :
+              styleObj.icon === "✏️" ? "270f" :
+              styleObj.icon === "😊" ? "1f60a" :
+              styleObj.icon === "🎨" ? "1f3a8" : "1f31f"
+            } size={16} /> {styleObj.label} <span className="text-xs opacity-60">+ DALL·E 3</span>
+          </>
         )}
       </div>
 
@@ -193,7 +215,11 @@ function GeneratingLoader({ childName, theme, storyColor, streamText, style, isF
         />
       </div>
       <p className="font-body text-xs mt-4 text-center" style={{ color:`${accent.text}60` }}>
-        {isFree ? "Groq LLAMA writing your story…" : "Groq LLAMA + DALL·E 3 creating your story… ✨"}
+        {isFree ? (
+          "Groq LLAMA writing your story…"
+        ) : (
+          <>Groq LLAMA + DALL·E 3 creating your story… <EmojiSvg code="2728" size={12} /></>
+        )}
       </p>
     </motion.div>
   );
@@ -218,12 +244,12 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
   useEffect(() => { lsSet(LS_NAME, childName); }, [childName]);
 
   const THEMES = [
-    { label:"🏫 Going to School",  value:"going to school for the first time" },
-    { label:"🌈 Making Friends",   value:"making new friends"                  },
-    { label:"🛒 Supermarket",      value:"shopping at the supermarket"         },
-    { label:"🚌 Taking the Bus",   value:"taking the bus"                      },
-    { label:"🏥 Doctor Visit",     value:"visiting the doctor"                 },
-    { label:"🎉 Birthday Party",   value:"celebrating a birthday"              },
+    { label: <span><EmojiSvg code="1f3eb" size={16} /> Going to School</span>, value: "going to school for the first time" },
+    { label: <span><EmojiSvg code="1f308" size={16} /> Making Friends</span>, value: "making new friends" },
+    { label: <span><EmojiSvg code="1f6d2" size={16} /> Supermarket</span>, value: "shopping at the supermarket" },
+    { label: <span><EmojiSvg code="1f68c" size={16} /> Taking the Bus</span>, value: "taking the bus" },
+    { label: <span><EmojiSvg code="1f3e5" size={16} /> Doctor Visit</span>, value: "visiting the doctor" },
+    { label: <span><EmojiSvg code="1f389" size={16} /> Birthday Party</span>, value: "celebrating a birthday" },
   ];
 
   const activeTheme  = customTheme.trim() || theme;
@@ -384,13 +410,15 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="text-center pb-2">
         <motion.div animate={{ rotate:[-8,8,-8] }} transition={{ duration:2, repeat:Infinity, ease:"easeInOut" }}
-          className="text-5xl mb-3 inline-block">🪄</motion.div>
+          className="text-5xl mb-3 inline-block">
+          <EmojiSvg code="1fa84" size={48} />
+        </motion.div>
         <h2 style={{ lineHeight:1 }}>
           <BubbleTitle color={C.blue} size={34}>Create a Magic Story</BubbleTitle>
         </h2>
         <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full font-body text-xs font-semibold"
           style={{ background:"#FFF3E0", color:C.orange }}>
-          ✨ Groq LLAMA + DALL·E 3 + OpenAI TTS
+          <EmojiSvg code="2728" size={12} /> Groq LLAMA + DALL·E 3 + OpenAI TTS
         </div>
       </div>
 
@@ -402,14 +430,16 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
         <motion.div initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }}
           className="flex items-start gap-3 rounded-2xl px-4 py-3"
           style={{ background:"#EFF6FF", border:"2px solid #BFDBFE" }}>
-          <span style={{ fontSize:18, flexShrink:0 }}>ℹ️</span>
+          <span style={{ fontSize:18, flexShrink:0 }}>
+            <EmojiSvg code="2139" size={18} />
+          </span>
           <div>
             <div className="font-display text-sm font-bold" style={{ color:C.blue }}>
               Free plan · Text stories only
             </div>
             <div className="font-body text-xs text-slate-500 mt-0.5 leading-relaxed">
               Generated stories include <strong>text + translation</strong> but no DALL·E illustrations or AI voice.
-              Upgrade for full magic — illustrated pages + premium narration. ✨
+              Upgrade for full magic — illustrated pages + premium narration. <EmojiSvg code="2728" size={12} />
             </div>
           </div>
         </motion.div>
@@ -417,7 +447,7 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
 
       {/* ── 1. Child's name ─────────────────────────────────────────── */}
       <div style={card}>
-        <span style={sectionLabel}>👤 Child's name</span>
+        <span style={sectionLabel}><EmojiSvg code="1f464" size={14} /> Child's name</span>
         <input type="text" value={childName} onChange={e => setChildName(e.target.value)}
           placeholder="e.g. Sofia, Omar, Lucas…" maxLength={20}
           className="w-full px-5 py-3.5 rounded-2xl border-2 border-slate-200 font-body text-lg focus:outline-none focus:border-blue-400 bg-amber-50 transition-colors placeholder-slate-300"
@@ -426,11 +456,11 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
 
       {/* ── 2. Story theme ──────────────────────────────────────────── */}
       <div style={card}>
-        <span style={sectionLabel}>🌟 Story theme</span>
+        <span style={sectionLabel}><EmojiSvg code="1f31f" size={14} /> Story theme</span>
         <div className="grid grid-cols-3 gap-2 mb-3">
           {THEMES.map(t => (
             <button key={t.value}
-              onClick={() => { setTheme(t.value); setCustomTheme(""); setSelectedThemeLabel(t.label); }}
+              onClick={() => { setTheme(t.value); setCustomTheme(""); setSelectedThemeLabel(t.value); }}
               className="px-3 py-2.5 rounded-xl font-body text-sm text-left transition-all"
               style={{
                 background: theme===t.value && !customTheme ? C.blue : "#F8FAFC",
@@ -450,7 +480,7 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
       {/* ── 3. Illustration style (Premium only) ───────────────────────── */}
       {quota.hasIllustrations ? (
       <div style={card}>
-        <span style={sectionLabel}>🎨 Illustration style
+        <span style={sectionLabel}><EmojiSvg code="1f3a8" size={14} /> Illustration style
           <span className="ml-2 font-normal text-xs opacity-60">via DALL·E 3</span>
         </span>
         {/* Row 1: 4 styles */}
@@ -469,7 +499,14 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
                   transition:"all 0.15s",
                 }}
               >
-                <span style={{ fontSize:20 }}>{s.icon}</span>
+                <span style={{ fontSize:20 }}>
+                  <EmojiSvg code={
+                    s.icon === "💧" ? "1f4a7" :
+                    s.icon === "🖼️" ? "1f5bc" :
+                    s.icon === "✏️" ? "270f" :
+                    s.icon === "😊" ? "1f60a" : "1f3a8"
+                  } size={20} />
+                </span>
                 <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:10, color:active?C.blue:"#64748B" }}>
                   {s.label}
                 </span>
@@ -493,7 +530,12 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
                   transition:"all 0.15s",
                 }}
               >
-                <span style={{ fontSize:20 }}>{s.icon}</span>
+                <span style={{ fontSize:20 }}>
+                  <EmojiSvg code={
+                    s.icon === "🎨" ? "1f3a8" :
+                    s.icon === "🌟" ? "1f31f" : "1f3a8"
+                  } size={20} />
+                </span>
                 <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:10, color:active?C.blue:"#64748B" }}>
                   {s.label}
                 </span>
@@ -504,7 +546,15 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
         {/* Style description preview */}
         <div className="px-3 py-2.5 rounded-xl text-xs font-body flex items-start gap-2"
           style={{ background:C.blueSoft, color:C.blue }}>
-          <span style={{ fontSize:16, flexShrink:0 }}>{styleObj.icon}</span>
+          <span style={{ fontSize:16, flexShrink:0 }}>
+            <EmojiSvg code={
+              styleObj.icon === "💧" ? "1f4a7" :
+              styleObj.icon === "🖼️" ? "1f5bc" :
+              styleObj.icon === "✏️" ? "270f" :
+              styleObj.icon === "😊" ? "1f60a" :
+              styleObj.icon === "🎨" ? "1f3a8" : "1f31f"
+            } size={16} />
+          </span>
           <div>
             <strong>{styleObj.label}:</strong> {styleObj.prompt}
           </div>
@@ -512,29 +562,30 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
       </div>
       ) : (
         <div style={{...card, opacity:0.7}}>
-          <span style={sectionLabel}>🎨 Illustration style
+          <span style={sectionLabel}><EmojiSvg code="1f3a8" size={14} /> Illustration style
             <span className="ml-2 font-normal text-xs opacity-60">Premium feature</span>
           </span>
           <div className="flex items-center gap-3 px-3 py-3 rounded-xl"
             style={{ background:"#F8FAFC", border:"2px dashed #E2E8F0" }}>
-            <span style={{ fontSize:28 }}>🔒</span>
+            <span style={{ fontSize:28 }}>
+              <EmojiSvg code="1f512" size={28} />
+            </span>
             <div>
               <div className="font-display text-sm font-bold text-slate-500">
                 Text-only stories on Free plan
               </div>
               <div className="font-body text-xs text-slate-400 mt-0.5">
-                Upgrade for DALL·E 3 illustrations per page ✨
+                Upgrade for DALL·E 3 illustrations per page <EmojiSvg code="2728" size={12} />
               </div>
             </div>
           </div>
         </div>
       )}
 
-
       {/* ── 4. Voice (Premium: OpenAI TTS · Free: browser) ──────────────── */}
       {quota.hasVoicePicker ? (
       <div style={card}>
-        <span style={sectionLabel}>🔊 Narrator voice
+        <span style={sectionLabel}><EmojiSvg code="1f50a" size={14} /> Narrator voice
           <span className="ml-2 font-normal text-xs opacity-60">via OpenAI TTS</span>
         </span>
         <div className="grid grid-cols-4 gap-2 mb-3">
@@ -552,7 +603,13 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
                   transition:"all 0.15s",
                 }}
               >
-                <span style={{ fontSize:20 }}>{v.icon}</span>
+                <span style={{ fontSize:20 }}>
+                  <EmojiSvg code={
+                    v.icon === "👩" ? "1f469" :
+                    v.icon === "👨" ? "1f468" :
+                    v.icon === "🧒" ? "1f9d2" : "1f916"
+                  } size={20} />
+                </span>
                 <span style={{ fontFamily:"var(--font-display,'Nunito',sans-serif)", fontWeight:700, fontSize:11, color:active?C.green:"#64748B" }}>
                   {v.label}
                 </span>
@@ -577,25 +634,27 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
         >
           {voicePreviewLoading
             ? <><Loader size={14} className="animate-spin"/> Generating preview…</>
-            : <><Play size={13} fill={C.green}/> Preview voice {voiceObj.icon}</>
+            : <><Play size={13} fill={C.green}/> Preview voice <EmojiSvg code={voiceObj.icon === "👩" ? "1f469" : voiceObj.icon === "👨" ? "1f468" : voiceObj.icon === "🧒" ? "1f9d2" : "1f916"} size={14} /></>
           }
         </motion.button>
       </div>
 
       ) : (
         <div style={{...card, opacity:0.75}}>
-          <span style={sectionLabel}>🔊 Narrator voice
+          <span style={sectionLabel}><EmojiSvg code="1f50a" size={14} /> Narrator voice
             <span className="ml-2 font-normal text-xs opacity-60">Browser TTS · Free plan</span>
           </span>
           <div className="flex items-center gap-3 px-3 py-3 rounded-xl"
             style={{ background:"#F0FFF4", border:"2px solid #BBF7D0" }}>
-            <span style={{ fontSize:22 }}>🔊</span>
+            <span style={{ fontSize:22 }}>
+              <EmojiSvg code="1f50a" size={22} />
+            </span>
             <div className="flex-1">
               <div className="font-display text-sm font-bold" style={{ color:C.green }}>
                 Browser voice — always free
               </div>
               <div className="font-body text-xs text-slate-400 mt-0.5">
-                Upgrade for AI voices (OpenAI TTS) with multiple accents ✨
+                Upgrade for AI voices (OpenAI TTS) with multiple accents <EmojiSvg code="2728" size={12} />
               </div>
             </div>
           </div>
@@ -604,7 +663,7 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
 
       {/* ── 5. Language ─────────────────────────────────────────────── */}
       <div style={card}>
-        <span style={sectionLabel}>🌍 Translation language</span>
+        <span style={sectionLabel}><EmojiSvg code="1f30d" size={14} /> Translation language</span>
         <LanguagePicker value={lang} onChange={onLangChange} fullWidth/>
         <p className="mt-2 text-xs font-body text-slate-400 text-center">
           Story will be generated in English + {getLang(lang).name}
@@ -626,7 +685,7 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
       {error && (
         <motion.div initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }}
           className="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 font-body text-sm flex items-start gap-2">
-          <span>⚠️</span><span>{error}</span>
+          <span><EmojiSvg code="26a0" size={16} /></span><span>{error}</span>
         </motion.div>
       )}
 
@@ -645,17 +704,25 @@ function StoryForm({ lang, onLangChange, onGenerated, onBack, planId = "free", o
           fontSize: 18, fontWeight: 800,
         }}
       >
-        <span className="text-2xl">🪄</span>
+        <span className="text-2xl"><EmojiSvg code="1fa84" size={24} /></span>
         <KiddsyTitle className="text-xl text-white">Generate Story</KiddsyTitle>
         <span style={{ fontSize:12, opacity:0.7, fontWeight:400 }}>
-          {styleObj.icon} + {voiceObj.icon}
+          <EmojiSvg code={
+            styleObj.icon === "💧" ? "1f4a7" :
+            styleObj.icon === "🖼️" ? "1f5bc" :
+            styleObj.icon === "✏️" ? "270f" :
+            styleObj.icon === "😊" ? "1f60a" :
+            styleObj.icon === "🎨" ? "1f3a8" : "1f31f"
+          } size={12} /> + <EmojiSvg code={voiceObj.icon === "👩" ? "1f469" : voiceObj.icon === "👨" ? "1f468" : voiceObj.icon === "🧒" ? "1f9d2" : "1f916"} size={12} />
         </span>
       </motion.button>
 
       <p className="text-center font-body text-xs text-white/60 pb-4">
-        {quota.hasIllustrations
-          ? "💡 DALL·E 3 illustrations take a few extra seconds — the magic is worth it!"
-          : "💡 Generating text story · upgrade for illustrated pages ✨"}
+        {quota.hasIllustrations ? (
+          <><EmojiSvg code="1f4a1" size={12} /> DALL·E 3 illustrations take a few extra seconds — the magic is worth it!</>
+        ) : (
+          <><EmojiSvg code="1f4a1" size={12} /> Generating text story · upgrade for illustrated pages <EmojiSvg code="2728" size={12} /></>
+        )}
       </p>
     </motion.div>
   );
@@ -670,7 +737,7 @@ function RecentStories({ onRead }) {
   return (
     <div className="max-w-3xl mx-auto mt-10 px-1">
       <h3 className="font-display text-xl mb-4 text-center" style={{ color:"white" }}>
-        📚 Recently generated
+        <EmojiSvg code="1f4da" size={20} /> Recently generated
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {stories.map((story, i) => (
@@ -699,7 +766,7 @@ export default function StoryGenerator({ lang = "en", onLangChange, onGenerated,
 
         {!activeStory && (
           <div className="text-center mb-8 pt-6">
-            <BubbleTitle color="white" size={48} wobble>Story Time ✨</BubbleTitle>
+            <BubbleTitle color="white" size={48} wobble>Story Time <EmojiSvg code="2728" size={32} /></BubbleTitle>
             <p className="font-body text-white/80 mt-2 text-lg">
               Create a personalised bilingual story in seconds
             </p>
@@ -714,8 +781,7 @@ export default function StoryGenerator({ lang = "en", onLangChange, onGenerated,
               onBack={() => setActiveStory(null)}
             />
           ) : (
-            <>
-              <StoryForm 
+            <StoryForm 
               lang={lang} 
               onLangChange={onLangChange} 
               onGenerated={handleGenerated} 
@@ -723,8 +789,7 @@ export default function StoryGenerator({ lang = "en", onLangChange, onGenerated,
               planId={planId}
               onUpgrade={onUpgrade}
             />
-          </>
-        )}
+          )}
         </div>
       </div>
     </div>

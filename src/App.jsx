@@ -285,7 +285,7 @@ export default function App() {
     "privacidad":    <Privacidad                onNav={handleNav} lang={lang}/>,
     subscription:    <Subscription  lang={lang} onLangChange={setLang}/>,
     collaborate:     <Collaborate   lang={lang} onLangChange={setLang}/>,
-    mylibrary:       <MyLibrary                 onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory} lang={lang} onLangChange={setLang}/>,
+    mylibrary:       <MyLibrary                 onCreateStory={() => handleNav("generator")} onReadStory={handleSelectStory} lang={lang} onLangChange={setLang}/>,
   };
 
   return (

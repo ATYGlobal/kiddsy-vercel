@@ -10,7 +10,7 @@ import { RainbowTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg          from "../utils/EmojiSvg.jsx";
 import { LANGUAGES, getLang } from "../utils/langConfig.js";
 import { C } from "../utils/designConfig.js";
-import { StoryCoverCard } from "./StoryReader.jsx"; // Ajusta la ruta si es necesario
+import { StoryCoverCard } from "./StoryReader.jsx";
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function speak(text,voice="en-US"){
@@ -108,7 +108,7 @@ function LetterCard({item,lang,langMeta,active,onClick}){
         style={{borderColor:active?item.color:"white",
           background:active?`${item.color}18`:"white",
           boxShadow:active?`0 8px 32px ${item.color}40`:"0 4px 16px rgba(0,0,0,0.08)"}}>
-        <div className="text-4xl mb-1"><EmojiSvg code={item.emojiCode} size={24}/></div>
+        <div className="text-4xl mb-1"><EmojiSvg code={item.emoji} size={24}/></div>
         <div className="font-display text-4xl font-black mb-1" style={{color:item.color}}>
           {item.letter}
         </div>
@@ -139,7 +139,7 @@ function NumberCard({item,lang,langMeta,active,onClick}){
           background:active?`${color}18`:"white",
           boxShadow:active?`0 8px 32px ${color}40`:"0 4px 16px rgba(0,0,0,0.08)"}}>
         <div className="font-display text-5xl font-black mb-1" style={{color}}>{item.n}</div>
-        <div className="text-3xl mb-1"><EmojiSvg code={item.emojiCode} size={24}/></div>
+        <div className="text-3xl mb-1"><EmojiSvg code={item.emoji} size={24}/></div>
         <div className="font-display text-base" style={{color}}>
           {Array.from({length:Math.max(item.n,1)},(_,i)=>"⭐").join(" ").slice(0,item.n===0?0:undefined)||"—"}
         </div>
@@ -165,7 +165,7 @@ function WordCard({item,lang,langMeta,active,onClick}){
           background:active?`${item.color}14`:"white",
           boxShadow:active?`0 8px 32px ${item.color}35`:"0 4px 16px rgba(0,0,0,0.07)"}}>
         <div className="flex items-center gap-3">
-          <span style={{fontSize:32}}><EmojiSvg code={item.emojiCode} size={24}/></span>
+          <span style={{fontSize:32}}><EmojiSvg code={item.emoji} size={24}/></span>
           <div className="flex-1 min-w-0">
             <div className="font-display text-lg font-bold" style={{color:item.color}}>{item.en}</div>
             <div className="font-body text-base text-slate-700" dir={langMeta.dir}>
@@ -196,7 +196,7 @@ function DetailPanel({item,lang,langMeta,type,onClose}){
       className="rounded-3xl border-4 p-6 shadow-2xl" style={{borderColor:color,background:"white"}}>
       {/* Main display */}
       <div className="text-center mb-5">
-        <div style={{fontSize:56,marginBottom:4}}><EmojiSvg code={item.emojiCode} size={48}/></div>
+        <div style={{fontSize:56,marginBottom:4}}><EmojiSvg code={item.emoji} size={48}/></div>
         {type==="letters"&&<div className="font-display text-6xl font-black mb-1" style={{color}}>{item.letter}</div>}
         {type==="numbers"&&<div className="font-display text-6xl font-black mb-1" style={{color}}>{item.n}</div>}
         <div className="font-display text-xl" style={{color}}>{englishText}</div>
@@ -260,6 +260,7 @@ export default function Education({ lang = "en", onLangChange, stories = [], onS
   const [confetti,setConfetti]=useState(false);
   const [learned,setLearned] = useState({letters:new Set(),numbers:new Set(),words:new Set()});
   const tabColor = TABS.find(t=>t.id===tab)?.color || C.orange;
+  const langMeta = getLang(lang);
 
   const handleCardClick=(item,key)=>{
     if (tab === "stories") return;
@@ -271,7 +272,7 @@ export default function Education({ lang = "en", onLangChange, stories = [], onS
       if (!prev.has(newKey)){
         const next=new Set([...prev,newKey]);
         setLearned(l=>({...l,[tab]:next}));
-        if (next.size===({letters:ALPHABET,numbers:NUMBERS,words:COMMON_WORDS}[tab].length)){
+        if (next.size==={letters:ALPHABET,numbers:NUMBERS,words:COMMON_WORDS}[tab].length){
           setConfetti(true); setTimeout(()=>setConfetti(false),2500);
         }
       }
@@ -439,9 +440,9 @@ return (
                           transition={{ duration: 2, repeat: Infinity }} 
                           className="text-5xl mb-3"
                         >
-                          📚
+                          <EmojiSvg code="1f4da" size={48} />
                         </motion.div>
-                        <p>No stories yet. Create your first one in the Library! ✨</p>
+                        <p>No stories yet. Create your first one in the Library! <EmojiSvg code="2728" size={16} /></p>
                       </div>
                     ) : (
                       stories.map((story, i) => (

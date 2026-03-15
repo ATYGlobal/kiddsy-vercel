@@ -18,127 +18,129 @@ export const DIFFICULTIES = [
 ];
 
 // ── URL helper ────────────────────────────────────────────────────────────
-export const u = kw =>
-  `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(kw)}`;
+// Usamos el CDN de Google Noto 3D Emojis. Es rápido, no tiene límites de API, 
+// y devuelve imágenes 3D de alta resolución (512px) con fondo transparente.
+export const u = hex =>
+  `https://fonts.gstatic.com/s/e/notoemoji/latest/${hex}/512.webp`;
 
 
 // ── 🦁 ANIMALS ────────────────────────────────────────────────────────────
 export const ANIMALS = [
- { name:"Lion",        emoji:"1f981", color:"#F9A825", img:u("lion wildlife"),
+ { name:"Lion",        emoji:"1f981", color:"#F9A825", img:u("1f981"),
     fact:"Lions can sleep up to 20 hours a day!",
     es:"León",       fr:"Lion",          ar:"أسد",         de:"Löwe",
     it:"Leone",      pt:"Leão",          ru:"Лев",          zh:"狮子",
     ja:"ライオン",   ko:"사자",          bn:"সিংহ",         hi:"शेर",
     nl:"Leeuw",      pl:"Lew",           no:"Løve",         sv:"Lejon" },
-  { name:"Elephant",    emoji:"1f418", color:"#78909C", img:u("elephant"),
+  { name:"Elephant",    emoji:"1f418", color:"#78909C", img:u("1f418"),
     fact:"Elephants never forget — they have the best memory of any land animal!",
     es:"Elefante",   fr:"Éléphant",      ar:"فيل",          de:"Elefant",
     it:"Elefante",   pt:"Elefante",      ru:"Слон",         zh:"大象",
     ja:"ゾウ",       ko:"코끼리",        bn:"হাতি",         hi:"हाथी",
     nl:"Olifant",    pl:"Słoń",          no:"Elefant",      sv:"Elefant" },
-   { name:"Tiger",       emoji:"1f42f", color:"#EF6C00", img:u("tiger"),
+   { name:"Tiger",       emoji:"1f42f", color:"#EF6C00", img:u("1f42f"),
     fact:"No two tigers have the same stripe pattern — like fingerprints!",
     es:"Tigre",      fr:"Tigre",         ar:"نمر",          de:"Tiger",
     it:"Tigre",      pt:"Tigre",         ru:"Тигр",         zh:"老虎",
     ja:"トラ",       ko:"호랑이",        bn:"বাঘ",          hi:"बाघ",
     nl:"Tijger",     pl:"Tygrys",        no:"Tiger",        sv:"Tiger" },
-  { name:"Giraffe",     emoji:"1f992", color:"#F4A435", img:u("giraffe"),
+  { name:"Giraffe",     emoji:"1f992", color:"#F4A435", img:u("1f992"),
     fact:"Giraffes are the tallest animals — up to 6 metres tall!",
     es:"Jirafa",     fr:"Girafe",        ar:"زرافة",        de:"Giraffe",
     it:"Giraffa",    pt:"Girafa",        ru:"Жираф",        zh:"长颈鹿",
     ja:"キリン",     ko:"기린",          bn:"জিরাফ",        hi:"जिराफ़",
     nl:"Giraf",      pl:"Żyrafa",        no:"Sjiraff",      sv:"Giraff" },
-  { name:"Dolphin",     emoji:"1f42c", color:"#0288D1", img:u("dolphin ocean"),
+  { name:"Dolphin",     emoji:"1f42c", color:"#0288D1", img:u("1f42c"),
     fact:"Dolphins call each other by unique whistle names!",
     es:"Delfín",     fr:"Dauphin",       ar:"دلفين",        de:"Delfin",
     it:"Delfino",    pt:"Golfinho",      ru:"Дельфин",      zh:"海豚",
     ja:"イルカ",     ko:"돌고래",        bn:"ডলফিন",        hi:"डॉल्फिन",
     nl:"Dolfijn",    pl:"Delfin",        no:"Delfin",       sv:"Delfin" },
-  { name:"Panda",       emoji:"1f43c", color:"#546E7A", img:u("panda bear"),
+  { name:"Panda",       emoji:"1f43c", color:"#546E7A", img:u("1f43c"),
     fact:"A giant panda eats up to 40 kg of bamboo in a single day!",
     es:"Panda",      fr:"Panda",         ar:"الباندا",      de:"Panda",
     it:"Panda",      pt:"Panda",         ru:"Панда",        zh:"熊猫",
     ja:"パンダ",     ko:"판다",          bn:"পান্ডা",       hi:"पांडा",
     nl:"Panda",      pl:"Panda",         no:"Panda",        sv:"Panda" },
-  { name:"Penguin",     emoji:"1f427", color:"#37474F", img:u("penguin"),
+  { name:"Penguin",     emoji:"1f427", color:"#37474F", img:u("1f427"),
     fact:"Penguins cannot fly — but are incredible swimmers!",
     es:"Pingüino",   fr:"Manchot",       ar:"بطريق",        de:"Pinguin",
     it:"Pinguino",   pt:"Pinguim",       ru:"Пингвин",      zh:"企鹅",
     ja:"ペンギン",   ko:"펭귄",          bn:"পেঙ্গুইন",     hi:"पेंगुइन",
     nl:"Pinguïn",    pl:"Pingwin",       no:"Pingvin",      sv:"Pingvin" },
-  { name:"Parrot",      emoji:"1f99c", color:"#2E7D32", img:u("parrot colorful"),
+  { name:"Parrot",      emoji:"1f99c", color:"#2E7D32", img:u("1f99c"),
     fact:"Parrots can live over 80 years — longer than many humans!",
     es:"Loro",       fr:"Perroquet",     ar:"ببغاء",        de:"Papagei",
     it:"Pappagallo", pt:"Papagaio",      ru:"Попугай",      zh:"鹦鹉",
     ja:"オウム",     ko:"앵무새",        bn:"টিয়া",        hi:"तोता",
     nl:"Papegaai",   pl:"Papuga",        no:"Papegøye",     sv:"Papegoja" },
-  { name:"Fox",         emoji:"1f98a", color:"#BF360C", img:u("fox wildlife"),
+  { name:"Fox",         emoji:"1f98a", color:"#BF360C", img:u("1f98a"),
     fact:"Foxes use Earth's magnetic field to hunt under snow!",
     es:"Zorro",      fr:"Renard",        ar:"ثعلب",         de:"Fuchs",
     it:"Volpe",      pt:"Raposa",        ru:"Лиса",         zh:"狐狸",
     ja:"キツネ",     ko:"여우",          bn:"শেয়াল",       hi:"लोमड़ी",
     nl:"Vos",        pl:"Lis",           no:"Rev",          sv:"Räv" },
-  { name:"Eagle",       emoji:"1f985", color:"#5D4037", img:u("eagle bird sky"),
+  { name:"Eagle",       emoji:"1f985", color:"#5D4037", img:u("1f985"),
     fact:"Eagles can spot a rabbit from 3 km — their vision is 4× sharper than ours!",
     es:"Águila",     fr:"Aigle",         ar:"نسر",          de:"Adler",
     it:"Aquila",     pt:"Águia",         ru:"Орёл",         zh:"老鹰",
     ja:"ワシ",       ko:"독수리",        bn:"ঈগল",          hi:"ईगल",
     nl:"Adelaar",    pl:"Orzeł",         no:"Ørn",          sv:"Örn" },
-  { name:"Whale",       emoji:"1f40b", color:"#1565C0", img:u("whale ocean"),
+  { name:"Whale",       emoji:"1f40b", color:"#1565C0", img:u("1f40b"),
     fact:"Blue whale hearts are the size of a small car!",
     es:"Ballena",    fr:"Baleine",       ar:"حوت",          de:"Wal",
     it:"Balena",     pt:"Baleia",        ru:"Кит",          zh:"鲸鱼",
     ja:"クジラ",     ko:"고래",          bn:"তিমি",         hi:"व्हेल",
     nl:"Walvis",     pl:"Wieloryb",      no:"Hval",         sv:"Val" },
-  { name:"Cheetah",     emoji:"1f406", color:"#F57F17", img:u("cheetah"),
+  { name:"Cheetah",     emoji:"1f406", color:"#F57F17", img:u("1f406"),
     fact:"The cheetah goes from 0 to 100 km/h in just 3 seconds!",
     es:"Guepardo",   fr:"Guépard",       ar:"فهد",          de:"Gepard",
     it:"Ghepardo",   pt:"Guepardo",      ru:"Гепард",       zh:"猎豹",
     ja:"チーター",   ko:"치타",          bn:"চিতা",         hi:"चीता",
     nl:"Jachtluipaard",pl:"Gepard",      no:"Gepard",       sv:"Gepard" },
-  { name:"Gorilla",     emoji:"1f98d", color:"#37474F", img:u("gorilla primate"),
+  { name:"Gorilla",     emoji:"1f98d", color:"#37474F", img:u("1f98d"),
     fact:"Gorillas share 98.3% of their DNA with humans!",
     es:"Gorila",     fr:"Gorille",       ar:"غوريلا",       de:"Gorilla",
     it:"Gorilla",    pt:"Gorila",        ru:"Горилла",      zh:"大猩猩",
     ja:"ゴリラ",     ko:"고릴라",        bn:"গরিলা",        hi:"गोरिल्ला",
     nl:"Gorilla",    pl:"Goryl",         no:"Gorilla",      sv:"Gorilla" },
-  { name:"Flamingo",    emoji:"1f9a9", color:"#E91E8C", img:u("flamingo pink"),
+  { name:"Flamingo",    emoji:"1f9a9", color:"#E91E8C", img:u("1f9a9"),
     fact:"Flamingos are born grey — their pink color comes from their food!",
     es:"Flamenco",   fr:"Flamant rose",  ar:"نحام",         de:"Flamingo",
     it:"Fenicottero",pt:"Flamingo",      ru:"Фламинго",     zh:"火烈鸟",
     ja:"フラミンゴ", ko:"홍학",          bn:"ফ্লামিঙ্গো",   hi:"राजहंस",
     nl:"Flamingo",   pl:"Flaming",       no:"Flamingo",     sv:"Flamingo" },
-  { name:"Octopus",     emoji:"1f419", color:"#6A1B9A", img:u("octopus underwater"),
+  { name:"Octopus",     emoji:"1f419", color:"#6A1B9A", img:u("1f419"),
     fact:"Octopuses have three hearts and blue blood!",
     es:"Pulpo",      fr:"Pieuvre",       ar:"أخطبوط",       de:"Oktopus",
     it:"Polpo",      pt:"Polvo",         ru:"Осьминог",     zh:"章鱼",
     ja:"タコ",       ko:"문어",          bn:"অক্টোপাস",     hi:"ऑक्टोपस",
     nl:"Octopus",    pl:"Ośmiornica",    no:"Blekksprut",   sv:"Bläckfisk" },
-  { name:"Kangaroo",    emoji:"1f998", color:"#D84315", img:u("kangaroo australia"),
+  { name:"Kangaroo",    emoji:"1f998", color:"#D84315", img:u("1f998"),
     fact:"A baby kangaroo (joey) is only the size of a grape when born!",
     es:"Canguro",    fr:"Kangourou",     ar:"كنغر",         de:"Känguru",
     it:"Canguro",    pt:"Canguru",       ru:"Кенгуру",      zh:"袋鼠",
     ja:"カンガルー", ko:"캥거루",        bn:"ক্যাঙারু",     hi:"कंगारू",
     nl:"Kangoeroe",  pl:"Kangur",        no:"Kenguru",      sv:"Känguru" },
-  { name:"Koala",       emoji:"1f428", color:"#8D6E63", img:u("koala eucalyptus"),
+  { name:"Koala",       emoji:"1f428", color:"#8D6E63", img:u("1f428"),
     fact:"Koalas sleep up to 22 hours a day!",
     es:"Koala",      fr:"Koala",         ar:"الكوالا",      de:"Koala",
     it:"Koala",      pt:"Coala",         ru:"Коала",        zh:"考拉",
     ja:"コアラ",     ko:"코알라",        bn:"কোয়ালা",      hi:"कोआला",
     nl:"Koala",      pl:"Koala",         no:"Koala",        sv:"Koala" },
-  { name:"Zebra",       emoji:"1f993", color:"#424242", img:u("zebra africa"),
+  { name:"Zebra",       emoji:"1f993", color:"#424242", img:u("1f993"),
     fact:"Every zebra's stripe pattern is completely unique!",
     es:"Cebra",      fr:"Zèbre",         ar:"حمار وحشي",   de:"Zebra",
     it:"Zebra",      pt:"Zebra",         ru:"Зебра",        zh:"斑马",
     ja:"シマウマ",   ko:"얼룩말",        bn:"জেব্রা",       hi:"ज़ेबरा",
     nl:"Zebra",      pl:"Zebra",         no:"Sebra",        sv:"Zebra" },
-  { name:"Turtle",      emoji:"1f422", color:"#2E7D32", img:u("sea turtle"),
+  { name:"Turtle",      emoji:"1f422", color:"#2E7D32", img:u("1f422"),
     fact:"Sea turtles return to the exact beach where they were born!",
     es:"Tortuga",    fr:"Tortue",        ar:"سلحفاة",       de:"Schildkröte",
     it:"Tartaruga",  pt:"Tartaruga",     ru:"Черепаха",     zh:"乌龟",
     ja:"カメ",       ko:"거북이",        bn:"কচ্ছপ",        hi:"कछुआ",
     nl:"Schildpad",  pl:"Żółw",          no:"Skilpadde",    sv:"Sköldpadda" },
-  { name:"Butterfly",   emoji:"1f98b", color:"#AB47BC", img:u("butterfly flower"),
+  { name:"Butterfly",   emoji:"1f98b", color:"#AB47BC", img:u("1f98b"),
     fact:"Butterflies taste with their feet — they have sensors on their legs!",
     es:"Mariposa",   fr:"Papillon",      ar:"فراشة",        de:"Schmetterling",
     it:"Farfalla",   pt:"Borboleta",     ru:"Бабочка",      zh:"蝴蝶",
@@ -148,121 +150,121 @@ export const ANIMALS = [
 
 // ── 🏙️ CITIES ────────────────────────────────────────────────────────────
 export const CITIES = [
-  { name:"Paris",    emoji:"1f5fc", color:"#0D47A1", img:u("paris eiffel tower"), // 🗼
+  { name:"Paris",    emoji:"1f5fc", color:"#0D47A1", img:u("1f5fc"), // 🗼
     fact:"Paris is called 'The City of Light' — it was one of the first cities to have gas street lighting.",
     es:"París",      fr:"Paris",         ar:"باريس",        de:"Paris",
     it:"Parigi",     pt:"Paris",         ru:"Париж",        zh:"巴黎",
     ja:"パリ",       ko:"파리",          bn:"প্যারিস",      hi:"पेरिस",
     nl:"Parijs",     pl:"Paryż",         no:"Paris",        sv:"Paris" },
-  { name:"Tokyo",    emoji:"1f5fe", color:"#B71C1C", img:u("tokyo japan skyline"), // 🗾
+  { name:"Tokyo",    emoji:"1f5fe", color:"#B71C1C", img:u("1f5fe"), // 🗾
     fact:"Tokyo is the world's most populous metropolitan area — home to over 37 million people!",
     es:"Tokio",      fr:"Tokyo",         ar:"طوكيو",        de:"Tokio",
     it:"Tokyo",      pt:"Tóquio",        ru:"Токио",        zh:"东京",
-    ja:"東京",       ko:"도쿄",          bn:"টোকিও",        hi:"टोक्यो",
+    ja:"東京",       ko:"도쿄",          bn:"トウキョウ",    hi:"टोक्यो",
     nl:"Tokio",      pl:"Tokio",         no:"Tokyo",        sv:"Tokyo" },
-  { name:"New York",  emoji:"1f5fd", color:"#1B5E20", img:u("new york city skyline"), // 🗽
+  { name:"New York",  emoji:"1f5fd", color:"#1B5E20", img:u("1f5fd"), // 🗽
     fact:"New York City is home to more than 800 languages — more than anywhere else on Earth!",
     es:"Nueva York", fr:"New York",      ar:"نيويورك",      de:"New York",
     it:"New York",   pt:"Nova York",     ru:"Нью-Йорк",     zh:"纽约",
     ja:"ニューヨーク",ko:"뉴욕",         bn:"নিউ ইয়র্ক",   hi:"न्यूयॉर्क",
     nl:"New York",   pl:"Nowy Jork",     no:"New York",     sv:"New York" },
-  { name:"Cairo",     emoji:"1f3fa", color:"#E65100", img:u("cairo egypt pyramids"), // 🏺
+  { name:"Cairo",     emoji:"1f3fa", color:"#E65100", img:u("1f3fa"), // 🏺
     fact:"Cairo is the largest city in Africa and the Arab world!",
     es:"El Cairo",   fr:"Le Caire",      ar:"القاهرة",      de:"Kairo",
     it:"Il Cairo",   pt:"Cairo",         ru:"Каир",         zh:"开罗",
     ja:"カイロ",     ko:"카이로",        bn:"কায়রো",        hi:"काहिरा",
     nl:"Caïro",      pl:"Kair",          no:"Kairo",        sv:"Kairo" },
-  { name:"Rome",     emoji:"1f3db", color:"#8D3A00", img:u("rome colosseum italy"), // 🏛️
+  { name:"Rome",     emoji:"1f3db", color:"#8D3A00", img:u("1f3db"), // 🏛️
     fact:"Rome is built on seven hills and has been continuously inhabited for over 2,800 years!",
     es:"Roma",       fr:"Rome",          ar:"روما",         de:"Rom",
     it:"Roma",       pt:"Roma",          ru:"Рим",          zh:"罗马",
     ja:"ローマ",     ko:"로마",          bn:"রোম",          hi:"रोम",
     nl:"Rome",       pl:"Rzym",          no:"Roma",         sv:"Rom" },
-  { name:"London",    emoji:"1f3a1", color:"#1A237E", img:u("london big ben"), // 🎡
+  { name:"London",    emoji:"1f3a1", color:"#1A237E", img:u("1f3a1"), // 🎡
     fact:"London's Underground (The Tube) is the oldest metro system in the world, opened in 1863!",
     es:"Londres",    fr:"Londres",       ar:"لندن",         de:"London",
     it:"Londra",     pt:"Londres",       ru:"Лондон",       zh:"伦敦",
     ja:"ロンドン",   ko:"런던",          bn:"লন্ডন",        hi:"लंदन",
     nl:"Londen",     pl:"Londyn",        no:"London",       sv:"London" },
-  { name:"Madrid",    emoji:"1f339", color:"#C62828", img:u("madrid spain plaza"), // 🌹
+  { name:"Madrid",    emoji:"1f339", color:"#C62828", img:u("1f339"), // 🌹
     fact:"Madrid is the highest capital city in the European Union — at 667 metres above sea level!",
     es:"Madrid",     fr:"Madrid",        ar:"مدريد",        de:"Madrid",
     it:"Madrid",     pt:"Madrid",        ru:"Мадрид",       zh:"马德里",
     ja:"マドリード", ko:"마드리드",      bn:"মাদ্রিদ",      hi:"मैड्रिड",
     nl:"Madrid",     pl:"Madryt",        no:"Madrid",       sv:"Madrid" },
-  { name:"Sydney",    emoji:"1f998", color:"#006064", img:u("sydney opera house"), // 🦘
+  { name:"Sydney",    emoji:"1f998", color:"#006064", img:u("1f998"), // 🦘
     fact:"The Sydney Opera House has over one million roof tiles arranged on 14 shell structures!",
     es:"Sídney",     fr:"Sydney",        ar:"سيدني",        de:"Sydney",
     it:"Sydney",     pt:"Sydney",        ru:"Сидней",       zh:"悉尼",
     ja:"シドニー",   ko:"시드니",        bn:"সিডনি",        hi:"सिडनी",
     nl:"Sydney",     pl:"Sydney",        no:"Sydney",       sv:"Sydney" },
-  { name:"Dubai",    emoji:"1f306", color:"#F57F17", img:u("dubai skyline burj"), // 🌆
+  { name:"Dubai",    emoji:"1f306", color:"#F57F17", img:u("1f306"), // 🌆
     fact:"Dubai went from a small fishing village in 1970 to having the world's tallest building today!",
     es:"Dubái",      fr:"Dubaï",         ar:"دبي",          de:"Dubai",
     it:"Dubai",      pt:"Dubai",         ru:"Дубай",        zh:"迪拜",
     ja:"ドバイ",     ko:"두바이",        bn:"দুবাই",        hi:"दुबई",
     nl:"Dubai",      pl:"Dubaj",         no:"Dubai",        sv:"Dubai" },
-  { name:"Rio de Janeiro",  emoji:"1f30a",color:"#1B5E20",img:u("rio de janeiro brazil"), // 🌊
+  { name:"Rio de Janeiro",  emoji:"1f30a",color:"#1B5E20",img:u("1f30a"), // 🌊
     fact:"The Christ the Redeemer statue in Rio is struck by lightning about 3-6 times a year!",
     es:"Río de Janeiro",fr:"Rio de Janeiro",ar:"ريو دي جانيرو",de:"Rio de Janeiro",
     it:"Rio de Janeiro",pt:"Rio de Janeiro",ru:"Рио-де-Жанейро",zh:"里约热内卢",
     ja:"リオデジャネイロ",ko:"리우데자네이루",bn:"রিও ডি জেনেইরো",hi:"रियो डी जनेरियो",
     nl:"Rio de Janeiro",pl:"Rio de Janeiro",no:"Rio de Janeiro",sv:"Rio de Janeiro" },
-  { name:"Istanbul",    emoji:"1f54c", color:"#4A148C", img:u("istanbul turkey mosque"), // 🕌
+  { name:"Istanbul",    emoji:"1f54c", color:"#4A148C", img:u("1f54c"), // 🕌
     fact:"Istanbul is the only city in the world that spans two continents — Europe and Asia!",
     es:"Estambul",   fr:"Istanbul",      ar:"إسطنبول",      de:"Istanbul",
     it:"Istanbul",   pt:"Istambul",      ru:"Стамбул",      zh:"伊斯坦布尔",
     ja:"イスタンブール",ko:"이스탄불",   bn:"ইস্তানবুল",    hi:"इस्तांबुल",
     nl:"Istanbul",   pl:"Stambuł",       no:"Istanbul",     sv:"Istanbul" },
-  { name:"Beijing",  emoji:"1f3ee", color:"#B71C1C", img:u("beijing china forbidden city"), // 🏮
+  { name:"Beijing",  emoji:"1f3ee", color:"#B71C1C", img:u("1f3ee"), // 🏮
     fact:"Beijing has been the capital of China for over 800 years and has the largest palace complex in the world!",
     es:"Pekín",      fr:"Pékin",         ar:"بكين",         de:"Peking",
     it:"Pechino",    pt:"Pequim",        ru:"Пекин",        zh:"北京",
     ja:"北京",       ko:"베이징",        bn:"বেইজিং",       hi:"बीजिंग",
     nl:"Peking",     pl:"Pekin",         no:"Beijing",      sv:"Peking" },
-  { name:"Mumbai",      emoji:"🎬", color:"#880E4F", img:u("mumbai india gateway"), // 🎬
+  { name:"Mumbai",      emoji:"1f3ac", color:"#880E4F", img:u("1f3ac"), // 🎬 (Corregido a hexadecimal)
     fact:"Mumbai (Bollywood) produces more films per year than Hollywood!",
     es:"Bombay",     fr:"Mumbai",        ar:"مومباي",       de:"Mumbai",
     it:"Mumbai",     pt:"Mumbai",        ru:"Мумбаи",       zh:"孟买",
     ja:"ムンバイ",   ko:"뭄바이",        bn:"মুম্বাই",      hi:"मुंबई",
     nl:"Mumbai",     pl:"Mumbaj",        no:"Mumbai",       sv:"Mumbai" },
- { name:"Cape Town",  emoji:"1f981", color:"#004D40", img:u("cape town south africa table mountain"), // 🦁
+ { name:"Cape Town",  emoji:"1f981", color:"#004D40", img:u("1f981"), // 🦁
     fact:"Cape Town's Table Mountain is one of the oldest mountains on Earth — about 600 million years old!",
     es:"Ciudad del Cabo",fr:"Le Cap",    ar:"كيب تاون",     de:"Kapstadt",
     it:"Città del Capo",pt:"Cidade do Cabo",ru:"Кейптаун",  zh:"开普敦",
     ja:"ケープタウン",ko:"케이프타운",   bn:"কেপ টাউন",     hi:"केप टाउन",
     nl:"Kaapstad",   pl:"Kapsztad",      no:"Kapstaden",    sv:"Kapstaden" },
-  { name:"Amsterdam",  emoji:"1f6b2", color:"#01579B", img:u("amsterdam canals netherlands"), // 🚲
+  { name:"Amsterdam",  emoji:"1f6b2", color:"#01579B", img:u("1f6b2"), // 🚲
     fact:"Amsterdam has more bicycles than inhabitants — about 881,000 bikes for 872,000 people!",
     es:"Ámsterdam",  fr:"Amsterdam",     ar:"أمستردام",     de:"Amsterdam",
     it:"Amsterdam",  pt:"Amsterdão",     ru:"Амстердам",    zh:"阿姆斯特丹",
     ja:"アムステルダム",ko:"암스테르담", bn:"আমস্টারডাম",   hi:"एम्स्टर्डम",
     nl:"Amsterdam",  pl:"Amsterdam",     no:"Amsterdam",    sv:"Amsterdam" },
-  { name:"Mexico City",     emoji:"1f32e", color:"#B71C1C", img:u("mexico city zocalo"), // 🌮
+  { name:"Mexico City",     emoji:"1f32e", color:"#B71C1C", img:u("1f32e"), // 🌮
     fact:"Mexico City is built on a dried lake bed — making it sink about 10 cm per year!",
     es:"Ciudad de México",fr:"Mexico",   ar:"مكسيكو سيتي",  de:"Mexiko-Stadt",
     it:"Città del Messico",pt:"Cidade do México",ru:"Мехико",zh:"墨西哥城",
     ja:"メキシコシティ",ko:"멕시코시티",  bn:"মেক্সিকো সিটি",hi:"मेक्सिको सिटी",
     nl:"Mexico-Stad",pl:"Meksyk",        no:"Mexico by",    sv:"Mexico stad" },
- { name:"Bangkok",         emoji:"1f418", color:"#1B5E20", img:u("bangkok thailand temple"), // 🐘
+ { name:"Bangkok",         emoji:"1f418", color:"#1B5E20", img:u("1f418"), // 🐘
     fact:"Bangkok's full ceremonial name is the longest city name in the world — 169 characters!",
     es:"Bangkok",    fr:"Bangkok",       ar:"بانكوك",       de:"Bangkok",
     it:"Bangkok",    pt:"Banguecoque",   ru:"Бангкок",      zh:"曼谷",
     ja:"バンコク",   ko:"방콕",          bn:"ব্যাংকক",      hi:"बैंकॉक",
     nl:"Bangkok",    pl:"Bangkok",       no:"Bangkok",      sv:"Bangkok" },
-  { name:"Buenos Aires",    emoji:"1f483",color:"#880E4F",img:u("buenos aires argentina"), // 💃
+  { name:"Buenos Aires",    emoji:"1f483",color:"#880E4F",img:u("1f483"), // 💃
     fact:"Buenos Aires has more bookshops per capita than any other city in the world!",
     es:"Buenos Aires",fr:"Buenos Aires", ar:"بوينس أيرس",  de:"Buenos Aires",
     it:"Buenos Aires",pt:"Buenos Aires", ru:"Буэнос-Айрес", zh:"布宜诺斯艾利斯",
     ja:"ブエノスアイレス",ko:"부에노스아이레스",bn:"বুয়েনোস আইরেস",hi:"ब्यूनस आयर्स",
     nl:"Buenos Aires",pl:"Buenos Aires", no:"Buenos Aires", sv:"Buenos Aires" },
-  { name:"Moscow",          emoji:"1f3aa", color:"#B71C1C", img:u("moscow russia kremlin"), // 🎪
+  { name:"Moscow",          emoji:"1f3aa", color:"#B71C1C", img:u("1f3aa"), // 🎪
     fact:"Moscow's metro is famous as one of the most beautiful in the world — stations look like museums!",
     es:"Moscú",      fr:"Moscou",        ar:"موسكو",        de:"Moskau",
     it:"Mosca",      pt:"Moscovo",       ru:"Москва",       zh:"莫斯科",
     ja:"モスクワ",   ko:"모스크바",      bn:"মস্কো",        hi:"मॉस्को",
     nl:"Moskou",     pl:"Moskwa",        no:"Moskva",       sv:"Moskva" },
-  { name:"Singapore",       emoji:"1f981", color:"#006064", img:u("singapore skyline marina"), // 🦁
+  { name:"Singapore",       emoji:"1f981", color:"#006064", img:u("1f981"), // 🦁
     fact:"Singapore is one of only three city-states in the world — it is both a city and a country!",
     es:"Singapur",   fr:"Singapour",     ar:"سنغافورة",     de:"Singapur",
     it:"Singapore",  pt:"Singapura",     ru:"Сингапур",     zh:"新加坡",
@@ -272,123 +274,121 @@ export const CITIES = [
 
 // ── 🌿 NATURE ─────────────────────────────────────────────────────────────
 export const NATURE = [
-  { name:"Amazon Rainforest",    emoji:"1f33f",color:"#1B5E20",img:u("amazon rainforest jungle"), // 🌿
+  { name:"Amazon Rainforest",    emoji:"1f33f",color:"#1B5E20",img:u("1f33f"), // 🌿
     fact:"The Amazon produces 20% of Earth's oxygen — it's called the 'Lungs of the Planet'!",
     es:"Amazonia",   fr:"Amazonie",      ar:"غابة الأمازون",de:"Amazonas-Regenwald",
     it:"Amazzonia",  pt:"Amazônia",      ru:"Амазонка",     zh:"亚马逊雨林",
     ja:"アマゾン熱帯雨林",ko:"아마존 열대우림",bn:"আমাজন রেইনফরেস্ট",hi:"अमेज़न वर्षावन",
     nl:"Amazoneregenwoud",pl:"Amazonia",  no:"Amazonas",     sv:"Amazonas" },
-  { name:"Mount Everest",        emoji:"1f3d4",color:"#546E7A",img:u("mount everest himalaya"), // 🏔️
+  { name:"Mount Everest",        emoji:"1f3d4",color:"#546E7A",img:u("1f3d4"), // 🏔️
     fact:"Mount Everest grows about 4 mm taller every year due to geological uplift!",
     es:"Monte Everest",fr:"Mont Everest",ar:"جبل إيفرست",   de:"Mount Everest",
     it:"Monte Everest",pt:"Monte Everest",ru:"Эверест",      zh:"珠穆朗玛峰",
     ja:"エベレスト",ko:"에베레스트",    bn:"মাউন্ট এভারেস্ট",hi:"माउंट एवरेस्ट",
     nl:"Mount Everest",pl:"Mount Everest",no:"Mount Everest",sv:"Mount Everest" },
-  { name:"Great Barrier Reef",   emoji:"1f420",color:"#0097A7",img:u("great barrier reef coral"), // 🐠
-
+  { name:"Great Barrier Reef",   emoji:"1f420",color:"#0097A7",img:u("1f420"), // 🐠
     fact:"The Great Barrier Reef is the largest living structure on Earth — visible from space!",
     es:"Gran Barrera de Coral",fr:"Grande Barrière de Corail",ar:"الحاجز المرجاني العظيم",de:"Great Barrier Reef",
     it:"Grande Barriera Corallina",pt:"Grande Barreira de Coral",ru:"Большой Барьерный риф",zh:"大堡礁",
     ja:"グレートバリアリーフ",ko:"그레이트 배리어 리프",bn:"গ্রেট ব্যারিয়ার রিফ",hi:"ग्रेट बैरियर रीफ",
     nl:"Groot Barrièrerif",pl:"Wielka Rafa Koralowa",no:"Great Barrier Reef",sv:"Great Barrier Reef" },
-  { name:"Grand Canyon",         emoji:"1f3dc",color:"#BF360C",img:u("grand canyon arizona"), // 🏜️
+  { name:"Grand Canyon",         emoji:"1f3dc",color:"#BF360C",img:u("1f3dc"), // 🏜️
     fact:"The Grand Canyon is up to 1,857 metres deep and was carved by the Colorado River over 5–6 million years!",
     es:"Gran Cañón",fr:"Grand Canyon",   ar:"الغراند كانيون",de:"Grand Canyon",
     it:"Grand Canyon",pt:"Grande Cânion",ru:"Гранд-Каньон",  zh:"大峡谷",
     ja:"グランドキャニオン",ko:"그랜드 캐니언",bn:"গ্র্যান্ড ক্যানিয়ন",hi:"ग्रैंड कैनियन",
     nl:"Grand Canyon",pl:"Wielki Kanion",no:"Grand Canyon",  sv:"Grand Canyon" },
-  { name:"Sahara Desert",        emoji:"1f42a",color:"#F57F17",img:u("sahara desert sand dunes"), // 🐪
+  { name:"Sahara Desert",        emoji:"1f42a",color:"#F57F17",img:u("1f42a"), // 🐪
     fact:"The Sahara is the largest hot desert in the world — almost as big as the USA!",
     es:"Desierto del Sáhara",fr:"Désert du Sahara",ar:"الصحراء الكبرى",de:"Sahara-Wüste",
     it:"Deserto del Sahara",pt:"Deserto do Saara",ru:"Сахара",zh:"撒哈拉沙漠",
     ja:"サハラ砂漠",ko:"사하라 사막",  bn:"সাহারা মরুভূমি",hi:"सहारा मरुस्थल",
     nl:"Sahara",     pl:"Sahara",         no:"Sahara",       sv:"Sahara" },
-  { name:"Northern Lights",      emoji:"1f30c",color:"#006064",img:u("northern lights aurora borealis"), // 🌌
-
+  { name:"Northern Lights",      emoji:"1f30c",color:"#006064",img:u("1f30c"), // 🌌
     fact:"The Northern Lights are caused by solar particles colliding with Earth's atmosphere at 45,000 km/h!",
     es:"Aurora Boreal",fr:"Aurore Boréale",ar:"أضواء الشمال الشفق القطبي",de:"Nordlichter",
     it:"Aurora Boreale",pt:"Aurora Boreal",ru:"Северное сияние",zh:"北极光",
     ja:"オーロラ",   ko:"오로라",        bn:"উত্তর মেরু আলো",hi:"उत्तरी रोशनी",
     nl:"Noorderlicht",pl:"Zorza Polarna",  no:"Nordlyset",    sv:"Norrsken" },
-  { name:"Victoria Falls",       emoji:"1f4a7",color:"#1565C0",img:u("victoria falls waterfall africa"), // 💧
+  { name:"Victoria Falls",       emoji:"1f4a7",color:"#1565C0",img:u("1f4a7"), // 💧
     fact:"Victoria Falls is the world's largest waterfall by combined width and height!",
     es:"Cataratas Victoria",fr:"Chutes Victoria",ar:"شلالات فيكتوريا",de:"Viktoriafälle",
     it:"Cascate Vittoria",pt:"Cataratas Vitória",ru:"Водопад Виктория",zh:"维多利亚瀑布",
     ja:"ビクトリア滝",ko:"빅토리아 폭포",bn:"ভিক্টোরিয়া জলপ্রপাত",hi:"विक्टोरिया फॉल्स",
     nl:"Victoriawatervallen",pl:"Wodospady Wiktorii",no:"Victoriafallene",sv:"Victoriafallen" },
-  { name:"Dead Sea",             emoji:"1f30a", color:"#827717", img:u("dead sea israel floating"), // 🌊
+  { name:"Dead Sea",             emoji:"1f30a", color:"#827717", img:u("1f30a"), // 🌊
     fact:"The Dead Sea is so salty you can float effortlessly — it is 9.6× saltier than the ocean!",
     es:"Mar Muerto",fr:"Mer Morte",      ar:"البحر الميت",  de:"Totes Meer",
     it:"Mar Morto",  pt:"Mar Morto",      ru:"Мёртвое море", zh:"死海",
     ja:"死海",       ko:"사해",           bn:"মৃত সাগর",     hi:"मृत सागर",
     nl:"Dode Zee",   pl:"Morze Martwe",   no:"Dødehavet",    sv:"Döda havet" },
-  { name:"Niagara Falls",        emoji:"1f308",color:"#0277BD",img:u("niagara falls waterfall"), // 🌈
+  { name:"Niagara Falls",        emoji:"1f308",color:"#0277BD",img:u("1f308"), // 🌈
     fact:"Niagara Falls moves about 3 cm upstream per year due to erosion!",
     es:"Cataratas del Niágara",fr:"Chutes du Niagara",ar:"شلالات نياجرا",de:"Niagarafälle",
     it:"Cascate del Niagara",pt:"Cataratas do Niágara",ru:"Ниагарский водопад",zh:"尼亚加拉瀑布",
     ja:"ナイアガラの滝",ko:"나이아가라 폭포",bn:"নায়াগ্রা ফলস",hi:"नियाग्रा जलप्रपात",
     nl:"Niagarawatervallen",pl:"Wodospad Niagara",no:"Niagarafallene",sv:"Niagarafallen" },
-  { name:"Amazon River",         emoji:"1f30a",color:"#1B5E20",img:u("amazon river water aerial"), // 🌊
+  { name:"Amazon River",         emoji:"1f30a",color:"#1B5E20",img:u("1f30a"), // 🌊
     fact:"The Amazon River discharges 20% of all fresh water that flows into the world's oceans!",
     es:"Río Amazonas",fr:"Fleuve Amazone",ar:"نهر الأمازون",de:"Amazonas",
     it:"Rio delle Amazzoni",pt:"Rio Amazonas",ru:"Амазонка",zh:"亚马逊河",
     ja:"アマゾン川",ko:"아마존 강",      bn:"আমাজন নদী",    hi:"अमेज़न नदी",
     nl:"Amazone",    pl:"Amazonka",        no:"Amazonas",     sv:"Amazonfloden" },
-  { name:"Kilimanjaro",          emoji:"1f3d4",color:"#5D4037",img:u("kilimanjaro mountain africa"), // 🏔️
+  { name:"Kilimanjaro",          emoji:"1f3d4",color:"#5D4037",img:u("1f3d4"), // 🏔️
     fact:"Kilimanjaro is the highest free-standing mountain in the world — and you can hike to the top!",
     es:"Kilimanjaro",fr:"Kilimandjaro",   ar:"كيليمنجارو",  de:"Kilimandscharo",
     it:"Kilimangiaro",pt:"Kilimanjaro",   ru:"Килиманджаро", zh:"乞力马扎罗山",
     ja:"キリマンジャロ",ko:"킬리만자로",  bn:"কিলিমাঞ্জারো", hi:"किलिमंजारो",
     nl:"Kilimanjaro",pl:"Kilimandżaro",   no:"Kilimanjaro",  sv:"Kilimanjaro" },
-  { name:"Great Wall China",     emoji:"1f3ef",color:"#827717",img:u("great wall china mountains"), // 🏯
+  { name:"Great Wall China",     emoji:"1f3ef",color:"#827717",img:u("1f3ef"), // 🏯
     fact:"The Great Wall of China is NOT visible from space with the naked eye — that's a myth!",
     es:"Gran Muralla China",fr:"Grande Muraille de Chine",ar:"سور الصين العظيم",de:"Chinesische Mauer",
     it:"Grande Muraglia Cinese",pt:"Grande Muralha da China",ru:"Великая Китайская стена",zh:"长城",
     ja:"万里の長城",ko:"만리장성",       bn:"চীনের মহাপ্রাচীর",hi:"चीन की महान दीवार",
     nl:"Chinese Muur",pl:"Wielki Mur Chiński",no:"Den kinesiske mur",sv:"Kinesiska muren" },
-  { name:"Galápagos Islands",    emoji:"1f98e",color:"#00695C",img:u("galapagos islands wildlife"), // 🦎
+  { name:"Galápagos Islands",    emoji:"1f98e",color:"#00695C",img:u("1f98e"), // 🦎
     fact:"Darwin's visit to the Galápagos Islands in 1835 inspired his theory of evolution!",
     es:"Islas Galápagos",fr:"Îles Galápagos",ar:"جزر غالاباغوس",de:"Galapagosinseln",
     it:"Isole Galapagos",pt:"Ilhas Galápagos",ru:"Галапагосские острова",zh:"加拉帕戈斯群岛",
     ja:"ガラパゴス諸島",ko:"갈라파고스 제도",bn:"গ্যালাপাগোস দ্বীপপুঞ্জ",hi:"गैलापागोस द्वीप",
     nl:"Galapagoseilanden",pl:"Wyspy Galapagos",no:"Galápagosøyene",sv:"Galápagosöarna" },
-  { name:"Patagonia",            emoji:"1f304", color:"#37474F", img:u("patagonia argentina mountains"), // 🌄
+  { name:"Patagonia",            emoji:"1f304", color:"#37474F", img:u("1f304"), // 🌄
     fact:"Patagonia contains some of the largest ice fields outside of the polar regions!",
     es:"Patagonia",  fr:"Patagonie",      ar:"باتاغونيا",    de:"Patagonien",
     it:"Patagonia",  pt:"Patagônia",      ru:"Патагония",    zh:"巴塔哥尼亚",
     ja:"パタゴニア", ko:"파타고니아",     bn:"প্যাটাগোনিয়া", hi:"पेटागोनिया",
     nl:"Patagonië",  pl:"Patagonia",      no:"Patagonia",    sv:"Patagonien" },
-  { name:"Bora Bora",            emoji:"1f3dd", color:"#0097A7", img:u("bora bora lagoon island"), // 🏝️
+  { name:"Bora Bora",            emoji:"1f3dd", color:"#0097A7", img:u("1f3dd"), // 🏝️
     fact:"Bora Bora's lagoon is so clear you can see the bottom at 20 metres depth!",
     es:"Bora Bora",  fr:"Bora Bora",      ar:"بورا بورا",    de:"Bora Bora",
     it:"Bora Bora",  pt:"Bora Bora",      ru:"Бора-Бора",    zh:"波拉波拉岛",
     ja:"ボラボラ島", ko:"보라보라",       bn:"বোরা বোরা",    hi:"बोरा बोरा",
     nl:"Bora Bora",  pl:"Bora Bora",      no:"Bora Bora",    sv:"Bora Bora" },
-  { name:"Serengeti",            emoji:"1f981", color:"#F57F17", img:u("serengeti migration safari"), // 🦁
+  { name:"Serengeti",            emoji:"1f981", color:"#F57F17", imgu:u("1f981"), // 🦁
     fact:"The Serengeti hosts the largest animal migration on Earth — 1.5 million wildebeest!",
     es:"Serengueti",fr:"Serengeti",       ar:"سيرينغيتي",    de:"Serengeti",
     it:"Serengeti",  pt:"Serengeti",      ru:"Серенгети",    zh:"塞伦盖蒂",
     ja:"セレンゲティ",ko:"세렝게티",      bn:"সেরেঙ্গেটি",   hi:"सेरेंगेटी",
     nl:"Serengeti",  pl:"Serengeti",      no:"Serengeti",    sv:"Serengeti" },
-  { name:"Antarctica",           emoji:"1f427", color:"#B0BEC5", img:u("antarctica ice landscape"), // 🐧
+  { name:"Antarctica",           emoji:"1f427", color:"#B0BEC5", img:u("1f427"), // 🐧
     fact:"Antarctica holds 70% of the world's fresh water locked in ice!",
     es:"Antártida",  fr:"Antarctique",    ar:"القارة القطبية الجنوبية",de:"Antarktis",
     it:"Antartide",  pt:"Antártica",      ru:"Антарктида",   zh:"南极洲",
     ja:"南極",       ko:"남극",           bn:"অ্যান্টার্কটিকা",hi:"अंटार्कटिका",
     nl:"Antarctica", pl:"Antarktyda",     no:"Antarktis",    sv:"Antarktis" },
-  { name:"Maldives",             emoji:"1f420", color:"#00838F", img:u("maldives turquoise ocean"), // 🐠
+  { name:"Maldives",             emoji:"1f420", color:"#00838F", img:u("1f420"), // 🐠
     fact:"The Maldives is the lowest-lying country in the world — average ground level is just 1.5 m!",
     es:"Maldivas",   fr:"Maldives",       ar:"المالديف",     de:"Malediven",
     it:"Maldive",    pt:"Maldivas",       ru:"Мальдивы",     zh:"马尔代夫",
     ja:"モルディブ", ko:"몰디브",         bn:"মালদ্বীপ",     hi:"मालदीव",
     nl:"Malediven",  pl:"Malediwy",       no:"Maldivene",    sv:"Maldiverna" },
-  { name:"Yellowstone",          emoji:"1f30b", color:"#D84315", img:u("yellowstone geyser national park"), // 🌋
+  { name:"Yellowstone",          emoji:"1f30b", color:"#D84315", img:u("1f30b"), // 🌋
     fact:"Yellowstone sits on a supervolcano that holds enough lava to fill the Grand Canyon 11 times!",
     es:"Yellowstone",fr:"Yellowstone",    ar:"يلوستون",      de:"Yellowstone",
     it:"Yellowstone",pt:"Yellowstone",    ru:"Йеллоустон",   zh:"黄石公园",
     ja:"イエローストーン",ko:"옐로스톤",  bn:"ইয়েলোস্টোন",  hi:"येलोस्टोन",
     nl:"Yellowstone",pl:"Yellowstone",    no:"Yellowstone",  sv:"Yellowstone" },
-  { name:"Fjords of Norway",     emoji:"1f3d4",color:"#0D47A1",img:u("norway fjord landscape"), // 🏔️
+  { name:"Fjords of Norway",     emoji:"1f3d4",color:"#0D47A1",img:u("1f3d4"), // 🏔️
     fact:"Norway's fjords were carved by glaciers over millions of years — some are over 1,300 m deep!",
     es:"Fiordos de Noruega",fr:"Fjords de Norvège",ar:"فيوردات النرويج",de:"Norwegische Fjorde",
     it:"Fiordi della Norvegia",pt:"Fiordes da Noruega",ru:"Норвежские фьорды",zh:"挪威峡湾",
@@ -398,140 +398,140 @@ export const NATURE = [
 
 // ── 🏛️ MONUMENTS ─────────────────────────────────────────────────────────
 export const MONUMENTS = [
-  { name:"Eiffel Tower",         emoji:"1f5fc", color:"#C0A060", img:u("eiffel tower paris night"),
+  { name:"Eiffel Tower",         emoji:"1f5fc", color:"#C0A060", img:u("1f5fc"),
     fact:"The Eiffel Tower was only meant to stand for 20 years — it was saved because it doubled as a radio antenna!",
     es:"Torre Eiffel",         fr:"Tour Eiffel",          ar:"برج إيفل",              de:"Eiffelturm",
     it:"Torre Eiffel",         pt:"Torre Eiffel",          ru:"Эйфелева башня",        zh:"埃菲尔铁塔",
     ja:"エッフェル塔",          ko:"에펠탑",                bn:"আইফেল টাওয়ার",          hi:"एफिल टॉवर",
     nl:"Eiffeltoren",           pl:"Wieża Eiffla",          no:"Eiffeltårnet",          sv:"Eiffeltornet" },
 
-  { name:"Great Wall of China",  emoji:"1f3ef", color:"#8D6E63", img:u("great wall china sunrise"),
+  { name:"Great Wall of China",  emoji:"1f3ef", color:"#8D6E63", img:u("1f3ef"),
     fact:"The Great Wall took over 1,000 years to build and was completed by millions of workers — including soldiers and peasants!",
     es:"Gran Muralla China",   fr:"Grande Muraille",       ar:"سور الصين العظيم",      de:"Chinesische Mauer",
     it:"Grande Muraglia",      pt:"Grande Muralha",        ru:"Великая стена",         zh:"长城",
     ja:"万里の長城",            ko:"만리장성",              bn:"চীনের মহাপ্রাচীর",      hi:"चीन की महान दीवार",
     nl:"Chinese Muur",          pl:"Wielki Mur",            no:"Kinesiske mur",         sv:"Kinesiska muren" },
 
-  { name:"Pyramids of Giza",     emoji:"1f53a", color:"#F9A825", img:u("pyramids of giza egypt"),
+  { name:"Pyramids of Giza",     emoji:"1f53a", color:"#F9A825", img:u("1f53a"),
     fact:"The Great Pyramid of Giza was the tallest man-made structure in the world for 3,800 years!",
     es:"Pirámides de Guiza",   fr:"Pyramides de Gizeh",   ar:"أهرامات الجيزة",        de:"Pyramiden von Gizeh",
     it:"Piramidi di Giza",     pt:"Pirâmides de Gizé",    ru:"Пирамиды Гизы",         zh:"吉萨金字塔",
     ja:"ギザのピラミッド",      ko:"기자의 피라미드",       bn:"গিজার পিরামিড",          hi:"गीज़ा के पिरामिड",
     nl:"Piramides van Gizeh",   pl:"Piramidy w Gizie",     no:"Pyramidene ved Giza",   sv:"Pyramiderna i Giza" },
 
-  { name:"Colosseum",            emoji:"1f3db", color:"#8D3A00", img:u("colosseum rome italy"),
+  { name:"Colosseum",            emoji:"1f3db", color:"#8D3A00", img:u("1f3db"),
     fact:"The Colosseum could hold up to 80,000 spectators and had a retractable roof made of canvas!",
     es:"Coliseo",              fr:"Colisée",               ar:"الكولوسيوم",            de:"Kolosseum",
     it:"Colosseo",             pt:"Coliseu",               ru:"Колизей",               zh:"罗马竞技场",
     ja:"コロッセオ",            ko:"콜로세움",              bn:"কলোসিয়াম",              hi:"कोलोसियम",
     nl:"Colosseum",             pl:"Koloseum",              no:"Colosseum",             sv:"Colosseum" },
 
-  { name:"Taj Mahal",            emoji:"1f54c", color:"#F3E5AB", img:u("taj mahal india agra"),
+  { name:"Taj Mahal",            emoji:"1f54c", color:"#F3E5AB", img:u("1f54c"),
     fact:"The Taj Mahal was built by Emperor Shah Jahan as a tribute to his late wife — it took 22 years and 20,000 workers!",
     es:"Taj Mahal",            fr:"Taj Mahal",             ar:"تاج محل",               de:"Taj Mahal",
     it:"Taj Mahal",            pt:"Taj Mahal",             ru:"Тадж-Махал",            zh:"泰姬陵",
     ja:"タージ・マハル",        ko:"타지마할",              bn:"তাজমহল",                hi:"ताजमहल",
     nl:"Taj Mahal",             pl:"Tadż Mahal",            no:"Taj Mahal",             sv:"Taj Mahal" },
 
-  { name:"Machu Picchu",         emoji:"1f999", color:"#33691E", img:u("machu picchu peru inca"),
+  { name:"Machu Picchu",         emoji:"1f999", color:"#33691E", img:u("1f999"),
     fact:"Machu Picchu was built without wheels, iron tools, or mortar — yet no blade of grass fits between the stones!",
     es:"Machu Picchu",         fr:"Machu Picchu",          ar:"ماتشو بيتشو",           de:"Machu Picchu",
     it:"Machu Picchu",         pt:"Machu Picchu",          ru:"Мачу-Пикчу",            zh:"马丘比丘",
     ja:"マチュ・ピチュ",        ko:"마추픽추",              bn:"মাচু পিচু",              hi:"माचू पिच्चू",
     nl:"Machu Picchu",          pl:"Machu Picchu",          no:"Machu Picchu",          sv:"Machu Picchu" },
 
-  { name:"Statue of Liberty",    emoji:"1f5fd", color:"#00695C", img:u("statue of liberty new york"),
+  { name:"Statue of Liberty",    emoji:"1f5fd", color:"#00695C", img:u("1f5fd"),
     fact:"The Statue of Liberty was a gift from France to the USA in 1886 — and her torch was originally meant to be a lighthouse!",
     es:"Estatua de la Libertad",fr:"Statue de la Liberté", ar:"تمثال الحرية",          de:"Freiheitsstatue",
     it:"Statua della Libertà", pt:"Estátua da Liberdade",  ru:"Статуя Свободы",        zh:"自由女神像",
     ja:"自由の女神",            ko:"자유의 여신상",          bn:"স্ট্যাচু অব লিবার্টি",  hi:"स्वतंत्रता की मूर्ति",
     nl:"Vrijheidsbeeld",        pl:"Statua Wolności",       no:"Frihetsgudinnen",       sv:"Frihetsgudinnan" },
 
-  { name:"Big Ben",              emoji:"1f550", color:"#1A237E", img:u("big ben london westminster"),
+  { name:"Big Ben",              emoji:"1f550", color:"#1A237E", img:u("1f550"),
     fact:"'Big Ben' is actually the nickname of the bell inside the tower — the tower itself is called Elizabeth Tower!",
     es:"Big Ben",              fr:"Big Ben",               ar:"بيغ بن",                de:"Big Ben",
     it:"Big Ben",              pt:"Big Ben",               ru:"Биг-Бен",               zh:"大本钟",
     ja:"ビッグベン",            ko:"빅벤",                  bn:"বিগ বেন",               hi:"बिग बेन",
     nl:"Big Ben",               pl:"Big Ben",               no:"Big Ben",               sv:"Big Ben" },
 
-  { name:"Sagrada Família",      emoji:"26ea", color:"#B71C1C", img:u("sagrada familia barcelona gaudi"),
+  { name:"Sagrada Família",      emoji:"26ea", color:"#B71C1C", img:u("26ea"),
     fact:"The Sagrada Família has been under construction since 1882 and is still not finished — it's the slowest construction project ever!",
     es:"Sagrada Família",      fr:"Sagrada Família",       ar:"الساغرادا فاميليا",     de:"Sagrada Família",
     it:"Sagrada Família",      pt:"Sagrada Família",       ru:"Саграда Фамилия",       zh:"圣家堂",
     ja:"サグラダ・ファミリア",  ko:"사그라다 파밀리아",     bn:"সাগ্রাদা ফামিলিয়া",    hi:"सागरादा फ़ैमिलिया",
     nl:"Sagrada Família",       pl:"Sagrada Família",       no:"Sagrada Família",       sv:"Sagrada Família" },
 
-  { name:"Stonehenge",           emoji:"1f5ff", color:"#78909C", img:u("stonehenge england uk"),
+  { name:"Stonehenge",           emoji:"1f5ff", color:"#78909C", img:u("1f5ff"),
     fact:"Stonehenge was built over 5,000 years ago — but we still don't fully understand how or exactly why!",
     es:"Stonehenge",           fr:"Stonehenge",            ar:"ستونهنج",               de:"Stonehenge",
     it:"Stonehenge",           pt:"Stonehenge",            ru:"Стоунхендж",            zh:"巨石阵",
     ja:"ストーンヘンジ",        ko:"스톤헨지",              bn:"স্টোনহেঞ্জ",             hi:"स्टोनहेंज",
     nl:"Stonehenge",            pl:"Stonehenge",            no:"Stonehenge",            sv:"Stonehenge" },
 
-  { name:"Acropolis",            emoji:"1f3db", color:"#F9A825", img:u("acropolis athens parthenon"),
+  { name:"Acropolis",            emoji:"1f3db", color:"#F9A825", img:u("1f3db"),
     fact:"The Parthenon on the Acropolis has stood for 2,500 years and was built without the use of mortar!",
     es:"Acrópolis",            fr:"Acropole",              ar:"الأكروبول",             de:"Akropolis",
     it:"Acropoli",             pt:"Acrópole",              ru:"Акрополь",              zh:"雅典卫城",
     ja:"アクロポリス",          ko:"아크로폴리스",          bn:"অ্যাক্রোপোলিস",          hi:"एक्रोपोलिस",
     nl:"Acropolis",             pl:"Akropol",               no:"Akropolis",             sv:"Akropolis" },
 
-  { name:"Angkor Wat",           emoji:"1f6d5", color:"#5D4037", img:u("angkor wat cambodia temple"),
+  { name:"Angkor Wat",           emoji:"1f6d5", color:"#5D4037", img:u("1f6d5"),
     fact:"Angkor Wat is the largest religious monument in the world — covering 162.6 hectares!",
     es:"Angkor Wat",           fr:"Angkor Vat",            ar:"أنكور وات",             de:"Angkor Wat",
     it:"Angkor Wat",           pt:"Angkor Wat",            ru:"Ангкор-Ват",            zh:"吴哥窟",
     ja:"アンコールワット",      ko:"앙코르 와트",           bn:"আংকোর ওয়াট",           hi:"अंगकोर वाट",
     nl:"Angkor Wat",            pl:"Angkor Wat",            no:"Angkor Wat",            sv:"Angkor Wat" },
 
-  { name:"Chichen Itza",         emoji:"1f53a", color:"#827717", img:u("chichen itza mexico mayan"),
+  { name:"Chichen Itza",         emoji:"1f53a", color:"#827717", img:u("1f53a"),
     fact:"The pyramid of Chichen Itza casts a shadow of a serpent slithering down the steps during the spring equinox!",
     es:"Chichén Itzá",         fr:"Chichen Itza",          ar:"تشيتشن إيتزا",          de:"Chichen Itza",
     it:"Chichen Itza",         pt:"Chichén Itzá",          ru:"Чичен-Ица",             zh:"奇琴伊察",
     ja:"チチェン・イッツァ",    ko:"치첸이트사",            bn:"চিচেন ইতজা",             hi:"चिचेन इत्ज़ा",
     nl:"Chichen Itza",          pl:"Chichen Itza",          no:"Chichen Itza",          sv:"Chichen Itza" },
 
-  { name:"Alhambra",             emoji:"1f319", color:"#880E4F", img:u("alhambra granada spain palace"),
+  { name:"Alhambra",             emoji:"1f319", color:"#880E4F", img:u("1f319"),
     fact:"The Alhambra's intricate geometric patterns contain no depictions of living beings — it was forbidden in Islamic art!",
     es:"La Alhambra",          fr:"Alhambra",              ar:"الحمراء",               de:"Alhambra",
     it:"Alhambra",             pt:"Alhambra",              ru:"Альгамбра",             zh:"阿尔罕布拉宫",
     ja:"アルハンブラ宮殿",     ko:"알함브라",              bn:"আলহামব্রা",              hi:"अलहम्ब्रा",
     nl:"Alhambra",              pl:"Alhambra",              no:"Alhambra",              sv:"Alhambra" },
 
-  { name:"Christ the Redeemer",  emoji:"271d", color:"#1B5E20", img:u("christ redeemer rio brazil"),
+  { name:"Christ the Redeemer",  emoji:"271d", color:"#1B5E20", img:u("271d"),
     fact:"The Christ the Redeemer statue was named one of the New Seven Wonders of the World in 2007!",
     es:"Cristo Redentor",      fr:"Christ Rédempteur",     ar:"تمثال المسيح الفادي",   de:"Christus der Erlöser",
     it:"Cristo Redentore",     pt:"Cristo Redentor",       ru:"Христос Искупитель",    zh:"救世基督像",
     ja:"コルコバードのキリスト像",ko:"예수상",              bn:"ক্রাইস্ট দ্য রিডিমার",  hi:"क्राइस्ट द रिडीमर",
     nl:"Christus de Verlosser", pl:"Chrystus Odkupiciel",  no:"Kristus Forløseren",    sv:"Kristus Återlösaren" },
 
-  { name:"Sydney Opera House",   emoji:"1f3ad", color:"#0277BD", img:u("sydney opera house australia"),
+  { name:"Sydney Opera House",   emoji:"1f3ad", color:"#0277BD", img:u("1f3ad"),
     fact:"The Sydney Opera House has 1,056,006 roof tiles — each one handmade in Sweden!",
     es:"Ópera de Sídney",      fr:"Opéra de Sydney",       ar:"دار أوبرا سيدني",       de:"Opernhaus Sydney",
     it:"Opera House di Sydney", pt:"Ópera de Sydney",      ru:"Оперный театр Сиднея",  zh:"悉尼歌剧院",
     ja:"シドニーオペラハウス",  ko:"시드니 오페라 하우스",  bn:"সিডনি অপেরা হাউস",      hi:"सिडनी ओपेरा हाउस",
     nl:"Sydney Opera House",    pl:"Opera w Sydney",        no:"Sydney Opera House",    sv:"Sydneys operahus" },
 
-  { name:"Burj Khalifa",         emoji:"1f306", color:"#00838F", img:u("burj khalifa dubai skyscraper"),
+  { name:"Burj Khalifa",         emoji:"1f306", color:"#00838F", img:u("1f306"),
     fact:"The Burj Khalifa is so tall you can watch the sunset from the top floor, then take an elevator down and watch it again!",
     es:"Burj Khalifa",         fr:"Burj Khalifa",          ar:"برج خليفة",             de:"Burj Khalifa",
     it:"Burj Khalifa",         pt:"Burj Khalifa",          ru:"Бурдж-Халифа",          zh:"哈利法塔",
-    ja:"ブルジュ・ハリファ",    ko:"부르즈 할리파",         bn:"বুর্জ খলিফা",            hi:"बुर्ज खलीफा",
+    ja:"ブルジュ・ハリファ",    ko:"부르즈 할리파",         bn:"বুর্জ خলিফা",            hi:"बुर्ज खलीफा",
     nl:"Burj Khalifa",          pl:"Burj Chalifa",          no:"Burj Khalifa",          sv:"Burj Khalifa" },
 
-  { name:"Hagia Sophia",         emoji:"1f54c",  color:"#4A148C", img:u("hagia sophia istanbul mosque"),
+  { name:"Hagia Sophia",         emoji:"1f54c",  color:"#4A148C", img:u("1f54c"),
     fact:"Hagia Sophia has served as a cathedral, a mosque, and a museum — and is now a mosque again!",
     es:"Santa Sofía",          fr:"Sainte-Sophie",         ar:"آيا صوفيا",             de:"Hagia Sophia",
     it:"Santa Sofia",          pt:"Santa Sofia",           ru:"Айя-София",             zh:"圣索菲亚大教堂",
     ja:"ハギア・ソフィア",      ko:"아야 소피아",           bn:"হাগিয়া সোফিয়া",         hi:"हागिया सोफिया",
     nl:"Hagia Sophia",          pl:"Hagia Sophia",          no:"Hagia Sophia",          sv:"Hagia Sofia" },
 
-  { name:"Petra",                emoji:"1f3fa", color:"#C62828", img:u("petra jordan treasury carved"),
+  { name:"Petra",                emoji:"1f3fa", color:"#C62828", img:u("1f3fa"),
     fact:"Petra, the 'Rose City,' was carved directly into pink sandstone cliffs — and was lost to the Western world for 500 years!",
     es:"Petra",                fr:"Pétra",                 ar:"البتراء",               de:"Petra",
     it:"Petra",                pt:"Petra",                 ru:"Петра",                 zh:"佩特拉",
     ja:"ペトラ",                ko:"페트라",                bn:"পেট্রা",                 hi:"पेट्रा",
     nl:"Petra",                 pl:"Petra",                 no:"Petra",                 sv:"Petra" },
 
-  { name:"Neuschwanstein",       emoji:"1f3f0", color:"#1565C0", img:u("neuschwanstein castle germany"),
+  { name:"Neuschwanstein",       emoji:"1f3f0", color:"#1565C0", img:u("1f3f0"),
     fact:"Neuschwanstein Castle inspired the Disney fairy-tale castles — it was built by a 19th-century 'fairy tale king'!",
     es:"Castillo de Neuschwanstein",fr:"Château de Neuschwanstein",ar:"قلعة نويشفانشتاين",de:"Schloss Neuschwanstein",
     it:"Castello di Neuschwanstein",pt:"Castelo de Neuschwanstein",ru:"Нойшванштайн",  zh:"新天鹅城堡",
@@ -541,4 +541,3 @@ export const MONUMENTS = [
 
 // ── Mapa de categorías ────────────────────────────────────────────────────
 export const PREMIUM_CATS = new Set(["cities", "nature", "monuments"]);
-

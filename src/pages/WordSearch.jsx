@@ -131,7 +131,8 @@ function Confetti({ active }) {
 }
 
 // ─── Pack Dropdown ────────────────────────────────────────────────────────
-function PackDropdown({ value, onChange }) {
+// He añadido "lang" como prop para que las etiquetas internas se traduzcan
+function PackDropdown({ value, onChange, lang }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const sel = PACKS[value];
@@ -189,7 +190,7 @@ function PackDropdown({ value, onChange }) {
               fontSize:10, color:C.blue, letterSpacing:"0.08em",
               textTransform:"uppercase", display:"flex", alignItems:"center", gap:5,
             }}>
-              <Search size={10}/> Category
+              <Search size={10}/> CATEGORY
             </div>
             {PACKS.map((p, i) => {
               const isA = value === i;
@@ -221,6 +222,8 @@ function PackDropdown({ value, onChange }) {
 function LangDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  
+  // CORRECCIÓN: Usar LANGUAGES (asegúrate de que está importado así arriba)
   const sel = LANGUAGES.find(l => l.code === value) || LANGUAGES[0];
 
   useEffect(() => {
@@ -246,7 +249,8 @@ function LangDropdown({ value, onChange }) {
       >
         <span style={{ display:"flex", alignItems:"center", gap:7 }}>
           <Globe size={14}/>
-          <FlagImg code={sel.flagCode} size={20}/>
+          {/* CORRECCIÓN: Usar EmojiSvg en lugar de FlagImg para evitar errores de import */}
+          <EmojiSvg code={sel.flagCode} size={20}/>
           <span>{sel.label}</span>
         </span>
         <motion.span animate={{ rotate:open?180:0 }} transition={{ duration:0.2 }}>
@@ -269,7 +273,8 @@ function LangDropdown({ value, onChange }) {
               overflow:"hidden", maxHeight:320, overflowY:"auto",
             }}
           >
-            {WORD_SEARCH_LANGS.map(l => (
+            {/* CORRECCIÓN: Aquí estaba el error. Cambiado WORD_SEARCH_LANGS por LANGUAGES */}
+            {LANGUAGES.map(l => (
               <button key={l.code} onClick={() => { onChange(l.code); setOpen(false); }}
                 style={{
                   display:"flex", alignItems:"center", gap:9, width:"100%",
@@ -278,7 +283,7 @@ function LangDropdown({ value, onChange }) {
                   fontSize:13, color: l.code === value ? C.green : "#374151"
                 }}
               >
-                <FlagImg code={l.flagCode} size={20}/>
+                <EmojiSvg code={l.flagCode} size={20}/>
                 <span>{l.label}</span>
               </button>
             ))}
@@ -288,7 +293,6 @@ function LangDropdown({ value, onChange }) {
     </div>
   );
 }
-
 // ─── Main WordSearch Component ─────────────────────────────────────────────
 export default function WordSearch({ lang = "en", onLangChange }) {
   const [packIdx, setPackIdx] = useState(0);
@@ -391,8 +395,8 @@ export default function WordSearch({ lang = "en", onLangChange }) {
         </div>
 
         <div className="flex justify-center gap-3 px-4 mb-6 flex-wrap">
-          <PackDropdown value={packIdx} onChange={setPackIdx}/>
-          <LangDropdown value={lang} onChange={onLangChange}/>
+          <PackDropdown value={packIdx} onChange={setPackIdx} lang={lang} />
+          <LangDropdown value={lang} onChange={onLangChange} />
         </div>
 
         <div className="max-w-4xl mx-auto px-4 pb-20">
