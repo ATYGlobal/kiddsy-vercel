@@ -23,8 +23,8 @@ import { t } from "../utils/uiStrings.js";
 const SPRING = { type:"spring", stiffness:380, damping:16 };
 
 const GAME_TABS = [
-  { id:"puzzle", label:t("games.tab.puzzle", lang),  Icon:Puzzle, color:C.blue,    bg:C.blueSoft    },
-  { id:"memory", label:t("games.tab.memory", lang), Icon:Brain,  color:C.magenta, bg:C.magentaSoft },
+  { id:"puzzle", label:t("games.tab.puzzle", "en"),  Icon:Puzzle, color:C.blue,    bg:C.blueSoft   },
+  { id:"memory", label:t("games.tab.memory", "en"),  Icon:Brain,  color:C.magenta, bg:C.magentaSoft },
 ];
 
 export default function Games({ lang = "en" }) {
