@@ -10,6 +10,8 @@ import { RainbowTitle } from "../components/KiddsyFont.jsx";
 import EmojiSvg          from "../utils/EmojiSvg.jsx";
 import { LANGUAGES, getLang } from "../utils/langConfig.js";
 import { C } from "../utils/designConfig.js";
+import { motion, AnimatePresence } from "framer-motion";
+import { StoryCoverCard } from "./StoryReader.jsx"; // Ajusta la ruta si es necesario
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function speak(text,voice="en-US"){
@@ -248,10 +250,11 @@ const TABS = [
   { id:"letters", label:"Alphabet", icon:BookOpen,  color:C.orange  },
   { id:"numbers", label:"Numbers",  icon:Hash,      color:C.blue    },
   { id:"words",   label:"Words",    icon:MessageCircle,color:C.green },
+  { id:"stories", label:"My Stories", icon:BookOpen, color:C.purple },
 ];
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
-export default function Education({ lang = "en", onLangChange }) {
+export default function Education({ lang = "en", onLangChange, stories = [], onSelectStory }) {
   const setLang = v => onLangChange?.(v);
   const [tab,setTab]         = useState("letters");
   const [active,setActive]   = useState(null);
@@ -356,6 +359,25 @@ return (
               <motion.div key={tab}
                 initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-10}}
                 transition={{duration:0.2}}>
+                  {tab === "stories" && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {stories.length === 0 ? (
+                        <div className="col-span-full text-center py-16 text-slate-400 font-body">
+                          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-5xl mb-3">📚</motion.div>
+                          <p>Your story card will arrive soon!✨</p>
+                        </div>
+                      ) : (
+                        stories.map((story, i) => (
+                          <StoryCoverCard
+                            key={story.id}
+                            story={story}
+                            index={i}
+                            onClick={() => onSelectStory(story)}
+                          />
+                        ))
+                      )}
+                    </div>
+                  )}
                 {tab==="letters"&&(
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                     {ALPHABET.map(item=>(

@@ -131,17 +131,6 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest, lang = "en" 
         <DemoBookShelf lang={lang} onRead={story => onSelectStory(story)} />
       </div>
       
-      {/* ── TUS CUENTOS GUARDADOS ── */}
-        <h3 className="font-display text-2xl mb-4" style={{ color: C.blue }}>
-          📚 Your Library
-        </h3>
-
-        {/* Este es el contenedor de las tarjetas de colores que vamos a quitar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Probablemente aquí tengas un .map o las tarjetas hardcoded como 'A Day at School' */}
-          {/* Bórralo o coméntalo por completo */}
-        </div>
-      
       {stories.length === 0 ? (
         <div className="text-center py-16 text-slate-400 font-body">
           <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-5xl mb-3">📡</motion.div>
@@ -286,17 +275,17 @@ export default function App() {
   }
 
   const FULL_PAGES = {
-    games:           <Games lang={lang} onLangChange={setLang}/>,
-    wordsearch:      <WordSearch lang={lang} onLangChange={setLang}/>,
-    animals:         <PuzzleMaster lang={lang} onLangChange={setLang}/>,
-    puzzles:         <PuzzleMaster lang={lang} onLangChange={setLang}/>,  
-    education:       <Education lang={lang} onLangChange={setLang}/>,
-    "legal":         <AvisoLegal onNav={handleNav} lang={lang}/>,
-    "aviso-legal":   <AvisoLegal onNav={handleNav} lang={lang}/>,
-    "privacidad":    <Privacidad onNav={handleNav} lang={lang}/>,
-    subscription:    <Subscription lang={lang} onLangChange={setLang}/>,
-    collaborate:     <Collaborate lang={lang} onLangChange={setLang}/>,
-    mylibrary:       <MyLibrary onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory} lang={lang} onLangChange={setLang}/>,
+    games:           <Games         lang={lang} onLangChange={setLang}/>,
+    wordsearch:      <WordSearch    lang={lang} onLangChange={setLang}/>,
+    animals:         <PuzzleMaster  lang={lang} onLangChange={setLang}/>,
+    puzzles:         <PuzzleMaster  lang={lang} onLangChange={setLang}/>,  
+    education:       <Education     lang={lang} onLangChange={setLang} stories={stories} onSelectStory={handleSelectStory}/>,
+    "legal":         <AvisoLegal                onNav={handleNav} lang={lang}/>,
+    "aviso-legal":   <AvisoLegal                onNav={handleNav} lang={lang}/>,
+    "privacidad":    <Privacidad                onNav={handleNav} lang={lang}/>,
+    subscription:    <Subscription  lang={lang} onLangChange={setLang}/>,
+    collaborate:     <Collaborate   lang={lang} onLangChange={setLang}/>,
+    mylibrary:       <MyLibrary                 onCreateStory={() => handleNav("generate")} onReadStory={handleSelectStory} lang={lang} onLangChange={setLang}/>,
   };
 
   return (
