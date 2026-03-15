@@ -12,8 +12,8 @@ import {
   Star, Loader, Trophy, Target, CheckCircle, Lock, Puzzle,
 } from "lucide-react";
 import { 
-  ANIMALS, CITIES, NATURE, MONUMENTS, 
-  C as j // Mapeamos C como 'j' para que tu código de colores funcione
+  ANIMALS, CITIES, NATURE, MONUMENTS, PREMIUM_CATS, DIFFICULTIES,
+  C as j 
 } from "../data/puzzleMasterData.js";
 import { t as Te } from "../utils/uiStrings.js";
 import Pricing         from "../components/Pricing.jsx";
@@ -245,7 +245,7 @@ export default function PuzzleMaster({ lang = "en", onLangChange }) {
 
   // ── Category / item switching (with premium gate) ─────────────────────
   const switchCat = (id, close) => {
-    if (PREMIUM_CATS.has(id)) {
+    if (PREMIUM_CATS && PREMIUM_CATS.has(id)) {
       const found = CATEGORIES.find(c => c.id === id);
       setLockedCatLabel(found?.label ?? id);
       setShowPricing(true);

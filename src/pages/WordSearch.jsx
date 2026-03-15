@@ -8,7 +8,7 @@ import { RotateCcw, Trophy, CheckCircle, Star, Search, Globe, ChevronDown } from
 import { WordSearchBg } from "../components/PageBg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-import { LANGUAGES as WORD_SEARCH_LANGS } from "../utils/langConfig.js";
+import { LANGUAGES } from "../utils/langConfig.js";
 import { C } from "../utils/designConfig.js";
 import { PACKS } from "../utils/gameData.js";
 import { FlagImg } from "../components/KiddsyIcons.jsx";
@@ -221,7 +221,7 @@ function PackDropdown({ value, onChange }) {
 function LangDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const sel = WORD_SEARCH_LANGS.find(l => l.code === value) || WORD_SEARCH_LANGS[0];
+  const sel = LANGUAGES.find(l => l.code === value) || LANGUAGES[0];
 
   useEffect(() => {
     const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
