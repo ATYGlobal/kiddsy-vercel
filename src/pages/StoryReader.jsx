@@ -14,6 +14,7 @@ import { getLang } from "../utils/langConfig.js";
 import { StoryCoverIcon } from "../components/KiddsyIcons.jsx";
 import { DEMO_STORIES } from "../data/demoStories.js";
 import { C } from "../utils/designConfig.js";
+import { t } from "../utils/uiStrings.js";
 
 // ── Story accent colours ──────────────────────────────────────────────────
 function getStoryAccent(colorClass = "") {
@@ -127,10 +128,10 @@ export function BookCard({ story, onClick, index = 0 }) {
                   <motion.div initial={{ scale: 0.7 }} animate={{ scale: 1 }}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-full font-display text-xs font-bold text-white shadow-xl"
                     style={{ background: accent.primary }}>
-                    <Play size={12} fill="white"/> Read now
+                    <Play size={12} fill="white"/> {t("reader.readNow", lang)}
                   </motion.div>
                   <span className="font-body text-white text-xs opacity-80">
-                    {story.pages?.length ?? 0} pages
+                    {story.pages?.length ?? 0} {t("reader.pages", lang)}
                   </span>
                 </motion.div>
               )}
@@ -174,7 +175,7 @@ export function DemoBookShelf({ lang = "en", onRead }) {
           style={{ background: "#FFF3E0", border: "2px solid #FFE0B2" }}>
           <Sparkles size={16} style={{ color: C.orange }}/>
           <span className="font-display text-sm font-bold" style={{ color: C.orange }}>
-            Demo Stories — Free
+            {t("reader.demoLabel", lang)}
           </span>
         </div>
         <div className="h-px flex-1 rounded-full" style={{ background: "#E2E8F0" }}/>
@@ -226,7 +227,7 @@ function ComingSoonBook({ index }) {
       <div className="flex-1 rounded-r-2xl flex flex-col items-center justify-center gap-2"
         style={{ background: "#F8FAFC", border: "3px dashed #CBD5E1" }}>
         <BookOpen size={28} style={{ color: "#CBD5E1" }}/>
-        <span className="font-display text-xs font-bold text-slate-400">Coming soon</span>
+        <span className="font-display text-xs font-bold text-slate-400">{t("reader.comingSoon", lang)}</span>
       </div>
     </motion.div>
   );
@@ -253,7 +254,7 @@ export function StoryCoverCard({ story, onClick, index }) {
           <StoryCoverIcon emoji={story.emoji} size={56}/>
           <h3 className="font-display text-white text-lg leading-tight flex-1 drop-shadow mt-3">{story.title}</h3>
           <div className="flex items-center gap-1.5 text-white/75 font-body text-xs mt-2">
-            <BookOpen size={12}/> {story.pages?.length ?? 0} pages
+            <BookOpen size={12}/> {story.pages?.length ?? 0} {t("reader.pages", lang)}
           </div>
         </div>
         <div className="absolute inset-0 rounded-3xl bg-white/0 group-hover:bg-white/15 transition-all flex items-center justify-center">
@@ -340,7 +341,7 @@ export default function StoryReader({ story, lang = "en", onBack }) {
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onBack}
           className="flex items-center gap-2 px-4 py-2 rounded-2xl font-display text-sm bg-white/80 shadow-sm border border-white"
           style={{ color: C.blue }}
-        ><ArrowLeft size={18}/> Library</motion.button>
+        ><ArrowLeft size={18}/> {t("reader.back", lang)}</motion.button>
 
         <div className="flex items-center gap-2 bg-white/80 backdrop-blur rounded-full px-4 py-2 shadow-sm border border-white overflow-hidden max-w-[200px]">
           <StoryCoverIcon emoji={story.emoji} size={28}/>
@@ -373,7 +374,7 @@ export default function StoryReader({ story, lang = "en", onBack }) {
                   {/* Page header */}
                   <div className="flex justify-between items-start mb-5">
                     <div className="font-display text-xs px-3 py-1 rounded-full" style={{ background: accent.soft, color: accent.text }}>
-                      Page {pageIdx + 1}
+                      {t("reader.page", lang)} {pageIdx + 1}
                     </div>
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-display"
                       style={{ background: accent.soft, color: accent.text }}>
@@ -421,7 +422,7 @@ export default function StoryReader({ story, lang = "en", onBack }) {
                         <div dir={langMeta.dir} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: accent.soft }}>
                           <span className="text-xl flex-shrink-0">{langMeta.flag}</span>
                           <p className="font-body text-base leading-relaxed" style={{ color: accent.text }}>
-                            {page[lang] || "Translation not available"}
+                            {page[lang] || t("reader.noTranslation", lang)}
                           </p>
                         </div>
                       </div>
@@ -440,12 +441,12 @@ export default function StoryReader({ story, lang = "en", onBack }) {
                         }}
                       >
                         {audioLoading
-                          ? <><span className="animate-spin inline-block">⏳</span> Loading…</>
+                          ? <><span className="animate-spin inline-block">⏳</span> {t("reader.loading", lang)}</>
                           : isFreeStory
-                            ? <><span>🔊</span> Listen <span style={{ fontSize: 10, opacity: 0.7, marginLeft: 4 }}>Browser TTS</span></>
+                            ? <><span>🔊</span> {t("reader.listen", lang)} <span style={{ fontSize: 10, opacity: 0.7, marginLeft: 4 }}>Browser TTS</span></>
                             : audioBlobUrl
-                              ? <><span>🔊</span> Play again</>
-                              : <><span>🔊</span> Listen</>
+                              ? <><span>🔊</span> {t("reader.playAgain", lang)}</>
+                              : <><span>🔊</span> {t("reader.listen", lang)}</>
                         }
                       </motion.button>
                     </>
@@ -464,7 +465,7 @@ export default function StoryReader({ story, lang = "en", onBack }) {
             onClick={() => { setDirection(-1); setPageIdx(p => p - 1); }}
             className="flex items-center gap-2 px-7 py-3.5 rounded-2xl font-display text-base text-white shadow-xl"
             style={{ background: `linear-gradient(135deg,${accent.primary},${accent.primary}CC)`, boxShadow: `0 8px 24px ${accent.primary}40` }}
-          ><ChevronLeft size={20}/> Previous</motion.button>
+          ><ChevronLeft size={20}/> {t("reader.previous", lang)}</motion.button>
         ) : <div/>}
 
         {pageIdx < total - 1 ? (
@@ -472,13 +473,13 @@ export default function StoryReader({ story, lang = "en", onBack }) {
             onClick={() => { setDirection(1); setPageIdx(p => p + 1); }}
             className="flex items-center gap-2 px-7 py-3.5 rounded-2xl font-display text-base text-white shadow-xl"
             style={{ background: `linear-gradient(135deg,${accent.primary},${accent.primary}CC)`, boxShadow: `0 8px 24px ${accent.primary}40` }}
-          >Next <ChevronRight size={20}/></motion.button>
+          >{t("reader.next", lang)} <ChevronRight size={20}/></motion.button>
         ) : (
           <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
             onClick={onBack}
             className="flex items-center gap-2 px-7 py-3.5 rounded-2xl font-display text-base text-white shadow-xl"
             style={{ background: `linear-gradient(135deg,${C.green},#66BB6A)`, boxShadow: `0 8px 24px ${C.green}40` }}
-          >The End ✨</motion.button>
+          >{t("reader.theEnd", lang)}</motion.button>
         )}
       </div>
 

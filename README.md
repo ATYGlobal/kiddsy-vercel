@@ -1,222 +1,297 @@
-# ✨ Kiddsy
+Claro, como CEO de Kiddsy, he preparado un README.md completo y profesional para tu proyecto. Este documento está diseñado para que cualquier desarrollador (incluido tú en el futuro) pueda entender, configurar y desplegar la aplicación sin problemas.
 
-> Bilingual storybook & learning app for migrant families. Generate personalized AI stories with illustrations and narration, play language games, and learn together.
+He extraído toda la información clave de tu código y la he estructurado de la siguiente manera:
 
----
+```markdown
+# Kiddsy 🚀 - Aventuras Bilingües con IA
 
-## Stack
+[![Kiddsy Logo](public/kiddsy-logo.png)](https://kiddsy.vercel.app)
 
-| Layer | Tech |
-|---|---|
-| Frontend | React 18 + Vite + Tailwind CSS + Framer Motion |
-| Backend | Node.js + Express — standalone server (`api/server.js`) |
-| Story AI | Groq LLaMA 3.3 70B — real-time streaming SSE |
-| Illustrations | OpenAI DALL·E 3 — one image per story page |
-| Narration | OpenAI TTS-1 (nova / onyx / fable / shimmer) |
-| Auth / DB | Supabase *(optional — guest mode works without it)* |
-| Payments | Stripe + Apple Pay + Google Pay *(stubbed, ready to activate)* |
-| PWA | Service Worker v3 + Web App Manifest |
+**Kiddsy** es una innovadora aplicación web (PWA) diseñada para que las familias aprendan inglés juntas a través de historias mágicas y juegos educativos. Utiliza inteligencia artificial de vanguardia para crear experiencias personalizadas, bilingües y completamente ilustradas.
 
-> **Migrated from:** GPT-4o-mini (single API) → Groq LLaMA 3.3 70B (streaming) + DALL·E 3 (parallel images) + OpenAI TTS (dynamic voice)
+🔗 **Demo en Vivo:** [https://kiddsy.vercel.app](https://kiddsy.vercel.app)
 
 ---
 
-## Project Structure
+## ✨ Características Principales
+
+*   **Generador de Historias con IA:** Crea cuentos personalizados con el nombre del niño, un tema elegido y en 16 idiomas diferentes.
+    *   **Texto:** Utiliza **Groq** (LLaMA 3.3 70B) para generar narrativas fluidas y educativas, transmitidas en tiempo real (SSE).
+    *   **Ilustraciones:** Cada página se ilustra con **DALL·E 3**, siguiendo un estilo seleccionado (acuarela, realista, lápiz, etc.).
+    *   **Narración:** Escucha la historia con voces realistas de **OpenAI TTS** (nova, onyx, fable, shimmer).
+*   **16 Idiomas:** Interfaz y traducciones de historias en: ES, FR, AR, DE, IT, PT, RU, ZH, JA, KO, BN, HI, NL, PL, NO, SV. Soporte RTL para árabe.
+*   **Juegos Educativos:** Aprende jugando con:
+    *   **Puzzle Master:** Puzzle deslizante con imágenes de animales, ciudades, naturaleza y monumentos. Incluye datos curiosos en 16 idiomas.
+    *   **Memory Match:** El clásico juego de memoria con iconos temáticos (animales, comida, espacio, herramientas).
+    *   **Word Hunt:** Sopa de letras para encontrar palabras ocultas.
+    *   **ABC Explorer:** Aprende el alfabeto, los números y palabras básicas con pronunciación.
+*   **Sistema de Cuotas Mensuales:** Control de uso por plan (Free, Plus, Annual, Family, Lifetime) con almacenamiento en memoria (listo para Redis).
+*   **Modo Invitado y Cuenta de Usuario:** Almacena tus historias en el dispositivo como invitado o créa una cuenta con **Supabase** para sincronizarlas en la nube.
+*   **PWA (Progressive Web App):** Instálala en tu móvil u ordenador para disfrutar de una experiencia nativa, con soporte offline para los assets principales.
+*   **Diseño Encantador:** Interfaz colorida, amigable y llena de animaciones suaves con `framer-motion`, diseñada especialmente para niños y familias.
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+### Frontend
+*   **Framework:** React 18 + Vite
+*   **Lenguaje:** JavaScript (ES6+)
+*   **Ruteo:** Gestión de estado local y navegación con componentes
+*   **Estilos:** Tailwind CSS + CSS Modules
+*   **Animaciones:** Framer Motion
+*   **Iconos:** Lucide React + SVG personalizados
+*   **PWA:** Vite PWA Plugin, Service Worker personalizado (`sw.js`)
+*   **Cliente Supabase:** `@supabase/supabase-js`
+
+### Backend (API Routes en Vercel)
+*   **Entorno:** Node.js (Serverless Functions)
+*   **Framework:** Express.js
+*   **IA (Texto):** Groq SDK (`llama-3.3-70b-versatile`)
+*   **IA (Imágenes):** OpenAI API (`dall-e-3`)
+*   **IA (Voz):** OpenAI API (`tts-1`)
+*   **Pagos:** Stripe SDK (Checkout, Webhooks)
+*   **Almacenamiento de Cuotas:** In-memory (Map), preparado para Redis.
+
+---
+
+## 📁 Estructura del Proyecto
+
+Una visión general de los directorios más importantes:
 
 ```
 kiddsy/
-├── api/
-│   ├── server.js               ← Express server  (Groq SSE · DALL·E 3 · TTS · quota)
-│   └── usageQuota.js           ← Monthly quota middleware (in-memory → Redis-ready)
+├── api/                           # Backend (API Routes de Vercel)
+│   ├── server.js                  # Punto de entrada principal: /api/generate-story, /api/tts, etc.
+│   └── usageQuota.js              # Lógica de cuotas mensuales (middleware)
 │
-├── public/
-│   ├── sw.js                   ← Service Worker (cache kiddsy-v3, auto-update)
-│   ├── manifest.json
-│   └── icons/                  ← PWA icons (generate at pwabuilder.com/imageGenerator)
+├── public/                         # Archivos estáticos y PWA
+│   ├── sw.js                       # Service Worker personalizado
+│   ├── manifest.json                # Manifiesto de la PWA
+│   ├── kiddsy-logo.png
+│   └── icons/                       # Iconos para PWA (72px - 512px)
 │
 ├── src/
-│   ├── main.jsx
-│   ├── App.jsx                 ← Routing + SW registration + global state
+│   ├── main.jsx                     # Punto de entrada de React
+│   ├── index.css
 │   │
-│   ├── components/
+│   ├── context/                      # Contextos de React
+│   │   └── AuthContext.jsx            # Autenticación con Supabase
+│   │
+│   ├── hooks/                         # Custom Hooks
+│   │   └── useQuota.js                 # Hook para interactuar con la API de cuotas
+│   │
+│   ├── utils/                          # Utilidades y configuraciones
+│   │   ├── designConfig.js              # Paleta de colores global
+│   │   ├── langConfig.js                # Configuración de los 16 idiomas
+│   │   ├── EmojiSvg.jsx                  # Renderizador de emojis SVG
+│   │   ├── storage.js                    # Helpers para localStorage
+│   │   └── ...
+│   │
+│   ├── data/                            # Datos estáticos
+│   │   ├── demoStories.js                 # 3 historias de demostración
+│   │   ├── gameData.js                     # Datos para juegos (categorías, iconos)
+│   │   ├── navbarTranslations.js           # Traducciones para el menú
+│   │   └── ...
+│   │
+│   ├── components/                      # Componentes reutilizables
 │   │   ├── Navbar.jsx
-│   │   ├── Footer.jsx          ← i18n newsletter + social links
-│   │   ├── Pricing.jsx         ← Plan modal (Portal · 3-layer flex centering)
-│   │   ├── KiddsyFont.jsx      ← BubbleTitle · RainbowTitle · StickerText
-│   │   ├── PageBg.jsx          ← Per-page animated backgrounds
-│   │   └── SwUpdateToast.jsx   ← PWA "new version" toast
+│   │   ├── Footer.jsx
+│   │   ├── KiddsyIcons.jsx                # 25+ iconos SVG vectoriales
+│   │   ├── KiddsyFont.jsx                  # Componentes de texto estilizados
+│   │   ├── Pricing.jsx                      # Planes de suscripción
+│   │   ├── QuotaUI.jsx                      # Barra de progreso de cuota
+│   │   ├── StripeCheckout.jsx               # Modal de pago con Stripe
+│   │   ├── InstallPrompt.jsx                 # Banner para instalar la PWA
+│   │   └── ...
 │   │
-│   ├── pages/
-│   │   ├── StoryGenerator.jsx  ← AI form · style & voice pickers · quota UI
-│   │   ├── StoryReader.jsx     ← Animated reader · DALL·E images · TTS playback
-│   │   ├── MyLibrary.jsx       ← Story shelf (localStorage guest + Supabase)
-│   │   ├── WordSearch.jsx      ← Bilingual word hunt · 5 packs · 16 languages
-│   │   ├── PuzzleMaster.jsx    ← Picture puzzles · animals / cities / monuments
-│   │   ├── Education.jsx       ← ABC Explorer · alphabet · numbers · words
-│   │   ├── Subscription.jsx    ← Pricing page · plans · lifetime · Apple/Google Pay
-│   │   ├── Donation.jsx        ← Support page
-│   │   └── LegalPages.jsx      ← Privacy Policy + Terms of Service
-│   │
-│   ├── hooks/
-│   │   └── useQuota.js         ← Monthly quota hook (localStorage + server sync)
-│   │
-│   ├── utils/
-│   │   ├── storage.js          ← lsGet/lsSet · getGuestId · saveStory · Supabase stub
-│   │   └── EmojiSvg.jsx        ← Twemoji SVG wrapper (cross-platform emoji)
-│   │
-│   └── data/
-│       ├── educationData.js    ← Alphabet · numbers · words (16 languages)
-│       ├── puzzleMasterData.js ← Puzzle categories + image data
-│       └── puzzleHelpers.js    ← Puzzle utility functions
+│   └── pages/                            # Vistas principales de la aplicación
+│       ├── App.jsx                          # Componente raíz con lógica de navegación
+│       ├── HeroScreen.jsx                   # Pantalla de bienvenida
+│       ├── StoryGenerator.jsx                # Formulario para crear historias
+│       ├── StoryReader.jsx                   # Lector de historias (con TTS y navegación)
+│       ├── MyLibrary.jsx                      # Biblioteca personal del usuario
+│       ├── Games.jsx                          # Menú principal de juegos
+│       ├── PuzzleMaster.jsx                    # Puzzle deslizante
+│       ├── MemoryMatch.jsx                      # Juego de memoria
+│       ├── WordSearch.jsx                       # Sopa de letras
+│       ├── Education.jsx                         # Aprende ABC, números y palabras
+│       ├── Subscription.jsx                       # Página de suscripciones
+│       └── ...
 │
-├── index.html
-├── vercel.json                 ← Routes /api/* → api/server.js
-├── vite.config.js              ← Dev proxy /api → localhost:10000
+├── index.html                         # Archivo HTML principal (con CSP)
+├── vite.config.js                     # Configuración de Vite y PWA
 ├── tailwind.config.js
-└── package.json
+├── postcss.config.js
+└── vercel.json                        # Configuración para despliegue en Vercel
 ```
 
 ---
 
-## Features
+## 🚀 Primeros Pasos (Desarrollo Local)
 
-### 📚 Story Generator
-- Personalized stories using the child's name and chosen theme
-- **Streaming SSE** — text appears word by word in real time
-- **6 illustration styles** — Watercolour · Realistic · Pencil · Cartoon · Vintage · Fantasy
-- **4 narrator voices** — Woman (Nova) · Man (Onyx) · Child (Fable) · Auto (Shimmer)
-- **16 languages** — ES FR AR DE IT PT RU ZH JA KO BN HI NL PL NO SV
-- DALL·E 3 images generated in parallel after streaming completes
-- **Free plan**: text-only stories + browser `SpeechSynthesis` (zero API cost)
-- **Paid plans**: full DALL·E 3 illustrations + OpenAI TTS
+Sigue estos pasos para poner Kiddsy en funcionamiento en tu máquina local.
 
-### 🎮 Games
-- **Word Hunt** — bilingual word search, 5 thematic packs, category + language dropdowns, 16 languages
-- **Picture Puzzle** — 50+ animals, cities, monuments, nature — lock/unlock per category
+### Prerrequisitos
 
-### 📖 ABC Explorer
-- Alphabet A–Z · numbers 0–9 · common words — all translated into 16 languages
-- Audio pronunciation, animated cards, confetti rewards
+*   Node.js (versión 18 o superior recomendada)
+*   npm o yarn
+*   Una cuenta en [Groq](https://groq.com) para obtener una API Key.
+*   Una cuenta en [OpenAI](https://openai.com) para obtener API Keys (DALL·E 3 y TTS).
+*   (Opcional) Una cuenta en [Supabase](https://supabase.com) para la autenticación de usuarios.
+*   (Opcional) Una cuenta en [Stripe](https://stripe.com) para procesar pagos.
+
+### Instalación
+
+1.  **Clona el repositorio:**
+    ```bash
+    git clone https://github.com/tu-usuario/kiddsy.git
+    cd kiddsy
+    ```
+
+2.  **Instala las dependencias:**
+    ```bash
+    npm install
+    # o
+    yarn
+    ```
+
+3.  **Configura las variables de entorno:**
+    Crea un archivo `.env` en la raíz del proyecto (junto a `vercel.json`). Este archivo **nunca debe ser comiteado**. Añade las siguientes variables:
+
+    ```env
+    # ===== CLAVES DE API =====
+    GROQ_API_KEY="tu_clave_de_groq_aqui"
+    OPENAI_API_KEY="tu_clave_de_openai_aqui"
+
+    # ===== STRIPE (Opcional, para pagos) =====
+    STRIPE_SECRET_KEY="sk_test_..."
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+
+    # ===== SUPABASE (Opcional, para cuentas de usuario) =====
+    # Encuentra estos valores en la configuración de tu proyecto Supabase
+    VITE_SUPABASE_URL="https://tu-proyecto.supabase.co"
+    VITE_SUPABASE_ANON_KEY="tu-clave-anon"
+    ```
+
+    > **⚠️ Importante para el Frontend:** Las variables que empiezan con `VITE_` son las únicas que estarán disponibles en el código del frontend. Las claves secretas como `GROQ_API_KEY` solo deben usarse en el backend (`/api`).
+
+### Ejecutar en Modo Desarrollo
+
+Kiddsy tiene dos partes que deben ejecutarse simultáneamente para el desarrollo local:
+
+1.  **El Frontend (Vite):**
+    ```bash
+    npm run dev
+    ```
+    Esto iniciará el servidor de desarrollo de Vite, generalmente en `http://localhost:5173`.
+
+2.  **El Backend (API de Vercel):**
+    Necesitas emular el entorno serverless de Vercel. La forma más fácil es usar la CLI de Vercel:
+    ```bash
+    # Instalar la CLI de Vercel globalmente (si no la tienes)
+    npm i -g vercel
+
+    # Ejecutar el entorno de desarrollo de Vercel
+    vercel dev
+    ```
+    Esto iniciará las funciones de la API en `http://localhost:3000` (o el puerto que indique). Asegúrate de que coincida con la variable `API_BASE_URL` que usa el frontend (en el código se configura automáticamente para usar `localhost:10000` o la URL de producción).
+
+Ahora puedes abrir `http://localhost:5173` y empezar a usar Kiddsy.
 
 ---
 
-## Monetisation
+## 📦 Construcción para Producción
 
-| Plan | Price | Stories/month | DALL·E 3 | TTS |
-|---|---|---|---|---|
-| Free | €0 | 3 | ❌ text only | Browser |
-| Kiddsy Plus | €5.99 / mo | 15 | ✅ | OpenAI |
-| Kiddsy Annual | €3.33 / mo · €39.99 / yr | 15 | ✅ | OpenAI |
-| Kiddsy Family | €7.99 / mo | 25 | ✅ | OpenAI |
-| Lifetime | €49.99 one-time | 20 / mo | ✅ | OpenAI |
-| Puzzles Only | €3.99 / mo | 0 | — | — |
-
-**Individual purchases:** puzzle seasonal pack €0.99 · single book €2.99 · 5-book bundle €9.99 · unlimited puzzles €3.99
-
----
-
-## Environment Variables
+Para crear una versión optimizada para producción:
 
 ```bash
-# api/.env  (or set in your hosting dashboard)
-GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxx
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx
+npm run build
+```
 
-# Optional — Supabase (leave out to run in guest-only / localStorage mode)
-VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+Los archivos estáticos para el frontend se generarán en la carpeta `dist`. Las funciones de la API permanecen en la carpeta `api/`.
 
-# Optional — Stripe (for subscription checkout)
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_xxxx
+---
+
+## ☁️ Despliegue en Vercel
+
+Kiddsy está diseñado para desplegarse sin problemas en **Vercel**.
+
+1.  **Conecta tu repositorio** a Vercel (GitHub, GitLab, Bitbucket).
+2.  **Configura las variables de entorno** en el panel de control de Vercel. Añade **todas** las variables que definiste en tu `.env` local.
+    *   `GROQ_API_KEY`
+    *   `OPENAI_API_KEY`
+    *   `STRIPE_SECRET_KEY` (si aplica)
+    *   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (si aplica)
+    *   `VITE_SUPABASE_URL` (si aplica)
+    *   `VITE_SUPABASE_ANON_KEY` (si aplica)
+3.  **Despliega.** Vercel detectará automáticamente la configuración de `vercel.json` y construirá tanto el frontend como las API routes.
+
+El archivo `vercel.json` ya está configurado para redirigir todo el tráfico a `index.html` (para el enrutamiento del lado del cliente con React) y para mapear las funciones de la API.
+
+---
+
+## ⚙️ Configuración Clave
+
+### Content Security Policy (CSP)
+
+La política de seguridad se define en el `<head>` de `index.html`. Si necesitas ajustarla para nuevos dominios (por ejemplo, un nuevo servicio de IA o análisis), asegúrate de actualizar las directivas `connect-src`, `script-src`, etc.
+
+```html
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: https://js.stripe.com ...;
+  connect-src 'self' https://kiddsy-vercel.onrender.com ws: wss: ...;
+  ...">
+```
+
+### Service Worker
+
+El archivo `public/sw.js` maneja el comportamiento offline y las actualizaciones de la PWA. Emplea una estrategia de "network-first" para las llamadas a la API y "cache-first" para los assets estáticos.
+
+### Planes y Cuotas Mensuales
+
+Los límites de los planes se configuran en `api/usageQuota.js`. Si necesitas cambiarlos, modifica el objeto `PLAN_LIMITS`.
+
+```javascript
+// api/usageQuota.js
+export const PLAN_LIMITS = {
+  free: 3,
+  plus: 15,
+  annual: 15,
+  family: 25,
+  lifetime: 20,
+  puzzles_only: 0,
+};
 ```
 
 ---
 
-## Local Development
+## 🤝 Contribuciones
 
-```bash
-# 1. Install dependencies
-npm install
+¡Las contribuciones son siempre bienvenidas! Si tienes ideas para mejorar Kiddsy, por favor:
 
-# 2. Set env vars
-cp .env.example .env
-# → fill in GROQ_API_KEY and OPENAI_API_KEY
+1.  Haz un fork del proyecto.
+2.  Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`).
+3.  Haz commit de tus cambios (`git commit -m 'Add some AmazingFeature'`).
+4.  Haz push a la rama (`git push origin feature/AmazingFeature`).
+5.  Abre un Pull Request.
 
-# 3. Start API server  (port 10000)
-node api/server.js
+Por favor, asegúrate de que tu código sigue el estilo general del proyecto y de que todas las funcionalidades existentes siguen funcionando.
 
-# 4. Start frontend  (port 5173, proxies /api → 10000)
-npm run dev
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+
+---
+
+## 📬 Contacto
+
+*   **Email:** [hello@kiddsy.org](mailto:hello@kiddsy.org)
+*   **Issues:** [https://github.com/tu-usuario/kiddsy/issues](https://github.com/tu-usuario/kiddsy/issues)
+
+---
+**Hecho con ❤️ y ☕ para familias de todo el mundo.**
 ```
-
----
-
-## Deploy
-
-### Render / Railway / Fly.io
-```bash
-npm run build       # outputs dist/
-node api/server.js  # serves API on $PORT
-```
-Serve `dist/` as static files from the same Express server or a CDN.
-
-### Vercel
-`vercel.json` routes `/api/*` to `api/server.js` as a serverless function.  
-Set `GROQ_API_KEY` and `OPENAI_API_KEY` in **Vercel → Settings → Environment Variables**.
-
-```bash
-vercel deploy --prod
-```
-
----
-
-## Activating Optional Services
-
-### Supabase (persistent user data)
-1. `npm install @supabase/supabase-js`
-2. Add `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` to `.env`
-3. In `src/utils/storage.js` — uncomment the `createClient` import + two lines inside `getSupabase()`, delete `return null`
-
-### Stripe Checkout
-1. `npm install @stripe/react-stripe-js @stripe/stripe-js`
-2. Add `VITE_STRIPE_PUBLISHABLE_KEY` to `.env`
-3. Uncomment the marked blocks in `src/pages/Subscription.jsx`
-4. Add two server routes:
-   ```
-   POST /api/create-payment-intent  →  { clientSecret }
-   POST /api/create-subscription    →  { clientSecret }
-   ```
-Apple Pay and Google Pay appear automatically when the browser supports them (detected via `ApplePaySession` and `PaymentRequest` API).
-
----
-
-## Quota System
-
-Story generation is rate-limited on **both sides** to protect API costs:
-
-- **Client** (`src/hooks/useQuota.js`) — reads `localStorage`, blocks the button instantly, syncs with server on mount
-- **Server** (`api/usageQuota.js`) — double-checks every request, returns `429` if exceeded
-- Keys are `guestId:YYYY-MM` — reset automatically each month
-- **Production upgrade**: swap the in-memory `Map` for Redis — drop-in commented block included in `usageQuota.js`
-
----
-
-## PWA
-
-- Installable on Android (Chrome) and iOS (Safari — Add to Home Screen)
-- App shell and games cached for offline use
-- Auto-update: service worker sends `SW_UPDATED` → `SwUpdateToast` prompts the user to reload
-
----
-
-## Roadmap
-
-- [ ] Stripe checkout endpoints (server-side)
-- [ ] Redis quota store for multi-instance production
-- [ ] Parent dashboard with reading history
-- [ ] Push notifications for new story packs
-- [ ] iOS / Android app via Capacitor
-
----
-
-*Built with ❤️ for migrant families. Kiddsy makes bilingual learning magical.*

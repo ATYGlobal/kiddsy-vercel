@@ -29,6 +29,7 @@ import useQuota                         from "../hooks/useQuota.js";
 import { QuotaBadge, QuotaWall }        from "../components/QuotaUI.jsx";
 import StoryReader,  { StoryCoverCard } from "../pages/StoryReader.jsx";
 import { C } from "../utils/designConfig.js";
+import { t } from "../utils/uiStrings.js";
 
 // ── LocalStorage helpers ──────────────────────────────────────────────────
 const LS_NAME    = "kiddsy_childName";

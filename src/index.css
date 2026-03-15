@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Nota: El @import de Google Fonts se ha eliminado de aquí porque 
+  ya lo tienes correctamente incluido en tu index.html. 
+  Cargarlo en ambos sitios ralentiza la web.
+*/
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -12,6 +17,7 @@
   }
 
   body {
+    /* Fuente principal: Nunito */
     font-family: "Nunito", sans-serif;
     background-color: #FFFDE7;
     color: #1a1a2e;
@@ -19,21 +25,24 @@
     overflow-x: hidden;
   }
 
+  /* Títulos y cabeceras: Fredoka */
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Fredoka", cursive;
+    font-family: "Fredoka", sans-serif;
+    font-weight: 600;
   }
 }
 
 @layer utilities {
+  /* Utility classes para forzar fuentes */
   .font-display {
-    font-family: "Fredoka", cursive;
+    font-family: "Fredoka", sans-serif;
   }
 
   .font-body {
     font-family: "Nunito", sans-serif;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar - Estilo Kiddsy */
   ::-webkit-scrollbar {
     width: 8px;
   }
@@ -44,13 +53,16 @@
     background: #42A5F5;
     border-radius: 10px;
   }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #1E88E5;
+  }
 
-  /* Page turn 3D perspective */
+  /* Page turn 3D perspective (usado en cuentos) */
   .perspective-book {
     perspective: 1200px;
   }
 
-  /* Soft grain texture overlay */
+  /* Soft grain texture overlay - Efecto papel antiguo/mágico */
   .grain-overlay::before {
     content: "";
     position: fixed;
@@ -60,11 +72,4 @@
     z-index: 9999;
     opacity: 0.3;
   }
-
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
-
-body {
-  font-family: 'Fredoka', sans-serif;
-}
-
 }

@@ -12,6 +12,7 @@ import { LANGUAGES as WORD_SEARCH_LANGS } from "../utils/langConfig.js";
 import { C } from "../utils/designConfig.js";
 import { PACKS } from "../utils/gameData.js";
 import { FlagImg } from "../components/KiddsyIcons.jsx";
+import { t } from "../utils/uiStrings.js";
 
 // Highlight colors per word (pastel fills)
 const WORD_COLORS = [
@@ -381,11 +382,11 @@ export default function WordSearch({ lang = "en", onLangChange }) {
         <div className="text-center py-10 px-4">
           <motion.div initial={{ scale:0.8, opacity:0 }} animate={{ scale:1, opacity:1 }}>
             <h1 style={{ lineHeight:1.2 }}>
-              <BubbleTitle color="#E11D48" size={54}>Word Hunt</BubbleTitle>
+              <BubbleTitle color="#E11D48" size={54}>{t("ws.title", lang)}</BubbleTitle>
             </h1>
           </motion.div>
           <p className="font-display text-slate-700 text-lg font-medium bg-white/40 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
-            Find all the hidden English words!
+            {t("ws.subtitle", lang)}
           </p>
         </div>
 
@@ -399,7 +400,7 @@ export default function WordSearch({ lang = "en", onLangChange }) {
             <motion.div initial={{ scale:0.8, opacity:0 }} animate={{ scale:1, opacity:1 }}
               className="text-center mb-6 py-4 rounded-3xl font-display text-2xl text-white shadow-xl"
               style={{ background:`linear-gradient(135deg, ${C.green}, #2E7D32)`, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-              <Trophy size={22}/> {getTranslation("wellDone", lang)}
+              <Trophy size={22}/> {t("ws.wellDone", lang)}
             </motion.div>
           )}
 
@@ -424,14 +425,14 @@ export default function WordSearch({ lang = "en", onLangChange }) {
               </div>
               <div className="mt-4 flex justify-center">
                 <button onClick={handleReset} className="flex items-center gap-2 px-6 py-3 rounded-2xl font-display text-white shadow-md" style={{ background:C.red }}>
-                  <RotateCcw size={16}/> {getTranslation("newPuzzle", lang)}
+                  <RotateCcw size={16}/> {t("ws.newPuzzle", lang)}
                 </button>
               </div>
             </div>
 
             <div>
               <h3 className="font-display text-sm font-bold mb-2 flex items-center gap-1.5" style={{ color:C.blue }}>
-                <Search size={13}/> {getTranslation("findWords", lang)}
+                <Search size={13}/> {t("ws.findWords", lang)}
               </h3>
               <div className="grid grid-cols-2 gap-1.5">
                 {gameData && gameData.placed.map(({ word }, wi) => {

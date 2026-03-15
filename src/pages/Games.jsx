@@ -18,15 +18,16 @@ import MemoryMatch from "../components/MemoryMatch.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 import { BubbleTitle } from "../components/KiddsyFont.jsx";
 import { C } from "../utils/designConfig.js";
+import { t } from "../utils/uiStrings.js";
 
 const SPRING = { type:"spring", stiffness:380, damping:16 };
 
 const GAME_TABS = [
-  { id:"puzzle", label:"Tile Puzzle",  Icon:Puzzle, color:C.blue,    bg:C.blueSoft    },
-  { id:"memory", label:"Memory Match", Icon:Brain,  color:C.magenta, bg:C.magentaSoft },
+  { id:"puzzle", label:t("games.tab.puzzle", lang),  Icon:Puzzle, color:C.blue,    bg:C.blueSoft    },
+  { id:"memory", label:t("games.tab.memory", lang), Icon:Brain,  color:C.magenta, bg:C.magentaSoft },
 ];
 
-export default function Games({ lang = "en", onLangChange }) {
+export default function Games({ lang = "en" }) {
   const [activeGame, setActiveGame] = useState("puzzle");
   const active = GAME_TABS.find(g=>g.id===activeGame);
 
@@ -50,15 +51,15 @@ export default function Games({ lang = "en", onLangChange }) {
             initial={{ opacity:0, y:-14 }} animate={{ opacity:1, y:0 }}
             className="mb-3" style={{ lineHeight:1.2 }}
           >
-            <BubbleTitle color="#1E88E5" size={54}>Game Zone</BubbleTitle>
+            <BubbleTitle color="#1E88E5" size={54}>{t("games.title", lang)}</BubbleTitle>
           </motion.h1>
 
           <div className="bg-white/40 backdrop-blur-md rounded-3xl p-4 max-w-md mx-auto shadow-sm border border-white/50">
             <p className="font-display text-slate-700 text-lg font-medium">
-              Fun games that make learning English feel like playtime! <EmojiSvg code="1f31f" size={16}/>
+              {t("games.subtitle", lang)} <EmojiSvg code="1f31f" size={16}/>
             </p>
             <p className="font-display text-slate-500 text-sm mt-1 font-semibold uppercase tracking-wider">
-              4 categories · 25 icon variants
+              {t("games.meta", lang)}
             </p>
           </div>
         </div>
@@ -104,8 +105,8 @@ export default function Games({ lang = "en", onLangChange }) {
               exit={{    opacity:0, scale:0.95, y:-12 }}
               transition={{ duration:0.26 }}
             >
-              {activeGame==="puzzle" && <SlidingPuzzle/>}
-              {activeGame==="memory" && <MemoryMatch/>}
+              {activeGame==="puzzle" && <SlidingPuzzle lang={lang}/>}
+              {activeGame==="memory" && <MemoryMatch lang={lang}/>}
             </motion.div>
           </AnimatePresence>
         </div>

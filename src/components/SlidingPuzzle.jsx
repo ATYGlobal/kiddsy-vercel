@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { RotateCcw } from "lucide-react";
 import { CATEGORY_TILES, GameStickerTile } from "./KiddsyIcons.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
-
+import { t } from "../utils/uiStrings.js";
 import { C } from "../utils/designConfig.js";
 
 const SPRING = { type: "spring", stiffness: 380, damping: 16 };
@@ -44,7 +44,7 @@ const PUZZLE_CATS = [
 ];
 
 // ✅ UNA SOLA VEZ - al principio
-export default function SlidingPuzzle() {
+export default function SlidingPuzzle({ lang = "en" }) {
   const [catIdx, setCatIdx] = useState(0);
   const [target, setTarget] = useState(() => makePuzzleSet("animals"));
   const [tiles, setTiles] = useState(() => shufflePuzzle(makePuzzleSet("animals")));

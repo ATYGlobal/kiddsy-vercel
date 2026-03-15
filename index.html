@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- ══════════════════════════════════════════════════════════
-         CONTENT SECURITY POLICY (CSP) - CORREGIDA
-    ══════════════════════════════════════════════════════════ -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: https://js.stripe.com https://vercel.live;
@@ -19,46 +16,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Kiddsy — Magical bilingual storybooks for families learning English together" />
 
-    <!-- ══════════════════════════════════════════════════════════
-         PWA — MANIFEST
-    ══════════════════════════════════════════════════════════ -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- ══════════════════════════════════════════════════════════
-         PWA — ANDROID / CHROME: theme color for the browser chrome
-    ══════════════════════════════════════════════════════════ -->
     <meta name="theme-color" content="#1565C0" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <!-- ══════════════════════════════════════════════════════════
-         PWA — APPLE / IOS
-         iOS no lee el manifest.json — necesita estas meta tags propias
-    ══════════════════════════════════════════════════════════ -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Kiddsy" />
 
-    <!-- Apple Touch Icons (iOS los usa para el icono en la pantalla de inicio) -->
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
 
-    <!-- Apple Splash Screens (opcional pero mejora la experiencia) -->
-    <!-- Genera estas imágenes en https://progressier.com/pwa-icons-and-ios-splash-screen-generator -->
-    <!-- <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="..."/> -->
-
-    <!-- ══════════════════════════════════════════════════════════
-         FAVICON
-    ══════════════════════════════════════════════════════════ -->
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96x96.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png" />
-    <!-- Fallback -->
     <link rel="icon" type="image/png" href="/favicon.png" />
 
-    <!-- ══════════════════════════════════════════════════════════
-         FONTS
-    ══════════════════════════════════════════════════════════ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -66,7 +41,6 @@
       rel="stylesheet"
     />
 
-    <!-- Open Graph / Social sharing -->
     <meta property="og:title"       content="Kiddsy ✨" />
     <meta property="og:description" content="Magical bilingual storybooks for families learning English together" />
     <meta property="og:image"       content="/icons/icon-512x512.png" />
@@ -78,10 +52,6 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
-    <!-- ══════════════════════════════════════════════════════════
-         SERVICE WORKER REGISTRATION
-         Colócalo DESPUÉS del script de React para no bloquear
-    ══════════════════════════════════════════════════════════ -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -106,8 +76,5 @@
         });
       }
     </script>
-  </body>
-  <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

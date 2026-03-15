@@ -17,6 +17,7 @@ import {
   AnimatedSun,
 } from "../components/HeroIllustration.jsx";
 import HeroIllustration from "../components/HeroIllustration";
+import { t } from "../utils/uiStrings.js";
 
 
 const SPRING = { type: "spring", stiffness: 280, damping: 22 };
@@ -28,15 +29,14 @@ const SPRING = { type: "spring", stiffness: 280, damping: 22 };
 // Feature badges (below hero CTA)
 // ──────────────────────────────────────────────────────────────────────────
 const BADGES = [
-  { icon: BookOpen, label: "Unlimited Stories",   color: "#1565C0", bg: "#DBEAFE" },
-  { icon: Puzzle,   label: "Fun Games",    color: "#D81B60", bg: "#FCE7F3" },
-  { icon: Star,     label: "16 Languages",  color: "#F9A825", bg: "#FFFDE7" },
+  { icon: BookOpen, key: "hero.badge.stories", color: "#1565C0", bg: "#DBEAFE" },
+  { icon: Puzzle,   key: "hero.badge.games",   color: "#D81B60", bg: "#FCE7F3" },
+  { icon: Star,     key: "hero.badge.langs",   color: "#F9A825", bg: "#FFFDE7" },
 ];
-
 // ──────────────────────────────────────────────────────────────────────────
 // MAIN HERO SCREEN
 // ──────────────────────────────────────────────────────────────────────────
-export default function HeroScreen({ onPlay }) {
+export default function HeroScreen({ onPlay, lang = "en" }) {
   return (
     <div style={{
       position:   "relative",
@@ -194,8 +194,8 @@ export default function HeroScreen({ onPlay }) {
             marginBottom: 12,
             textShadow:  "0 2px 12px rgba(21,101,192,0.18)",
           }}>
-            Welcome to your<br/>
-            <span style={{ color:"#1565C0" }}>bilingual adventure!</span>
+            {t("hero.headline1", lang)}<br/>
+            <span style={{ color:"#1565C0" }}>{t("hero.headline2", lang)}</span>
           </h1>
           <p style={{
             fontFamily:  "var(--font-body,'Nunito',sans-serif)",
@@ -204,7 +204,7 @@ export default function HeroScreen({ onPlay }) {
             marginBottom: 32,
             lineHeight:  1.6,
           }}>
-            Magical bilingual stories and games in 16 global languages
+            {t("hero.subtitle", lang)}
           </p>
         </motion.div>
 
@@ -252,7 +252,7 @@ export default function HeroScreen({ onPlay }) {
               }}
             />
             <Rocket size={28} strokeWidth={2.5} style={{ filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}/>
-            Let's Play! <EmojiSvg code="1f680" size={28} />
+            {t("hero.cta", lang)} <EmojiSvg code="1f680" size={28} />
           </motion.button>
         </motion.div>
 
@@ -305,7 +305,7 @@ export default function HeroScreen({ onPlay }) {
             color:       "rgba(51,65,85,0.6)",
           }}
         >
-          Create an account to save stories to your library • Optional
+          {t("hero.guest", lang)}
         </motion.p>
       </div>
     </div>

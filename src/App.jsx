@@ -132,9 +132,15 @@ function LibraryView({ stories, onSelectStory, onGenerate, isGuest, lang = "en" 
       </div>
       
       {/* ── TUS CUENTOS GUARDADOS ── */}
-      <h3 className="font-display text-2xl mb-4" style={{ color: C.blue }}>
-        📚 Your Library
-      </h3>
+        <h3 className="font-display text-2xl mb-4" style={{ color: C.blue }}>
+          📚 Your Library
+        </h3>
+
+        {/* Este es el contenedor de las tarjetas de colores que vamos a quitar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Probablemente aquí tengas un .map o las tarjetas hardcoded como 'A Day at School' */}
+          {/* Bórralo o coméntalo por completo */}
+        </div>
       
       {stories.length === 0 ? (
         <div className="text-center py-16 text-slate-400 font-body">
@@ -276,7 +282,7 @@ export default function App() {
   };
 
   if (view === "hero") {
-    return <HeroScreen onPlay={() => { setView("library"); window.scrollTo({ top: 0 }); }}/>;
+    return <HeroScreen onPlay={() => { setView("library"); window.scrollTo({ top: 0 }); }}lang={lang}/>;
   }
 
   const FULL_PAGES = {

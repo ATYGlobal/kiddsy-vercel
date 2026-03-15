@@ -8,6 +8,7 @@ import { RotateCcw } from "lucide-react";
 import { CATEGORY_TILES, GameStickerTile } from "./KiddsyIcons.jsx";
 import EmojiSvg from "../utils/EmojiSvg.jsx";
 import { C } from "../utils/designConfig.js";
+import { t } from "../utils/uiStrings.js";
 
 const SPRING = { type: "spring", stiffness: 380, damping: 16 };
 
@@ -38,7 +39,7 @@ const MEMORY_CATS = [
   { id: "tools",   label: "Tools",   color: "#E65100", bg: "#FFF3E0" },
 ];
 
-export default function MemoryMatch() {
+export default function MemoryMatch({ lang = "en" }) {
   const [catIdx, setCatIdx] = useState(0);
   const [deck, setDeck] = useState(() => buildDeck("animals"));
   const [flipped, setFlipped] = useState([]);
@@ -125,13 +126,13 @@ export default function MemoryMatch() {
           className="px-5 py-2 rounded-full font-display bg-white/90 shadow-sm border border-white"
           style={{ color: cat.color }}
         >
-          <EmojiSvg code="1f9e0" size={14} /> {moves} pairs tried
+          <EmojiSvg code="1f9e0" size={14} /> {moves} {t("games.memory.tried", lang)}
         </div>
         <div
           className="px-5 py-2 rounded-full font-display bg-white/90 shadow-sm border border-white"
           style={{ color: C.green }}
         >
-          <EmojiSvg code="2705" size={14} /> {matchedCount} / 8 found
+          <EmojiSvg code="2705" size={14} /> {matchedCount} / 8 {t("games.memory.found", lang)}
         </div>
         {won && (
           <motion.div
